@@ -1,0 +1,100 @@
+.loginContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.imageSection {
+  flex: 0 0 60%;
+  background-image: url("/assets/ship.jpg");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.imageSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.imageContent {
+  position: relative;
+  z-index: 1;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.imageContent h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.imageContent p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.formSection {
+  flex: 0 0 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #fff;
+}
+
+.formContainer {
+  width: 100%;
+  max-width: 400px;
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.formTitle h2 {
+  font-size: 2rem;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.formTitle p {
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .loginContainer {
+    flex-direction: column;
+  }
+
+  .imageSection {
+    flex: 0 0 30vh;
+  }
+
+  .formSection {
+    flex: 1;
+    padding: 2rem 1rem;
+  }
+
+  .imageContent h1 {
+    font-size: 2rem;
+  }
+
+  .imageContent p {
+    font-size: 1rem;
+  }
+}
