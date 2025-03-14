@@ -1,11 +1,22 @@
+import { AuthState, AuthStore } from "@sharedTypes/auth"
 import { create } from "zustand"
 
-interface AuthStore {
-  isAuthenticated: boolean
-  setAuth: (value: boolean) => void
+const initialState: AuthState = {
+  isAuthenticated: false,
+  user: null,
+  token: null,
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  isAuthenticated: localStorage.getItem("isAuthenticated") === "true",
-  setAuth: (value) => set({ isAuthenticated: value }),
+  ...initialState,
+  login: async () => {
+    // Login işlemi
+    set({ isAuthenticated: true })
+  },
+  logout: () => {
+    set(initialState)
+  },
+  setAuth: (isAuthenticated: boolean) => {
+    set({ isAuthenticated })
+  },
 }))

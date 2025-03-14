@@ -1,13 +1,21 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
-import MainLayout from "./components/Layout/MainLayout"
-import Dashboard from "./pages/Dashboard"
-import Login from "./pages/Login"
-import Settings from "./pages/Settings"
-import Users from "./pages/Users"
+import Login from "./features/auth/Login"
+import Dashboard from "./features/dashboard/Dashboard"
+import Settings from "./features/settings/Settings"
+import Users from "./features/users/Users"
+import MainLayout from "./layouts/MainLayout"
 import { useAuthStore } from "./store/auth"
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+})
 
 function App() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)

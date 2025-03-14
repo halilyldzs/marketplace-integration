@@ -83,17 +83,3 @@
   margin-top: 4px;
   display: block;
 }
-
-@media (max-width: 768px) {
-  .loginContainer {
-    flex-direction: column;
-  }
-
-  .imageSection {
-    display: none;
-  }
-
-  .formSection {
-    padding: 1rem;
-  }
-}
