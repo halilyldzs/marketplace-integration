@@ -10,19 +10,21 @@ interface LoginFormValues {
   remember: boolean
 }
 
-const Login: React.FC = () => {
+interface LoginProps {
+  setAuth: (value: boolean) => void
+}
+
+const Login: React.FC<LoginProps> = ({ setAuth }) => {
   const navigate = useNavigate()
 
   const onFinish = async (values: LoginFormValues) => {
     try {
       // Burada gerçek bir API çağrısı yapılmalı
-      if (values.username === "admin" && values.password === "admin") {
+      if (values.username === "admin" && values.password === "admin123") {
         localStorage.setItem("isAuthenticated", "true")
+        setAuth(true)
         message.success("Giriş başarılı!")
-        // Kısa bir gecikme ekleyerek state'in güncellenmesini bekleyelim
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true })
-        }, 100)
+        navigate("/dashboard", { replace: true })
       } else {
         message.error("Kullanıcı adı veya şifre hatalı!")
       }

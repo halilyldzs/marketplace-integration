@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import MainLayout from "./components/Layout/MainLayout"
 import Dashboard from "./pages/Dashboard"
@@ -6,22 +7,49 @@ import Settings from "./pages/Settings"
 import Users from "./pages/Users"
 
 function App() {
-  // Burada gerçek bir auth kontrolü yapılmalı
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true"
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const authStatus = localStorage.getItem("isAuthenticated") === "true"
+    setIsAuthenticated(authStatus)
+  }, [])
 
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path='/login'
-          element={isAuthenticated ? <Navigate to='/dashboard' /> : <Login />}
+          element={
+            isAuthenticated ? (
+              <Navigate
+                to='/dashboard'
+                replace
+              />
+            ) : (
+              <Login setAuth={setIsAuthenticated} />
+            )
+          }
         />
         <Route
           path='/'
-          element={isAuthenticated ? <MainLayout /> : <Navigate to='/login' />}>
+          element={
+            isAuthenticated ? (
+              <MainLayout />
+            ) : (
+              <Navigate
+                to='/login'
+                replace
+              />
+            )
+          }>
           <Route
             index
-            element={<Navigate to='/dashboard' />}
+            element={
+              <Navigate
+                to='/dashboard'
+                replace
+              />
+            }
           />
           <Route
             path='dashboard'
@@ -35,7 +63,6 @@ function App() {
             path='settings'
             element={<Settings />}
           />
-          {/* Diğer route'lar buraya eklenebilir */}
         </Route>
       </Routes>
     </BrowserRouter>
