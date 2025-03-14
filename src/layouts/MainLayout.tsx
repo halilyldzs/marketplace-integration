@@ -5,16 +5,20 @@ import {
   UserOutlined,
 } from "@ant-design/icons"
 import { useAuthStore } from "@store/auth"
+import { useThemeStore } from "@store/theme"
 import styles from "@styles/layouts/MainLayout.module.css"
-import { Button, Layout, Menu } from "antd"
+import { Button, Layout, Menu, Switch, theme } from "antd"
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 
 const { Header, Content, Footer, Sider } = Layout
+const { useToken } = theme
 
 const MainLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { token } = useToken()
   const logout = useAuthStore((state) => state.logout)
+  const { isDarkMode, toggleTheme } = useThemeStore()
 
   const handleLogout = () => {
     logout()
@@ -42,18 +46,31 @@ const MainLayout = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        theme='light'
+        theme={isDarkMode ? "dark" : "light"}
         className={styles.sider}>
-        <div className={styles.logo}>Lojistik YS</div>
+        <div
+          className={styles.logo}
+          style={{ color: token.colorPrimary }}>
+          Lojistik YS
+        </div>
         <Menu
           mode='inline'
           selectedKeys={[location.pathname]}
           items={menuItems}
+          theme={isDarkMode ? "dark" : "light"}
           style={{ border: "none" }}
         />
       </Sider>
       <Layout>
-        <Header className={styles.header}>
+        <Header
+          className={styles.header}
+          style={{ background: isDarkMode ? token.colorBgContainer : "#fff" }}>
+          <Switch
+            checked={isDarkMode}
+            onChange={toggleTheme}
+            checkedChildren='🌙'
+            unCheckedChildren='☀️'
+          />
           <Button
             icon={<LogoutOutlined />}
             onClick={handleLogout}
@@ -61,10 +78,14 @@ const MainLayout = () => {
             Çıkış Yap
           </Button>
         </Header>
-        <Content className={styles.content}>
+        <Content
+          className={styles.content}
+          style={{ background: isDarkMode ? token.colorBgContainer : "#fff" }}>
           <Outlet />
         </Content>
-        <Footer className={styles.footer}>
+        <Footer
+          className={styles.footer}
+          style={{ background: "transparent" }}>
           Lojistik YS ©{new Date().getFullYear()} - Tüm hakları saklıdır.
         </Footer>
       </Layout>

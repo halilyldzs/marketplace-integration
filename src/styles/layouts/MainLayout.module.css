@@ -10,33 +10,29 @@
 .logo {
   height: 64px;
   padding: 16px;
-  color: #1890ff;
   font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.3);
   margin-bottom: 1px;
 }
 
 .header {
-  background: #fff;
   padding: 0 24px;
   display: flex;
   align-items: center;
+  gap: 16px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .content {
   margin: 24px;
   padding: 24px;
-  background: #fff;
   border-radius: 4px;
 }
 
 .footer {
   text-align: center;
   color: rgba(0, 0, 0, 0.45);
-  background: transparent;
 }
