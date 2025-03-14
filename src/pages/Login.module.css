@@ -1,59 +1,30 @@
 .loginContainer {
   display: flex;
-  min-height: 100vh;
-  background-color: #fff;
+  height: 100vh;
 }
 
 .imageSection {
-  flex: 0 0 60%;
-  background-image: url("/assets/ship.jpg");
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-.imageSection::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  flex: 1;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 2rem;
 }
 
 .imageContent {
-  position: relative;
-  z-index: 1;
-  color: white;
+  max-width: 500px;
   text-align: center;
-  padding: 2rem;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.imageContent h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-.imageContent p {
-  font-size: 1.25rem;
-  opacity: 0.9;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .formSection {
-  flex: 0 0 40%;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background-color: #fff;
+  background: #fff;
 }
 
 .formContainer {
@@ -67,13 +38,50 @@
 }
 
 .formTitle h2 {
-  font-size: 2rem;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  margin: 0;
+  color: #000;
+  font-size: 24px;
 }
 
 .formTitle p {
+  margin: 8px 0 0;
   color: #666;
+}
+
+.formItem {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.input:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  outline: none;
+}
+
+.prefix {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: #999;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.error {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-top: 4px;
+  display: block;
 }
 
 @media (max-width: 768px) {
@@ -82,19 +90,10 @@
   }
 
   .imageSection {
-    flex: 0 0 30vh;
+    display: none;
   }
 
   .formSection {
-    flex: 1;
-    padding: 2rem 1rem;
-  }
-
-  .imageContent h1 {
-    font-size: 2rem;
-  }
-
-  .imageContent p {
-    font-size: 1rem;
+    padding: 1rem;
   }
 }
