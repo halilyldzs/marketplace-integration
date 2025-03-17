@@ -1,4 +1,4 @@
-import { LoginCredentials } from "@sharedTypes/auth"
+import { LoginCredentials, RegisterFormValues } from "@sharedTypes/auth"
 
 // const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
@@ -12,6 +12,19 @@ export const authService = {
     }
 
     throw new Error("Invalid credentials")
+  },
+
+  async register(data: RegisterFormValues): Promise<void> {
+    // Mock API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Simüle edilmiş kayıt kontrolü
+    if (data.username === "admin") {
+      throw new Error("Bu kullanıcı adı zaten kullanılıyor")
+    }
+
+    // Başarılı kayıt simülasyonu
+    return
   },
 
   async logout(): Promise<void> {

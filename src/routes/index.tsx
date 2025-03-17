@@ -1,5 +1,6 @@
 import ProtectedRoute from "@components/ProtectedRoute"
 import Login from "@features/auth/Login"
+import Register from "@features/auth/Register"
 import Dashboard from "@features/dashboard/Dashboard"
 import Products from "@features/products/Products"
 import Settings from "@features/settings/Settings"
@@ -41,6 +42,16 @@ export const routes: RouteObject[] = [
         authRequired={false}
         redirectPath='/dashboard'>
         <Login />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <ProtectedRoute
+        authRequired={false}
+        redirectPath='/dashboard'>
+        <Register />
       </ProtectedRoute>
     ),
   },

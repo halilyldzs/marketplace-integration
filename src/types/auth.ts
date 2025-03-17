@@ -9,6 +9,14 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface RegisterFormValues {
+  fullName: string
+  email: string
+  username: string
+  password: string
+  confirmPassword: string
+}
+
 export interface AuthState {
   isAuthenticated: boolean
   user: User | null

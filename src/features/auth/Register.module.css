@@ -47,6 +47,7 @@
   justify-content: center;
   padding: 2rem;
   background-color: #fff;
+  overflow-y: auto;
 }
 
 .formContainer {
@@ -65,17 +66,17 @@
   margin-bottom: 2rem;
 }
 
-.registerLink {
+.loginLink {
   text-align: center;
   margin-top: 1rem;
 }
 
-.registerLink a {
+.loginLink a {
   color: #1890ff;
   cursor: pointer;
 }
 
-.registerLink a:hover {
+.loginLink a:hover {
   text-decoration: underline;
 }
 

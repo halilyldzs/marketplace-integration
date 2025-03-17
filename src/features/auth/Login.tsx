@@ -68,6 +68,11 @@ const Login = () => {
                 Giriş Yap
               </Button>
             </Form.Item>
+
+            <div className={styles.registerLink}>
+              Hesabınız yok mu?{" "}
+              <a onClick={() => navigate("/register")}>Kayıt olun</a>
+            </div>
           </Form>
         </div>
       </div>
