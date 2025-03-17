@@ -46,8 +46,8 @@ export const firebaseAuthService = {
       createdAt: now,
       updatedAt: now,
       isActive: true,
-      phoneNumber,
-      company,
+      ...(phoneNumber && { phoneNumber }),
+      ...(company && { company }),
       settings: {
         theme: "light",
         language: "tr",
