@@ -1,0 +1,84 @@
+.layout {
+  min-height: 100vh;
+}
+
+.sider {
+  overflow: auto;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.logo {
+  height: 64px;
+  margin: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.logo img {
+  height: 40px;
+  width: auto;
+}
+
+.logoCollapsed img {
+  height: 32px;
+  width: auto;
+}
+
+.content {
+  margin: 24px 16px;
+  padding: 24px;
+  min-height: 280px;
+  border-radius: var(--border-radius-lg);
+}
+
+.header {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 100%;
+  width: 100%;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userDropdown {
+  cursor: pointer;
+  padding: 0 24px;
+}
+
+.userName {
+  margin-left: 8px;
+}
+
+.toggleButton {
+  font-size: 16px;
+  width: 64px;
+  height: 64px;
+}
+
+.themeButton {
+  font-size: 16px;
+}

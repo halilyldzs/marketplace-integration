@@ -1,26 +1,31 @@
 import {
+  BulbFilled,
+  BulbOutlined,
   DashboardOutlined,
   LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   SettingOutlined,
   ShoppingOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons"
+import logo from "@assets/logo.svg"
 import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
-import styles from "@styles/layouts/MainLayout.module.css"
-import { Button, Layout, Menu, Switch, theme } from "antd"
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { Avatar, Button, Dropdown, Layout, Menu } from "antd"
+import { useState } from "react"
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
+import styles from "./MainLayout.module.css"
 
-const { Header, Content, Footer, Sider } = Layout
-const { useToken } = theme
+const { Header, Sider, Content } = Layout
 
 const MainLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { token } = useToken()
-  const logout = useAuthStore((state) => state.logout)
+  const { logout, user } = useAuthStore()
   const { isDarkMode, toggleTheme } = useThemeStore()
+  const [collapsed, setCollapsed] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -29,81 +34,114 @@ const MainLayout = () => {
 
   const menuItems = [
     {
-      key: "/dashboard",
+      key: "dashboard",
       icon: <DashboardOutlined />,
-      label: <Link to='/dashboard'>Dashboard</Link>,
+      label: "Dashboard",
     },
     {
-      key: "/products",
+      key: "products",
       icon: <ShoppingOutlined />,
-      label: <Link to='/products'>Ürünler</Link>,
+      label: "Ürünler",
     },
     {
-      key: "/users",
+      key: "users",
       icon: <TeamOutlined />,
-      label: <Link to='/users'>Kullanıcılar</Link>,
+      label: "Kullanıcılar",
     },
     {
-      key: "/settings",
+      key: "settings",
       icon: <SettingOutlined />,
-      label: <Link to='/settings'>Ayarlar</Link>,
+      label: "Ayarlar",
     },
   ]
 
+  const userMenuItems = [
+    {
+      key: "profile",
+      icon: <UserOutlined />,
+      label: "Profil",
+    },
+    {
+      key: "logout",
+      icon: <LogoutOutlined />,
+      label: "Çıkış Yap",
+    },
+  ]
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    if (key === "logout") {
+      handleLogout()
+    } else {
+      navigate(key)
+    }
+  }
+
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout className={styles.layout}>
       <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
         theme={isDarkMode ? "dark" : "light"}
         className={styles.sider}>
         <div
-          className={styles.logo}
-          style={{ color: token.colorPrimary }}>
-          Lojistik YS
+          className={`${styles.logo} ${collapsed ? styles.logoCollapsed : ""}`}>
+          <img
+            src={logo}
+            alt='Logo'
+          />
         </div>
         <Menu
-          mode='inline'
-          selectedKeys={[location.pathname]}
-          items={menuItems}
           theme={isDarkMode ? "dark" : "light"}
-          style={{ border: "none" }}
-          onClick={({ key }) => navigate(key)}
+          mode='inline'
+          defaultSelectedKeys={[location.pathname.slice(1)]}
+          items={menuItems}
+          onClick={handleMenuClick}
         />
       </Sider>
-      <Layout>
+      <Layout
+        style={{ marginLeft: collapsed ? 80 : 200, transition: "all 0.2s" }}>
         <Header
           className={styles.header}
-          style={{ background: isDarkMode ? token.colorBgContainer : "#fff" }}>
-          <Switch
-            checked={isDarkMode}
-            onChange={toggleTheme}
-            checkedChildren='🌙'
-            unCheckedChildren='☀️'
-          />
-          <Button
-            type='link'
-            icon={<UserOutlined />}
-            onClick={() => navigate("/profile")}
-            style={{ marginLeft: "auto" }}>
-            Profil
-          </Button>
-          <Button
-            type='link'
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            style={{ marginLeft: "auto" }}>
-            Çıkış Yap
-          </Button>
+          style={{
+            background: isDarkMode ? "#141414" : "#fff",
+          }}>
+          <div className={styles.headerContent}>
+            <Button
+              type='text'
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className={styles.toggleButton}
+            />
+            <div className={styles.headerRight}>
+              <Button
+                type='text'
+                icon={isDarkMode ? <BulbFilled /> : <BulbOutlined />}
+                onClick={toggleTheme}
+                className={styles.themeButton}
+              />
+
+              <Dropdown
+                menu={{
+                  items: userMenuItems,
+                  onClick: handleMenuClick,
+                }}
+                placement='bottomRight'>
+                <div className={styles.userDropdown}>
+                  <Avatar icon={<UserOutlined />} />
+                  <span className={styles.userName}>{user?.fullName}</span>
+                </div>
+              </Dropdown>
+            </div>
+          </div>
         </Header>
         <Content
           className={styles.content}
-          style={{ background: isDarkMode ? token.colorBgContainer : "#fff" }}>
+          style={{
+            background: isDarkMode ? "#141414" : "#fff",
+          }}>
           <Outlet />
         </Content>
-        <Footer
-          className={styles.footer}
-          style={{ background: "transparent" }}>
-          Lojistik YS ©{new Date().getFullYear()} - Tüm hakları saklıdır.
-        </Footer>
       </Layout>
     </Layout>
   )

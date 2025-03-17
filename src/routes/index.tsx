@@ -27,3 +27,5 @@ const protectedRoutes: RouteObject[] = [
 ]
 
 export const routes: RouteObject[] = [...protectedRoutes, ...authRoutes]
+
+export default routes

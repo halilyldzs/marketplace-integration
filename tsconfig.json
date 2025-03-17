@@ -5,7 +5,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,15 +18,16 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@assets/*": ["src/assets/*"],
+      "@components/*": ["src/components/*"],
       "@features/*": ["src/features/*"],
-      "@services/*": ["src/services/*"],
-      "@sharedTypes/*": ["src/types/*"],
-      "@styles/*": ["src/styles/*"],
       "@layouts/*": ["src/layouts/*"],
       "@store/*": ["src/store/*"],
+      "@sharedTypes/*": ["src/types/*"],
+      "@services/*": ["src/services/*"],
+      "@styles/*": ["src/styles/*"],
       "@lib/*": ["src/lib/*"],
-      "@config/*": ["src/config/*"],
-      "@components/*": ["src/components/*"]
+      "@config/*": ["src/config/*"]
     }
   },
   "include": ["src"],

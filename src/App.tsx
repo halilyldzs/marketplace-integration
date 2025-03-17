@@ -1,34 +1,26 @@
 import { useThemeStore } from "@store/theme"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { ConfigProvider, theme } from "antd"
+import { ConfigProvider } from "antd"
 import { BrowserRouter, useRoutes } from "react-router-dom"
-import { routes } from "./routes"
+import AppRoutes from "./routes"
+import "./styles/global.css"
+import { darkTheme, lightTheme } from "./theme"
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-})
+const queryClient = new QueryClient()
 
-const AppRoutes = () => {
-  const element = useRoutes(routes)
+const AppRoutesComponent = () => {
+  const element = useRoutes(AppRoutes)
   return element
 }
 
 const App = () => {
-  const isDarkMode = useThemeStore((state) => state.isDarkMode)
+  const { isDarkMode } = useThemeStore()
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ConfigProvider
-        theme={{
-          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        }}>
+      <ConfigProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <BrowserRouter>
-          <AppRoutes />
+          <AppRoutesComponent />
         </BrowserRouter>
       </ConfigProvider>
     </QueryClientProvider>
