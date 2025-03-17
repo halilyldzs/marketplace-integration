@@ -1,3 +1,5 @@
+import { UserRole } from "./enums"
+
 export interface LoginFormValues {
   username: string
   password: string
@@ -24,11 +26,28 @@ export interface AuthState {
 }
 
 export interface User {
-  id: number
+  id: string
+  email: string
   username: string
   fullName: string
-  email: string
-  role: "admin" | "user"
+  role: UserRole
+  permissions?: string[]
+  createdAt: string
+  updatedAt: string
+  lastLoginAt?: string
+  isActive: boolean
+  phoneNumber?: string
+  avatar?: string
+  company?: {
+    name: string
+    position: string
+    department?: string
+  }
+  settings?: {
+    theme: "light" | "dark"
+    language: string
+    notifications: boolean
+  }
 }
 
 export interface AuthResponse {
@@ -38,8 +57,10 @@ export interface AuthResponse {
 
 export interface AuthStore {
   token: string | null
+  user: User | null
   isAuthenticated: boolean
   login: (token: string) => void
   logout: () => void
   setAuth: (isAuthenticated: boolean) => void
+  setUser: (user: User | null) => void
 }

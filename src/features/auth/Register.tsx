@@ -1,20 +1,34 @@
-import { authService } from "@services/auth.service"
-import { RegisterFormValues } from "@sharedTypes/auth"
+import { firebaseAuthService } from "@services/firebase-auth.service"
 import { Button, Form, Input, message } from "antd"
 import { useNavigate } from "react-router-dom"
-import styles from "./Register.module.css"
+import styles from "./Login.module.css"
+
+interface RegisterFormValues {
+  email: string
+  password: string
+  fullName: string
+  username: string
+}
 
 const Register = () => {
   const navigate = useNavigate()
-  const [form] = Form.useForm()
 
   const onFinish = async (values: RegisterFormValues) => {
     try {
-      await authService.register(values)
+      await firebaseAuthService.register({
+        email: values.email,
+        password: values.password,
+        fullName: values.fullName,
+        username: values.username,
+      })
       message.success("Kayıt başarılı! Giriş yapabilirsiniz.")
       navigate("/login")
-    } catch {
-      message.error("Kayıt işlemi başarısız!")
+    } catch (error: Error | unknown) {
+      message.error(
+        error instanceof Error
+          ? error.message
+          : "Kayıt sırasında bir hata oluştu!"
+      )
     }
   }
 
@@ -22,7 +36,7 @@ const Register = () => {
     <div className={styles.container}>
       <div className={styles.imageSection}>
         <img
-          src='/assets/ship.jpg'
+          src='/public/assets/ship.jpg'
           alt='Lojistik'
           className={styles.image}
         />
@@ -38,7 +52,6 @@ const Register = () => {
           <p className={styles.subtitle}>Yeni bir hesap oluşturun</p>
 
           <Form
-            form={form}
             name='register'
             onFinish={onFinish}
             layout='vertical'>
@@ -55,24 +68,20 @@ const Register = () => {
             </Form.Item>
 
             <Form.Item
-              label='E-posta'
-              name='email'
+              label='Kullanıcı Adı'
+              name='username'
               rules={[
-                { required: true, message: "Lütfen e-posta adresinizi girin!" },
-                { type: "email", message: "Geçerli bir e-posta adresi girin!" },
+                { required: true, message: "Lütfen kullanıcı adı girin!" },
               ]}>
               <Input size='large' />
             </Form.Item>
 
             <Form.Item
-              label='Kullanıcı Adı'
-              name='username'
+              label='E-posta'
+              name='email'
               rules={[
-                { required: true, message: "Lütfen kullanıcı adınızı girin!" },
-                {
-                  min: 3,
-                  message: "Kullanıcı adı en az 3 karakter olmalıdır!",
-                },
+                { required: true, message: "Lütfen e-posta adresinizi girin!" },
+                { type: "email", message: "Geçerli bir e-posta adresi girin!" },
               ]}>
               <Input size='large' />
             </Form.Item>
@@ -87,24 +96,6 @@ const Register = () => {
               <Input.Password size='large' />
             </Form.Item>
 
-            <Form.Item
-              label='Şifre Tekrar'
-              name='confirmPassword'
-              dependencies={["password"]}
-              rules={[
-                { required: true, message: "Lütfen şifrenizi tekrar girin!" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject(new Error("Şifreler eşleşmiyor!"))
-                  },
-                }),
-              ]}>
-              <Input.Password size='large' />
-            </Form.Item>
-
             <Form.Item>
               <Button
                 type='primary'
@@ -115,7 +106,7 @@ const Register = () => {
               </Button>
             </Form.Item>
 
-            <div className={styles.loginLink}>
+            <div className={styles.registerLink}>
               Zaten hesabınız var mı?{" "}
               <a onClick={() => navigate("/login")}>Giriş yapın</a>
             </div>

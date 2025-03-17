@@ -1,5 +1,4 @@
-import { authService } from "@services/auth.service"
-import { LoginCredentials } from "@sharedTypes/auth"
+import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
 import { Button, Form, Input, message } from "antd"
 import { useNavigate } from "react-router-dom"
@@ -8,15 +7,27 @@ import styles from "./Login.module.css"
 const Login = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
+  const setUser = useAuthStore((state) => state.setUser)
 
-  const onFinish = async (values: LoginCredentials) => {
+  const onFinish = async (values: { email: string; password: string }) => {
     try {
-      const { token } = await authService.login(values)
-      login(token)
+      const userCredential = await firebaseAuthService.login(values)
+      const userData = await firebaseAuthService.getUserData(
+        userCredential.user.uid
+      )
+
+      if (!userData) {
+        throw new Error("Kullanıcı bilgileri bulunamadı!")
+      }
+
+      login(userCredential.user.uid)
+      setUser(userData)
       navigate("/dashboard")
       message.success("Giriş başarılı!")
-    } catch {
-      message.error("Kullanıcı adı veya şifre hatalı!")
+    } catch (error: Error | unknown) {
+      message.error(
+        error instanceof Error ? error.message : "Giriş yapılamadı!"
+      )
     }
   }
 
@@ -44,10 +55,11 @@ const Login = () => {
             onFinish={onFinish}
             layout='vertical'>
             <Form.Item
-              label='Kullanıcı Adı'
-              name='username'
+              label='E-posta'
+              name='email'
               rules={[
-                { required: true, message: "Lütfen kullanıcı adınızı girin!" },
+                { required: true, message: "Lütfen e-posta adresinizi girin!" },
+                { type: "email", message: "Geçerli bir e-posta adresi girin!" },
               ]}>
               <Input size='large' />
             </Form.Item>
