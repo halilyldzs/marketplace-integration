@@ -28,8 +28,10 @@ export interface AuthResponse {
   user: User
 }
 
-export interface AuthStore extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>
+export interface AuthStore {
+  token: string | null
+  isAuthenticated: boolean
+  login: (token: string) => void
   logout: () => void
   setAuth: (isAuthenticated: boolean) => void
 }

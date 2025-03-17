@@ -1,22 +1,18 @@
-import { AuthState, AuthStore } from "@sharedTypes/auth"
+import { AuthStore } from "@sharedTypes/auth"
 import { create } from "zustand"
+import { persist } from "zustand/middleware"
 
-const initialState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-  token: null,
-}
-
-export const useAuthStore = create<AuthStore>((set) => ({
-  ...initialState,
-  login: async () => {
-    // Login işlemi
-    set({ isAuthenticated: true })
-  },
-  logout: () => {
-    set(initialState)
-  },
-  setAuth: (isAuthenticated: boolean) => {
-    set({ isAuthenticated })
-  },
-}))
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set) => ({
+      token: null,
+      isAuthenticated: false,
+      login: (token: string) => set({ token, isAuthenticated: true }),
+      logout: () => set({ token: null, isAuthenticated: false }),
+      setAuth: (isAuthenticated: boolean) => set({ isAuthenticated }),
+    }),
+    {
+      name: "auth-storage",
+    }
+  )
+)

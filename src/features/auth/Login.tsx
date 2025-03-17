@@ -1,79 +1,70 @@
-import { LockOutlined, UserOutlined } from "@ant-design/icons"
+import { authService } from "@services/auth.service"
+import { LoginCredentials } from "@sharedTypes/auth"
 import { useAuthStore } from "@store/auth"
-import styles from "@styles/features/auth/Login.module.css"
 import { Button, Form, Input, message } from "antd"
 import { useNavigate } from "react-router-dom"
+import styles from "./Login.module.css"
 
 const Login = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
 
-  const onFinish = async (values: { username: string; password: string }) => {
+  const onFinish = async (values: LoginCredentials) => {
     try {
-      await login(values)
+      const { token } = await authService.login(values)
+      login(token)
       navigate("/dashboard")
-    } catch (error) {
-      message.error("Giriş başarısız!")
+      message.success("Giriş başarılı!")
+    } catch {
+      message.error("Kullanıcı adı veya şifre hatalı!")
     }
   }
 
   return (
-    <div className={styles.loginContainer}>
+    <div className={styles.container}>
       <div className={styles.imageSection}>
-        <div className={styles.imageContent}>
+        <img
+          src='/public/assets/ship.jpg'
+          alt='Lojistik'
+          className={styles.image}
+        />
+        <div className={styles.overlay}>
           <h1>Lojistik YS</h1>
-          <p>
-            Lojistik süreçlerinizi kolayca yönetin, siparişlerinizi takip edin.
-          </p>
+          <p>Lojistik süreçlerinizi kolayca yönetin</p>
         </div>
       </div>
+
       <div className={styles.formSection}>
         <div className={styles.formContainer}>
-          <div className={styles.formTitle}>
-            <h2>Hoş Geldiniz</h2>
-            <p>Devam etmek için giriş yapın</p>
-          </div>
+          <h2>Hoş Geldiniz</h2>
+          <p className={styles.subtitle}>Devam etmek için giriş yapın</p>
+
           <Form
             name='login'
             onFinish={onFinish}
-            layout='vertical'
-            size='large'>
-            <div className={styles.formItem}>
-              <Form.Item
-                name='username'
-                rules={[
-                  {
-                    required: true,
-                    message: "Lütfen kullanıcı adınızı girin!",
-                  },
-                ]}>
-                <Input
-                  prefix={<UserOutlined className={styles.prefix} />}
-                  placeholder='Kullanıcı Adı'
-                  className={styles.input}
-                />
-              </Form.Item>
-            </div>
+            layout='vertical'>
+            <Form.Item
+              label='Kullanıcı Adı'
+              name='username'
+              rules={[
+                { required: true, message: "Lütfen kullanıcı adınızı girin!" },
+              ]}>
+              <Input size='large' />
+            </Form.Item>
 
-            <div className={styles.formItem}>
-              <Form.Item
-                name='password'
-                rules={[
-                  { required: true, message: "Lütfen şifrenizi girin!" },
-                ]}>
-                <Input.Password
-                  prefix={<LockOutlined className={styles.prefix} />}
-                  placeholder='Şifre'
-                  className={styles.input}
-                />
-              </Form.Item>
-            </div>
+            <Form.Item
+              label='Şifre'
+              name='password'
+              rules={[{ required: true, message: "Lütfen şifrenizi girin!" }]}>
+              <Input.Password size='large' />
+            </Form.Item>
 
             <Form.Item>
               <Button
                 type='primary'
                 htmlType='submit'
-                style={{ width: "100%" }}>
+                size='large'
+                block>
                 Giriş Yap
               </Button>
             </Form.Item>

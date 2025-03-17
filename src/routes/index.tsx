@@ -1,6 +1,7 @@
 import ProtectedRoute from "@components/ProtectedRoute"
 import Login from "@features/auth/Login"
 import Dashboard from "@features/dashboard/Dashboard"
+import Products from "@features/products/Products"
 import Settings from "@features/settings/Settings"
 import Users from "@features/users/Users"
 import MainLayout from "@layouts/MainLayout"
@@ -8,38 +9,39 @@ import { RouteObject } from "react-router-dom"
 
 export const routes: RouteObject[] = [
   {
-    element: <ProtectedRoute authRequired={false} />,
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
-        path: "login",
-        element: <Login />,
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "users",
+        element: <Users />,
+      },
+      {
+        path: "products",
+        element: <Products />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       },
     ],
   },
   {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <MainLayout />,
-        children: [
-          {
-            path: "/",
-            element: <Dashboard />,
-          },
-          {
-            path: "dashboard",
-            element: <Dashboard />,
-          },
-          {
-            path: "users",
-            element: <Users />,
-          },
-          {
-            path: "settings",
-            element: <Settings />,
-          },
-        ],
-      },
-    ],
+    path: "/login",
+    element: (
+      <ProtectedRoute
+        authRequired={false}
+        redirectPath='/dashboard'>
+        <Login />
+      </ProtectedRoute>
+    ),
   },
 ]

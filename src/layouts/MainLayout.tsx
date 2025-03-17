@@ -2,6 +2,7 @@ import {
   DashboardOutlined,
   LogoutOutlined,
   SettingOutlined,
+  ShopOutlined,
   UserOutlined,
 } from "@ant-design/icons"
 import { useAuthStore } from "@store/auth"
@@ -30,6 +31,11 @@ const MainLayout = () => {
       key: "/dashboard",
       icon: <DashboardOutlined />,
       label: <Link to='/dashboard'>Dashboard</Link>,
+    },
+    {
+      key: "/products",
+      icon: <ShopOutlined />,
+      label: <Link to='/products'>Ürünler</Link>,
     },
     {
       key: "/users",

@@ -1,12 +1,15 @@
 import { useAuthStore } from "@store/auth"
-import { Navigate, Outlet } from "react-router-dom"
+import { ReactNode } from "react"
+import { Navigate } from "react-router-dom"
 
 interface ProtectedRouteProps {
+  children: ReactNode
   authRequired?: boolean
   redirectPath?: string
 }
 
 const ProtectedRoute = ({
+  children,
   authRequired = true,
   redirectPath = "/login",
 }: ProtectedRouteProps) => {
@@ -30,7 +33,7 @@ const ProtectedRoute = ({
     )
   }
 
-  return <Outlet />
+  return <>{children}</>
 }
 
 export default ProtectedRoute
