@@ -2,7 +2,8 @@ import {
   DashboardOutlined,
   LogoutOutlined,
   SettingOutlined,
-  ShopOutlined,
+  ShoppingOutlined,
+  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons"
 import { useAuthStore } from "@store/auth"
@@ -21,8 +22,8 @@ const MainLayout = () => {
   const logout = useAuthStore((state) => state.logout)
   const { isDarkMode, toggleTheme } = useThemeStore()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate("/login")
   }
 
@@ -34,12 +35,12 @@ const MainLayout = () => {
     },
     {
       key: "/products",
-      icon: <ShopOutlined />,
+      icon: <ShoppingOutlined />,
       label: <Link to='/products'>Ürünler</Link>,
     },
     {
       key: "/users",
-      icon: <UserOutlined />,
+      icon: <TeamOutlined />,
       label: <Link to='/users'>Kullanıcılar</Link>,
     },
     {
@@ -65,6 +66,7 @@ const MainLayout = () => {
           items={menuItems}
           theme={isDarkMode ? "dark" : "light"}
           style={{ border: "none" }}
+          onClick={({ key }) => navigate(key)}
         />
       </Sider>
       <Layout>
@@ -78,6 +80,14 @@ const MainLayout = () => {
             unCheckedChildren='☀️'
           />
           <Button
+            type='link'
+            icon={<UserOutlined />}
+            onClick={() => navigate("/profile")}
+            style={{ marginLeft: "auto" }}>
+            Profil
+          </Button>
+          <Button
+            type='link'
             icon={<LogoutOutlined />}
             onClick={handleLogout}
             style={{ marginLeft: "auto" }}>
