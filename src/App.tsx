@@ -1,3 +1,4 @@
+import { StyleProvider } from "@ant-design/cssinjs"
 import { useThemeStore } from "@store/theme"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ConfigProvider, theme } from "antd"
@@ -5,7 +6,6 @@ import { useEffect } from "react"
 import { BrowserRouter, useRoutes } from "react-router-dom"
 import AppRoutes from "./routes"
 import "./styles/global.css"
-import getThemeConfig from "./theme/config"
 
 const queryClient = new QueryClient()
 
@@ -40,15 +40,25 @@ const AppContent = () => {
   }, [isDarkMode])
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        ...getThemeConfig(isDarkMode),
-      }}>
-      <BrowserRouter>
-        <AppRoutesComponent />
-      </BrowserRouter>
-    </ConfigProvider>
+    <StyleProvider hashPriority='high'>
+      <ConfigProvider
+        theme={{
+          algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+          token: {
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+            fontSize: 14,
+            borderRadius: 6,
+            colorPrimary: "#1890ff",
+          },
+          cssVar: true,
+          hashed: false,
+        }}>
+        <BrowserRouter>
+          <AppRoutesComponent />
+        </BrowserRouter>
+      </ConfigProvider>
+    </StyleProvider>
   )
 }
 

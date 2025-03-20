@@ -1,14 +1,14 @@
 .container {
   display: flex;
   min-height: 100vh;
-  background-color: #fff;
+  background-color: var(--ant-color-bg-container);
 }
 
 .imageSection {
   flex: 0.6;
   position: relative;
   overflow: hidden;
-  background-color: #001529;
+  background-color: var(--ant-color-bg-layout);
 }
 
 .image {
@@ -24,14 +24,14 @@
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  color: white;
+  color: var(--ant-color-white);
   z-index: 1;
 }
 
 .overlay h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
-  color: white;
+  color: var(--ant-color-white);
 }
 
 .overlay p {
@@ -46,7 +46,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background-color: #fff;
+  background-color: var(--ant-color-bg-container);
 }
 
 .formContainer {
@@ -57,11 +57,11 @@
 .formContainer h2 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  color: #001529;
+  color: var(--ant-color-text);
 }
 
 .subtitle {
-  color: #8c8c8c;
+  color: var(--ant-color-text-secondary);
   margin-bottom: 2rem;
 }
 
@@ -71,12 +71,8 @@
 }
 
 .registerLink a {
-  color: #1890ff;
+  color: var(--ant-color-primary);
   cursor: pointer;
-}
-
-.registerLink a:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 768px) {

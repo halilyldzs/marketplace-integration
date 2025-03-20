@@ -42,50 +42,8 @@
   gap: 1.5rem;
 }
 
-/* Light Mode Styles */
-:global(.light) {
-  .card {
-    background: #ffffff;
-    border: 1px solid #f0f0f0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  .card:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .marketplaceStats {
-    color: rgba(0, 0, 0, 0.65);
-  }
-
-  .chartGrid {
-    stroke: #f0f0f0;
-  }
-}
-
-/* Dark Mode Styles */
-:global(.dark) {
-  .card {
-    background: #141414;
-    border: 1px solid #303030;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  .card:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  }
-
-  .marketplaceStats {
-    color: rgba(255, 255, 255, 0.65);
-  }
-
-  .chartGrid {
-    stroke: #303030;
-  }
-
-  .title {
-    color: rgba(255, 255, 255, 0.85);
-  }
+.chartGrid {
+  stroke: var(--ant-color-split);
 }
 
 .cardContent {
@@ -107,7 +65,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  color: #666;
 }
 
 /* Responsive Styles */

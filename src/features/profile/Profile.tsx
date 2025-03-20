@@ -1,8 +1,9 @@
-import { UploadOutlined } from "@ant-design/icons"
+import { UploadOutlined, UserOutlined } from "@ant-design/icons"
 import { auth } from "@config/firebase"
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
 import {
+  Avatar,
   Button,
   Card,
   Col,
@@ -41,7 +42,7 @@ interface ProfileFormValues {
   }
 }
 
-const Profile = () => {
+export const Profile = () => {
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
@@ -216,208 +217,166 @@ const Profile = () => {
 
   return (
     <div className={styles.profileContainer}>
-      <Title
-        className={styles.pageTitle}
-        level={2}>
-        Profil Ayarları
-      </Title>
-      <Text
-        className={styles.pageDescription}
-        type='secondary'>
-        Hesap bilgilerinizi ve tercihlerinizi buradan yönetebilirsiniz.
-      </Text>
+      <div className={styles.pageHeader}>
+        <Title
+          level={2}
+          className={styles.pageTitle}>
+          Profile Settings
+        </Title>
+        <Text
+          type='secondary'
+          className={styles.pageDescription}>
+          Manage your account settings and preferences
+        </Text>
+      </div>
 
-      <Row
-        gutter={[24, 24]}
-        className={`${styles.rowContainer} ${styles.centeredRow}`}>
-        <Col className={styles.centeredCol}>
-          <Card
-            bordered={false}
-            className={styles.avatarCard}>
-            <div className={styles.avatarContainer}>
-              <div
-                className={`${styles.avatarCircle} ${
-                  user?.avatar
-                    ? styles.avatarCircleWithImage
-                    : styles.avatarCircleNoImage
-                }`}>
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt='Profil'
-                    className={styles.avatarImage}
-                  />
-                ) : (
-                  <div className={styles.avatarPlaceholder}>
-                    {user?.fullName?.charAt(0) || "U"}
-                  </div>
-                )}
-              </div>
-              <Upload
-                fileList={fileList}
-                onChange={({ fileList }) => setFileList(fileList)}
-                beforeUpload={(file) => {
-                  handleAvatarUpload(file)
-                  return false
-                }}
-                maxCount={1}
-                showUploadList={false}>
-                <Button
-                  icon={<UploadOutlined />}
-                  loading={avatarLoading}
-                  className={styles.uploadButton}>
-                  Fotoğraf Yükle
-                </Button>
-              </Upload>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+      <div className={styles.profileGrid}>
+        <Card className={styles.avatarSection}>
+          <Avatar
+            size={120}
+            icon={<UserOutlined />}
+            src={user?.avatar}
+          />
+          <Upload
+            fileList={fileList}
+            onChange={({ fileList }) => setFileList(fileList)}
+            beforeUpload={(file) => {
+              handleAvatarUpload(file)
+              return false
+            }}
+            maxCount={1}
+            showUploadList={false}>
+            <Button
+              type='primary'
+              icon={<UploadOutlined />}
+              className={styles.uploadButton}
+              loading={avatarLoading}>
+              Fotoğraf Yükle
+            </Button>
+          </Upload>
+        </Card>
 
-      <Row
-        gutter={[24, 24]}
-        className={styles.rowContainer}>
-        <Col span={24}>
-          <Card
-            title='Kişisel Bilgiler'
-            bordered={false}
-            className={styles.cardContainer}>
-            <Form
-              form={form}
-              layout='vertical'
-              initialValues={
-                user || {
-                  fullName: "",
-                  email: "",
-                  phoneNumber: "",
-                  settings: {
-                    theme: "light",
-                    language: "tr",
-                    notifications: false,
-                  },
-                }
+        <Card className={styles.preferencesSection}>
+          <Form
+            form={form}
+            layout='vertical'
+            className={styles.preferencesForm}
+            initialValues={
+              user || {
+                fullName: "",
+                email: "",
+                phoneNumber: "",
+                settings: {
+                  theme: "light",
+                  language: "tr",
+                  notifications: false,
+                },
               }
-              onFinish={onFinish}>
-              <Row gutter={24}>
-                <Col span={12}>
-                  <Form.Item
-                    label='Ad Soyad'
-                    name='fullName'
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lütfen adınızı ve soyadınızı girin!",
-                      },
-                    ]}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label='E-posta'
-                    name='email'
-                    rules={[
-                      {
-                        required: true,
-                        message: "Lütfen e-posta adresinizi girin!",
-                      },
-                      {
-                        type: "email",
-                        message: "Geçerli bir e-posta adresi girin!",
-                      },
-                    ]}>
-                    <Input disabled />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label='Telefon'
-                    name='phoneNumber'>
-                    <Input />
-                  </Form.Item>
-                </Col>
-              </Row>
+            }
+            onFinish={onFinish}>
+            <Form.Item
+              label='Ad Soyad'
+              name='fullName'
+              rules={[
+                {
+                  required: true,
+                  message: "Lütfen adınızı ve soyadınızı girin!",
+                },
+              ]}>
+              <Input placeholder='Adınız ve soyadınız' />
+            </Form.Item>
 
-              <Form.Item style={{ textAlign: "right" }}>
-                <Button
-                  onClick={() => setIsPasswordModalVisible(true)}
-                  style={{ marginRight: 8 }}>
-                  Şifreyi Değiştir
-                </Button>
-                <Button
-                  type='primary'
-                  htmlType='submit'
-                  loading={profileLoading}>
-                  Kaydet
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+            <Form.Item
+              label='E-posta'
+              name='email'
+              rules={[
+                { required: true, message: "Lütfen e-posta adresinizi girin!" },
+                { type: "email", message: "Geçerli bir e-posta adresi girin!" },
+              ]}>
+              <Input
+                placeholder='E-posta adresiniz'
+                disabled
+              />
+            </Form.Item>
 
-      <Row
-        gutter={[24, 24]}
-        className={styles.rowContainer}>
-        <Col xs={24}>
-          <Card
-            title='Tercihler'
-            bordered={false}
-            className={styles.cardContainer}>
-            <Form
-              form={preferencesForm}
-              layout='vertical'
-              initialValues={user?.settings}
-              onFinish={handlePreferencesUpdate}>
-              <Row gutter={24}>
-                <Col
-                  xs={24}
-                  md={8}>
-                  <Form.Item
-                    label='Tema'
-                    name={["settings", "theme"]}>
-                    <Select className={styles.fullWidthSelect}>
-                      <Option value='light'>Açık</Option>
-                      <Option value='dark'>Koyu</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col
-                  xs={24}
-                  md={8}>
-                  <Form.Item
-                    label='Dil'
-                    name={["settings", "language"]}>
-                    <Select className={styles.fullWidthSelect}>
-                      <Option value='tr'>Türkçe</Option>
-                      <Option value='en'>English</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col
-                  xs={24}
-                  md={8}>
-                  <Form.Item
-                    label='Bildirimler'
-                    name={["settings", "notifications"]}
-                    valuePropName='checked'>
-                    <Switch />
-                  </Form.Item>
-                </Col>
-              </Row>
+            <Form.Item
+              label='Telefon'
+              name='phoneNumber'>
+              <Input placeholder='Telefon numaranız' />
+            </Form.Item>
 
-              <Form.Item style={{ textAlign: "right" }}>
-                <Button
-                  type='primary'
-                  htmlType='submit'
-                  loading={preferencesLoading}>
-                  Tercihleri Kaydet
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+            <Form.Item>
+              <Button
+                onClick={() => setIsPasswordModalVisible(true)}
+                style={{ marginRight: 8 }}>
+                Şifreyi Değiştir
+              </Button>
+              <Button
+                type='primary'
+                htmlType='submit'
+                loading={profileLoading}>
+                Kaydet
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
+
+      <div className={styles.settingsSection}>
+        <Card title='Tercihler'>
+          <Form
+            form={preferencesForm}
+            layout='vertical'
+            initialValues={user?.settings}
+            onFinish={handlePreferencesUpdate}>
+            <Row gutter={24}>
+              <Col
+                xs={24}
+                md={8}>
+                <Form.Item
+                  label='Tema'
+                  name={["settings", "theme"]}>
+                  <Select>
+                    <Option value='light'>Açık</Option>
+                    <Option value='dark'>Koyu</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col
+                xs={24}
+                md={8}>
+                <Form.Item
+                  label='Dil'
+                  name={["settings", "language"]}>
+                  <Select>
+                    <Option value='tr'>Türkçe</Option>
+                    <Option value='en'>English</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col
+                xs={24}
+                md={8}>
+                <Form.Item
+                  label='Bildirimler'
+                  name={["settings", "notifications"]}
+                  valuePropName='checked'>
+                  <Switch />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
+              <Button
+                type='primary'
+                htmlType='submit'
+                loading={preferencesLoading}>
+                Tercihleri Kaydet
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      </div>
 
       <Modal
         title='Şifre Değiştir'
