@@ -121,6 +121,7 @@
 .themeButton {
   font-size: 16px;
   color: var(--text-color);
+  transition: all 0.3s ease;
 }
 
 .themeButton:hover {
@@ -128,7 +129,12 @@
   background: var(--hover-light);
 }
 
+[data-theme="dark"] .themeButton {
+  color: #fadb14; /* Sarı renk */
+}
+
 [data-theme="dark"] .themeButton:hover {
+  color: #ffec3d; /* Daha parlak sarı */
   background: var(--hover-dark);
 }
 
