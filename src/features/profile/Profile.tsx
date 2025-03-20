@@ -5,9 +5,11 @@ import { useAuthStore } from "@store/auth"
 import {
   Button,
   Card,
+  Col,
   Form,
   Input,
   message,
+  Row,
   Select,
   Switch,
   Typography,
@@ -17,6 +19,7 @@ import type { UploadFile } from "antd/es/upload/interface"
 import { updatePassword } from "firebase/auth"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage"
 import { useState } from "react"
+import styles from "./Profile.module.css"
 
 const { Option } = Select
 const { Title, Text } = Typography
@@ -93,17 +96,73 @@ const Profile = () => {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
-      <Title level={2}>Profil Ayarları</Title>
-      <Text type='secondary'>
+    <div className={styles.profileContainer}>
+      <Title
+        className={styles.pageTitle}
+        level={2}>
+        Profil Ayarları
+      </Title>
+      <Text
+        className={styles.pageDescription}
+        type='secondary'>
         Hesap bilgilerinizi ve tercihlerinizi buradan yönetebilirsiniz.
       </Text>
 
-      <div style={{ display: "flex", gap: "24px", marginTop: 24 }}>
-        <div style={{ flex: 2 }}>
+      <Row
+        gutter={[24, 24]}
+        className={`${styles.rowContainer} ${styles.centeredRow}`}>
+        <Col className={styles.centeredCol}>
+          <Card
+            bordered={false}
+            className={styles.avatarCard}>
+            <div className={styles.avatarContainer}>
+              <div
+                className={`${styles.avatarCircle} ${
+                  user?.avatar
+                    ? styles.avatarCircleWithImage
+                    : styles.avatarCircleNoImage
+                }`}>
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt='Profil'
+                    className={styles.avatarImage}
+                  />
+                ) : (
+                  <div className={styles.avatarPlaceholder}>
+                    {user?.fullName?.charAt(0) || "U"}
+                  </div>
+                )}
+              </div>
+              <Upload
+                fileList={fileList}
+                onChange={({ fileList }) => setFileList(fileList)}
+                beforeUpload={(file) => {
+                  handleAvatarUpload(file)
+                  return false
+                }}
+                maxCount={1}
+                showUploadList={false}>
+                <Button
+                  icon={<UploadOutlined />}
+                  className={styles.uploadButton}>
+                  Fotoğraf Yükle
+                </Button>
+              </Upload>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+      <Row
+        gutter={[24, 24]}
+        className={styles.rowContainer}>
+        <Col
+          xs={24}
+          lg={14}>
           <Card
             title='Kişisel Bilgiler'
-            bordered={false}>
+            bordered={false}
+            className={styles.cardContainer}>
             <Form
               form={form}
               layout='vertical'
@@ -158,104 +217,95 @@ const Profile = () => {
                 <Button
                   type='primary'
                   htmlType='submit'
-                  loading={loading}>
+                  loading={loading}
+                  className={styles.fullWidthButton}>
                   Kaydet
                 </Button>
               </Form.Item>
             </Form>
           </Card>
-        </div>
+        </Col>
 
-        <div style={{ flex: 1 }}>
-          <Card
-            title='Tercihler'
-            bordered={false}
-            style={{ marginBottom: 24 }}>
-            <Form
-              form={form}
-              layout='vertical'
-              initialValues={user?.settings}
-              onFinish={onFinish}>
-              <Form.Item
-                label='Tema'
-                name={["settings", "theme"]}>
-                <Select>
-                  <Option value='light'>Açık</Option>
-                  <Option value='dark'>Koyu</Option>
-                </Select>
-              </Form.Item>
+        <Col
+          xs={24}
+          lg={10}>
+          <div className={styles.preferencesContainer}>
+            <Card
+              title='Güvenlik'
+              bordered={false}>
+              <Form
+                layout='vertical'
+                onFinish={handlePasswordChange}>
+                <Form.Item
+                  label='Mevcut Şifre'
+                  name='currentPassword'
+                  rules={[
+                    {
+                      required: true,
+                      message: "Lütfen mevcut şifrenizi girin!",
+                    },
+                  ]}>
+                  <Input.Password />
+                </Form.Item>
 
-              <Form.Item
-                label='Dil'
-                name={["settings", "language"]}>
-                <Select>
-                  <Option value='tr'>Türkçe</Option>
-                  <Option value='en'>English</Option>
-                </Select>
-              </Form.Item>
+                <Form.Item
+                  label='Yeni Şifre'
+                  name='newPassword'
+                  rules={[
+                    { required: true, message: "Lütfen yeni şifrenizi girin!" },
+                    { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
+                  ]}>
+                  <Input.Password />
+                </Form.Item>
 
-              <Form.Item
-                label='Bildirimler'
-                name={["settings", "notifications"]}
-                valuePropName='checked'>
-                <Switch />
-              </Form.Item>
-            </Form>
-          </Card>
+                <Form.Item>
+                  <Button
+                    type='primary'
+                    htmlType='submit'
+                    loading={loading}
+                    className={styles.fullWidthButton}>
+                    Şifreyi Değiştir
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
+            <Card
+              title='Tercihler'
+              bordered={false}>
+              <Form
+                form={form}
+                layout='vertical'
+                initialValues={user?.settings}
+                onFinish={onFinish}>
+                <Form.Item
+                  label='Tema'
+                  name={["settings", "theme"]}>
+                  <Select className={styles.fullWidthSelect}>
+                    <Option value='light'>Açık</Option>
+                    <Option value='dark'>Koyu</Option>
+                  </Select>
+                </Form.Item>
 
-          <Card
-            title='Güvenlik'
-            bordered={false}
-            style={{ marginBottom: 24 }}>
-            <Form
-              layout='vertical'
-              onFinish={handlePasswordChange}>
-              <Form.Item
-                label='Mevcut Şifre'
-                name='currentPassword'
-                rules={[
-                  { required: true, message: "Lütfen mevcut şifrenizi girin!" },
-                ]}>
-                <Input.Password />
-              </Form.Item>
+                <Form.Item
+                  label='Dil'
+                  name={["settings", "language"]}>
+                  <Select className={styles.fullWidthSelect}>
+                    <Option value='tr'>Türkçe</Option>
+                    <Option value='en'>English</Option>
+                  </Select>
+                </Form.Item>
 
-              <Form.Item
-                label='Yeni Şifre'
-                name='newPassword'
-                rules={[
-                  { required: true, message: "Lütfen yeni şifrenizi girin!" },
-                  { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
-                ]}>
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type='primary'
-                  htmlType='submit'
-                  loading={loading}>
-                  Şifreyi Değiştir
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-
-          <Card
-            title='Profil Fotoğrafı'
-            bordered={false}>
-            <Upload
-              fileList={fileList}
-              onChange={({ fileList }) => setFileList(fileList)}
-              beforeUpload={(file) => {
-                handleAvatarUpload(file)
-                return false
-              }}
-              maxCount={1}>
-              <Button icon={<UploadOutlined />}>Fotoğraf Yükle</Button>
-            </Upload>
-          </Card>
-        </div>
-      </div>
+                <Form.Item
+                  label='Bildirimler'
+                  name={["settings", "notifications"]}
+                  valuePropName='checked'>
+                  <Switch />
+                </Form.Item>
+              </Form>
+            </Card>
+          </div>
+        </Col>
+      </Row>
     </div>
   )
 }
