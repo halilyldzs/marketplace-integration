@@ -17,7 +17,12 @@ import {
   Upload,
 } from "antd"
 import type { UploadFile } from "antd/es/upload/interface"
-import { updatePassword } from "firebase/auth"
+import {
+  AuthError,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth"
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage"
 import { useState } from "react"
 import styles from "./Profile.module.css"
@@ -59,8 +64,10 @@ const Profile = () => {
       })
       setUser({ ...user!, ...values })
       message.success("Profil başarıyla güncellendi!")
-    } catch (error) {
-      message.error(`Profil güncellenirken bir hata oluştu: ${error}`)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(`Profil güncellenirken bir hata oluştu: ${error.message}`)
+      }
     } finally {
       setProfileLoading(false)
     }
@@ -78,13 +85,80 @@ const Profile = () => {
       }
 
       setPasswordLoading(true)
-      if (!auth.currentUser) throw new Error("No user logged in")
-      await updatePassword(auth.currentUser, values.newPassword)
-      message.success("Şifre başarıyla güncellendi!")
-      passwordForm.resetFields()
-      setIsPasswordModalVisible(false)
-    } catch (error) {
-      message.error(`Şifre güncellenirken bir hata oluştu: ${error}`)
+      if (!auth.currentUser) {
+        message.error("Oturum açık değil. Lütfen tekrar giriş yapın.")
+        return
+      }
+
+      // Önce kullanıcıyı yeniden doğrula
+      try {
+        const credential = EmailAuthProvider.credential(
+          auth.currentUser.email!,
+          values.currentPassword
+        )
+        await reauthenticateWithCredential(auth.currentUser, credential)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          const authError = error as AuthError
+          switch (authError.code) {
+            case "auth/wrong-password":
+              message.error("Mevcut şifreniz yanlış!")
+              break
+            case "auth/too-many-requests":
+              message.error(
+                "Çok fazla başarısız deneme. Lütfen bir süre bekleyin."
+              )
+              break
+            case "auth/user-token-expired":
+              message.error(
+                "Oturumunuz süresi dolmuş. Lütfen tekrar giriş yapın."
+              )
+              break
+            case "auth/user-not-found":
+              message.error("Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.")
+              break
+            case "auth/invalid-credential":
+              message.error(
+                "Geçersiz kimlik bilgileri. Lütfen tekrar giriş yapın."
+              )
+              break
+            default:
+              message.error(
+                "Kimlik doğrulama başarısız oldu. Lütfen sayfayı yenileyip tekrar deneyin."
+              )
+          }
+        }
+        setPasswordLoading(false)
+        return
+      }
+
+      // Şifreyi güncelle
+      try {
+        await updatePassword(auth.currentUser, values.newPassword)
+        message.success("Şifre başarıyla güncellendi!")
+        passwordForm.resetFields()
+        setIsPasswordModalVisible(false)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          const authError = error as AuthError
+          switch (authError.code) {
+            case "auth/requires-recent-login":
+              message.error(
+                "Bu işlem için yakın zamanda giriş yapılmış olması gerekiyor. Lütfen çıkış yapıp tekrar giriş yapın."
+              )
+              break
+            case "auth/weak-password":
+              message.error(
+                "Yeni şifreniz çok zayıf. Lütfen daha güçlü bir şifre seçin."
+              )
+              break
+            default:
+              message.error(
+                `Şifre güncellenirken bir hata oluştu: ${authError.message}`
+              )
+          }
+        }
+      }
     } finally {
       setPasswordLoading(false)
     }
@@ -103,8 +177,12 @@ const Profile = () => {
       })
       setUser({ ...user!, avatar: downloadURL })
       message.success("Profil fotoğrafı güncellendi!")
-    } catch (error) {
-      message.error(`Profil fotoğrafı yüklenirken bir hata oluştu: ${error}`)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(
+          `Profil fotoğrafı yüklenirken bir hata oluştu: ${error.message}`
+        )
+      }
     } finally {
       setAvatarLoading(false)
     }
@@ -119,8 +197,12 @@ const Profile = () => {
       })
       setUser({ ...user!, settings: values.settings })
       message.success("Tercihler başarıyla güncellendi!")
-    } catch (error) {
-      message.error(`Tercihler güncellenirken bir hata oluştu: ${error}`)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(
+          `Tercihler güncellenirken bir hata oluştu: ${error.message}`
+        )
+      }
     } finally {
       setPreferencesLoading(false)
     }
