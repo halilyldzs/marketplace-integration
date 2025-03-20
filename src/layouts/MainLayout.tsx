@@ -119,7 +119,8 @@ const MainLayout = () => {
         style={{
           marginLeft: isMobile ? 0 : collapsed ? 80 : 200,
           transition: "all 0.2s",
-        }}>
+        }}
+        className={styles.mainLayout}>
         <Header className={styles.header}>
           <div className={styles.headerContent}>
             <Button

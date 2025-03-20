@@ -67,24 +67,3 @@ a:hover {
   width: 8px;
   height: 8px;
 }
-
-::-webkit-scrollbar-track {
-  background: var(--ant-color-bg-container);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--ant-color-text-quaternary);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ant-color-text-tertiary);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: var(--ant-color-text-tertiary);
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: var(--ant-color-text-secondary);
-}

@@ -3,8 +3,10 @@
   padding: 16px 24px;
   background: #fff;
   border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 [data-theme="dark"] .breadcrumbContainer {
-  background: #1f1f1f;
+  background: #262626;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15);
 }
