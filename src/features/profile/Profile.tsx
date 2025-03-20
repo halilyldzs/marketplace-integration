@@ -41,13 +41,18 @@ const Profile = () => {
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
-  const [loading, setLoading] = useState(false)
-  const [fileList, setFileList] = useState<UploadFile[]>([])
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false)
+
+  // Separate loading states
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [avatarLoading, setAvatarLoading] = useState(false)
+  const [preferencesLoading, setPreferencesLoading] = useState(false)
+  const [fileList, setFileList] = useState<UploadFile[]>([])
 
   const onFinish = async (values: ProfileFormValues) => {
     try {
-      setLoading(true)
+      setProfileLoading(true)
       await firebaseAuthService.updateUserData(user!.id, {
         ...values,
         updatedAt: new Date().toISOString(),
@@ -57,7 +62,7 @@ const Profile = () => {
     } catch (error) {
       message.error(`Profil güncellenirken bir hata oluştu: ${error}`)
     } finally {
-      setLoading(false)
+      setProfileLoading(false)
     }
   }
 
@@ -72,7 +77,7 @@ const Profile = () => {
         return
       }
 
-      setLoading(true)
+      setPasswordLoading(true)
       if (!auth.currentUser) throw new Error("No user logged in")
       await updatePassword(auth.currentUser, values.newPassword)
       message.success("Şifre başarıyla güncellendi!")
@@ -81,13 +86,13 @@ const Profile = () => {
     } catch (error) {
       message.error(`Şifre güncellenirken bir hata oluştu: ${error}`)
     } finally {
-      setLoading(false)
+      setPasswordLoading(false)
     }
   }
 
   const handleAvatarUpload = async (file: File) => {
     try {
-      setLoading(true)
+      setAvatarLoading(true)
       const storage = getStorage()
       const storageRef = ref(storage, `avatars/${user!.id}`)
       await uploadBytes(storageRef, file)
@@ -101,7 +106,23 @@ const Profile = () => {
     } catch (error) {
       message.error(`Profil fotoğrafı yüklenirken bir hata oluştu: ${error}`)
     } finally {
-      setLoading(false)
+      setAvatarLoading(false)
+    }
+  }
+
+  const handlePreferencesUpdate = async (values: ProfileFormValues) => {
+    try {
+      setPreferencesLoading(true)
+      await firebaseAuthService.updateUserData(user!.id, {
+        settings: values.settings,
+        updatedAt: new Date().toISOString(),
+      })
+      setUser({ ...user!, settings: values.settings })
+      message.success("Tercihler başarıyla güncellendi!")
+    } catch (error) {
+      message.error(`Tercihler güncellenirken bir hata oluştu: ${error}`)
+    } finally {
+      setPreferencesLoading(false)
     }
   }
 
@@ -155,6 +176,7 @@ const Profile = () => {
                 showUploadList={false}>
                 <Button
                   icon={<UploadOutlined />}
+                  loading={avatarLoading}
                   className={styles.uploadButton}>
                   Fotoğraf Yükle
                 </Button>
@@ -237,7 +259,7 @@ const Profile = () => {
                 <Button
                   type='primary'
                   htmlType='submit'
-                  loading={loading}>
+                  loading={profileLoading}>
                   Kaydet
                 </Button>
               </Form.Item>
@@ -258,7 +280,7 @@ const Profile = () => {
               form={form}
               layout='vertical'
               initialValues={user?.settings}
-              onFinish={onFinish}>
+              onFinish={handlePreferencesUpdate}>
               <Row gutter={24}>
                 <Col
                   xs={24}
@@ -300,7 +322,7 @@ const Profile = () => {
                 <Button
                   type='primary'
                   htmlType='submit'
-                  loading={loading}>
+                  loading={preferencesLoading}>
                   Tercihleri Kaydet
                 </Button>
               </Form.Item>
@@ -380,7 +402,7 @@ const Profile = () => {
             <Button
               type='primary'
               htmlType='submit'
-              loading={loading}>
+              loading={passwordLoading}>
               Şifreyi Değiştir
             </Button>
           </Form.Item>
