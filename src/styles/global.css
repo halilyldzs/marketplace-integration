@@ -184,23 +184,123 @@ a:hover {
   border-color: var(--border-color);
 }
 
+/* Ant Design Table Overrides */
 :global(.ant-table) {
-  background: var(--component-background);
-  color: var(--text-color);
-}
-
-:global(.ant-table-thead > tr > th) {
   background: var(--component-background) !important;
-  color: var(--heading-color) !important;
+}
+
+:global(.ant-table-wrapper .ant-table) {
+  background: var(--component-background) !important;
+}
+
+:global(.ant-table-wrapper .ant-table-thead > tr > th) {
+  background: var(--component-background) !important;
+  color: var(--text-color) !important;
   border-bottom: 1px solid var(--border-color) !important;
 }
 
-:global(.ant-table-tbody > tr > td) {
+:global(.ant-table-wrapper .ant-table-tbody > tr > td) {
+  background: var(--component-background) !important;
+  color: var(--text-color) !important;
   border-bottom: 1px solid var(--border-color) !important;
 }
 
-:global(.ant-table-tbody > tr:hover > td) {
+/* Light Theme */
+[data-theme="light"] :global(.ant-table-wrapper .ant-table) {
+  background: var(--neutral-1) !important;
+}
+
+[data-theme="light"] :global(.ant-table-wrapper .ant-table-thead > tr > th) {
+  background: var(--neutral-2) !important;
+  color: var(--neutral-10) !important;
+}
+
+[data-theme="light"] :global(.ant-table-wrapper .ant-table-tbody > tr > td) {
+  background: var(--neutral-1) !important;
+  color: var(--neutral-10) !important;
+}
+
+[data-theme="light"]
+  :global(.ant-table-wrapper .ant-table-tbody > tr:hover > td) {
+  background: var(--neutral-2) !important;
+}
+
+/* Dark Theme */
+[data-theme="dark"] :global(.ant-table-wrapper .ant-table) {
+  background: var(--neutral-2) !important;
+}
+
+[data-theme="dark"] :global(.ant-table-wrapper .ant-table-thead > tr > th) {
+  background: var(--neutral-2) !important;
+  color: var(--neutral-8) !important;
+  border-bottom: 1px solid var(--neutral-4) !important;
+}
+
+[data-theme="dark"] :global(.ant-table-wrapper .ant-table-tbody > tr > td) {
+  background: var(--neutral-2) !important;
+  color: var(--neutral-8) !important;
+  border-bottom: 1px solid var(--neutral-4) !important;
+}
+
+[data-theme="dark"]
+  :global(.ant-table-wrapper .ant-table-tbody > tr:hover > td) {
+  background: var(--neutral-3) !important;
+}
+
+/* Row Hover */
+:global(.ant-table-tbody > tr.ant-table-row:hover > td) {
   background: var(--hover-color) !important;
+}
+
+/* Fixed Columns */
+:global(.ant-table-cell-fix-left),
+:global(.ant-table-cell-fix-right) {
+  background: var(--component-background) !important;
+}
+
+[data-theme="light"] :global(.ant-table-cell-fix-left),
+[data-theme="light"] :global(.ant-table-cell-fix-right) {
+  background: var(--neutral-1) !important;
+}
+
+[data-theme="dark"] :global(.ant-table-cell-fix-left),
+[data-theme="dark"] :global(.ant-table-cell-fix-right) {
+  background: var(--neutral-2) !important;
+}
+
+/* Table Header Sort Icons */
+:global(.ant-table-column-sorter) {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Table Header Filter Icons */
+:global(.ant-table-filter-trigger) {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Empty Table */
+:global(.ant-empty) {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Pagination */
+:global(.ant-pagination-item-active) {
+  background: var(--primary-6) !important;
+  border-color: var(--primary-6) !important;
+}
+
+:global(.ant-pagination-item-active a) {
+  color: white !important;
+}
+
+/* Table Empty State */
+:global(.ant-empty-description) {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Table Loading State */
+:global(.ant-spin-dot-item) {
+  background-color: var(--primary-6) !important;
 }
 
 :global(.ant-input),

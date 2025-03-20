@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import { BrowserRouter, useRoutes } from "react-router-dom"
 import AppRoutes from "./routes"
 import "./styles/global.css"
+import getThemeConfig from "./theme/config"
 
 const queryClient = new QueryClient()
 
@@ -42,24 +43,7 @@ const AppContent = () => {
     <ConfigProvider
       theme={{
         algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        token: {
-          colorPrimary: "#1890ff",
-          borderRadius: 8,
-          colorBgContainer: isDarkMode
-            ? "var(--neutral-2)"
-            : "var(--neutral-1)",
-          colorBgElevated: isDarkMode ? "var(--neutral-3)" : "var(--neutral-2)",
-          colorText: isDarkMode ? "var(--neutral-8)" : "var(--neutral-10)",
-          colorTextSecondary: isDarkMode
-            ? "var(--neutral-7)"
-            : "var(--neutral-8)",
-          boxShadow: isDarkMode
-            ? "0 4px 12px rgba(0, 0, 0, 0.2)"
-            : "0 4px 12px rgba(0, 0, 0, 0.05)",
-          boxShadowSecondary: isDarkMode
-            ? "0 6px 16px rgba(0, 0, 0, 0.3)"
-            : "0 6px 16px rgba(0, 0, 0, 0.08)",
-        },
+        ...getThemeConfig(isDarkMode),
       }}>
       <BrowserRouter>
         <AppRoutesComponent />
