@@ -39,7 +39,6 @@ const Users = () => {
 
   return (
     <div>
-      <h1>Kullanıcılar</h1>
       <Table
         loading={isLoading}
         columns={columns}

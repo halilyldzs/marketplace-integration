@@ -43,11 +43,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Satış Dashboard</h1>
-      </div>
-
-      {/* Üst İstatistik Kartları */}
       <Row
         gutter={[16, 16]}
         className={styles.statsContainer}>

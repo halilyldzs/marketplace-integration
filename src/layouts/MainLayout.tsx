@@ -11,6 +11,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons"
 import logo from "@assets/logo.svg"
+import { PageBreadcrumb } from "@components/PageBreadcrumb/PageBreadcrumb"
 import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
 import { Avatar, Button, Dropdown, Layout, Menu } from "antd"
@@ -150,6 +151,7 @@ const MainLayout = () => {
           </div>
         </Header>
         <Content className={styles.content}>
+          <PageBreadcrumb />
           <Outlet />
         </Content>
       </Layout>

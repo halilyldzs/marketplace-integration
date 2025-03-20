@@ -1,0 +1,10 @@
+.breadcrumbContainer {
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .breadcrumbContainer {
+  background: #1f1f1f;
+}

@@ -22,7 +22,6 @@ const Settings = () => {
 
   return (
     <div>
-      <h1>Ayarlar</h1>
       <Card>
         <Form
           form={form}
