@@ -1,5 +1,7 @@
 .layout {
   min-height: 100vh;
+  background: var(--neutral-1);
+  transition: all 0.3s ease;
 }
 
 .sider {
@@ -9,6 +11,9 @@
   left: 0;
   top: 0;
   bottom: 0;
+  background: var(--component-background) !important;
+  border-right: 1px solid var(--border-color) !important;
+  transition: all 0.3s ease;
 }
 
 .logo {
@@ -17,14 +22,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--primary-1);
   border-radius: var(--border-radius-lg);
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .logo {
+  background: rgba(var(--primary-6-rgb), 0.1);
 }
 
 .logo img {
   height: 40px;
   width: auto;
+  transition: all 0.3s ease;
 }
 
 .logoCollapsed img {
@@ -37,6 +48,8 @@
   padding: 24px;
   min-height: 280px;
   border-radius: var(--border-radius-lg);
+  background: var(--component-background);
+  transition: all 0.3s ease;
 }
 
 .header {
@@ -47,6 +60,9 @@
   position: sticky;
   top: 0;
   z-index: 1;
+  background: var(--component-background) !important;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
 .headerContent {
@@ -67,18 +83,80 @@
 .userDropdown {
   cursor: pointer;
   padding: 0 24px;
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.userDropdown:hover {
+  background: var(--hover-light);
+}
+
+[data-theme="dark"] .userDropdown:hover {
+  background: var(--hover-dark);
 }
 
 .userName {
   margin-left: 8px;
+  color: var(--text-color);
 }
 
 .toggleButton {
   font-size: 16px;
   width: 64px;
   height: 64px;
+  color: var(--text-color);
+}
+
+.toggleButton:hover {
+  color: var(--primary-6);
+  background: var(--hover-light);
+}
+
+[data-theme="dark"] .toggleButton:hover {
+  background: var(--hover-dark);
 }
 
 .themeButton {
   font-size: 16px;
+  color: var(--text-color);
+}
+
+.themeButton:hover {
+  color: var(--primary-6);
+  background: var(--hover-light);
+}
+
+[data-theme="dark"] .themeButton:hover {
+  background: var(--hover-dark);
+}
+
+/* Ant Design Menu Overrides */
+.sider :global(.ant-menu) {
+  background: transparent !important;
+  border-right: none !important;
+}
+
+.sider :global(.ant-menu-item) {
+  color: var(--text-color) !important;
+  transition: all 0.3s ease !important;
+}
+
+.sider :global(.ant-menu-item:hover) {
+  color: var(--primary-6) !important;
+  background: var(--hover-light) !important;
+}
+
+[data-theme="dark"] .sider :global(.ant-menu-item:hover) {
+  background: var(--hover-dark) !important;
+}
+
+.sider :global(.ant-menu-item-selected) {
+  background: var(--primary-1) !important;
+  color: var(--primary-6) !important;
+}
+
+[data-theme="dark"] .sider :global(.ant-menu-item-selected) {
+  background: rgba(var(--primary-6-rgb), 0.1) !important;
 }

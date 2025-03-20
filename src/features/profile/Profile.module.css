@@ -1,21 +1,49 @@
 .profileContainer {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 32px;
+  min-height: 100vh;
+}
+
+[data-theme="dark"] .profileContainer {
+  background: linear-gradient(
+    135deg,
+    var(--neutral-1) 0%,
+    var(--neutral-2) 100%
+  );
 }
 
 .pageTitle {
-  margin-bottom: 8px;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--primary-6), var(--primary-4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+[data-theme="dark"] .pageTitle {
+  background: linear-gradient(135deg, var(--primary-5), var(--primary-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .pageDescription {
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: 40px;
+  font-size: var(--font-size-lg);
+  color: var(--text-color-secondary);
+  max-width: 600px;
+}
+
+[data-theme="dark"] .pageDescription {
+  color: var(--neutral-7);
 }
 
 .rowContainer {
   margin-top: 24px;
   width: 100%;
+  gap: 32px;
 }
 
 .centeredRow {
@@ -29,25 +57,88 @@
 
 .avatarCard {
   width: fit-content;
+  min-width: 300px;
   text-align: center;
+  background: var(--component-background);
+  border-radius: 24px;
+  box-shadow: var(--box-shadow-card);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--primary-6-rgb), 0.1);
+  backdrop-filter: blur(10px);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .avatarCard {
+  background: rgba(31, 31, 31, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--box-shadow-card);
+}
+
+.avatarCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(135deg, var(--primary-2), var(--primary-1));
+  opacity: 0.1;
+  z-index: 0;
+}
+
+[data-theme="dark"] .avatarCard::before {
+  background: linear-gradient(135deg, var(--primary-7), var(--primary-6));
+  opacity: 0.15;
+}
+
+.avatarCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--box-shadow-card-hover);
+  border-color: rgba(var(--primary-6-rgb), 0.2);
+}
+
+[data-theme="dark"] .avatarCard:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--box-shadow-card-hover);
 }
 
 .avatarContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .avatarCircle {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #f0f0f0;
-  margin-bottom: 16px;
+  border: 4px solid var(--component-background);
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+    0 0 0 4px rgba(var(--primary-6-rgb), 0.1);
+  position: relative;
+}
+
+.avatarCircle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 8px solid transparent;
+  background: linear-gradient(135deg, var(--primary-4), var(--primary-6))
+    border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
 }
 
 .avatarCircleWithImage {
@@ -55,30 +146,161 @@
 }
 
 .avatarCircleNoImage {
-  background: #f5f5f5;
+  background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
 }
 
 .avatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.avatarImage:hover {
+  transform: scale(1.05);
 }
 
 .avatarPlaceholder {
-  font-size: 48px;
-  color: #bfbfbf;
+  font-size: 54px;
+  background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
 }
 
 .uploadButton {
   width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.uploadButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.uploadButton:hover::before {
+  left: 100%;
+}
+
+.uploadButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--primary-6-rgb), 0.3);
 }
 
 .cardContainer {
   height: 100%;
+  background: var(--component-background);
+  border-radius: 24px;
+  box-shadow: var(--box-shadow-card);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--primary-6-rgb), 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+[data-theme="dark"] .cardContainer {
+  background: rgba(31, 31, 31, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.cardContainer:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--box-shadow-card-hover);
+  border-color: rgba(var(--primary-6-rgb), 0.2);
+}
+
+[data-theme="dark"] .cardContainer:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cardContainer :global(.ant-card-head) {
+  border-bottom: 1px solid rgba(var(--primary-6-rgb), 0.1);
+  padding: 20px 24px;
+  background: linear-gradient(135deg, var(--primary-1), transparent);
+}
+
+[data-theme="dark"] .cardContainer :global(.ant-card-head) {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--primary-7-rgb), 0.2),
+    transparent
+  );
+}
+
+.cardContainer :global(.ant-card-head-title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .cardContainer :global(.ant-card-head-title) {
+  color: var(--neutral-8);
 }
 
 .fullWidthButton {
   width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.fullWidthButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.fullWidthButton:hover::before {
+  left: 100%;
+}
+
+.fullWidthButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--primary-6-rgb), 0.3);
 }
 
 .preferencesContainer {
@@ -87,6 +309,104 @@
   gap: 24px;
 }
 
+.preferencesContainer :global(.ant-form-item) {
+  margin-bottom: 24px;
+}
+
+.preferencesContainer :global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.preferencesContainer :global(.ant-input),
+.preferencesContainer :global(.ant-select-selector),
+.preferencesContainer :global(.ant-input-password) {
+  border-radius: 12px !important;
+  border: 1px solid rgba(var(--primary-6-rgb), 0.1) !important;
+  background: var(--component-background) !important;
+  padding: 8px 16px !important;
+  height: auto !important;
+  transition: all 0.3s ease !important;
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .preferencesContainer :global(.ant-input),
+[data-theme="dark"] .preferencesContainer :global(.ant-select-selector),
+[data-theme="dark"] .preferencesContainer :global(.ant-input-password) {
+  background: rgba(31, 31, 31, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--neutral-8) !important;
+}
+
+.preferencesContainer :global(.ant-select-selector) {
+  padding: 4px 16px !important;
+}
+
+[data-theme="dark"]
+  .preferencesContainer
+  :global(.ant-form-item-label > label) {
+  color: var(--neutral-8);
+}
+
+.preferencesContainer :global(.ant-input:hover),
+.preferencesContainer :global(.ant-select-selector:hover),
+.preferencesContainer :global(.ant-input-password:hover) {
+  border-color: rgba(var(--primary-6-rgb), 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-6-rgb), 0.05) !important;
+}
+
+[data-theme="dark"] .preferencesContainer :global(.ant-input:hover),
+[data-theme="dark"] .preferencesContainer :global(.ant-select-selector:hover),
+[data-theme="dark"] .preferencesContainer :global(.ant-input-password:hover) {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-6-rgb), 0.1) !important;
+}
+
+.preferencesContainer :global(.ant-input:focus),
+.preferencesContainer :global(.ant-select-selector:focus),
+.preferencesContainer :global(.ant-input-password-focused) {
+  border-color: var(--primary-6) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-6-rgb), 0.1) !important;
+}
+
+[data-theme="dark"] .preferencesContainer :global(.ant-input:focus),
+[data-theme="dark"] .preferencesContainer :global(.ant-select-selector:focus),
+[data-theme="dark"] .preferencesContainer :global(.ant-input-password-focused) {
+  border-color: var(--primary-5) !important;
+  box-shadow: 0 0 0 2px rgba(var(--primary-5-rgb), 0.2) !important;
+}
+
 .fullWidthSelect {
   width: 100%;
+}
+
+/* Switch styling */
+.preferencesContainer :global(.ant-switch) {
+  background: rgba(var(--primary-6-rgb), 0.2);
+}
+
+.preferencesContainer :global(.ant-switch-checked) {
+  background: var(--primary-6);
+}
+
+/* Switch styling for dark mode */
+[data-theme="dark"] .preferencesContainer :global(.ant-switch) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .preferencesContainer :global(.ant-switch-checked) {
+  background: var(--primary-5);
+}
+
+/* Button styling for dark mode */
+[data-theme="dark"] .uploadButton,
+[data-theme="dark"] .fullWidthButton {
+  background: linear-gradient(135deg, var(--primary-6), var(--primary-7));
+  color: var(--neutral-1);
+}
+
+[data-theme="dark"] .uploadButton:hover,
+[data-theme="dark"] .fullWidthButton:hover {
+  background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
