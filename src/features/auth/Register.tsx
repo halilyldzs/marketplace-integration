@@ -1,5 +1,6 @@
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { Button, Form, Input, message } from "antd"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import styles from "./Login.module.css"
 
@@ -8,18 +9,22 @@ interface RegisterFormValues {
   password: string
   fullName: string
   username: string
+  phoneNumber: string
 }
 
 const Register = () => {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
 
   const onFinish = async (values: RegisterFormValues) => {
     try {
+      setLoading(true)
       await firebaseAuthService.register({
         email: values.email,
         password: values.password,
         fullName: values.fullName,
         username: values.username,
+        phoneNumber: values.phoneNumber,
       })
       message.success("Kayıt başarılı! Giriş yapabilirsiniz.")
       navigate("/login")
@@ -29,6 +34,8 @@ const Register = () => {
           ? error.message
           : "Kayıt sırasında bir hata oluştu!"
       )
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -77,6 +84,24 @@ const Register = () => {
             </Form.Item>
 
             <Form.Item
+              label='Telefon'
+              name='phoneNumber'
+              rules={[
+                { required: true, message: "Lütfen telefon numaranızı girin!" },
+                {
+                  pattern: /^5[0-9]{9}$/,
+                  message:
+                    "Telefon numarası 5 ile başlamalı ve 10 hane olmalıdır! (5XX XXX XXXX)",
+                },
+              ]}>
+              <Input
+                size='large'
+                placeholder='5XX XXX XXXX'
+                maxLength={10}
+              />
+            </Form.Item>
+
+            <Form.Item
               label='E-posta'
               name='email'
               rules={[
@@ -101,6 +126,7 @@ const Register = () => {
                 type='primary'
                 htmlType='submit'
                 size='large'
+                loading={loading}
                 block>
                 Kayıt Ol
               </Button>
