@@ -15,6 +15,13 @@
   --transition-duration: 0.2s;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
 /* Remove focus outline from buttons */
 button:focus {
   outline: none !important;
