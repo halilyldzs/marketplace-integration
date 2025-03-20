@@ -1,7 +1,7 @@
 .profileContainer {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 32px;
-  min-height: 100vh;
 }
 
 [data-theme="dark"] .profileContainer {
@@ -15,7 +15,7 @@
 .pageTitle {
   font-size: 32px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-xs);
   background: linear-gradient(135deg, var(--primary-6), var(--primary-4));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -30,7 +30,7 @@
 
 .pageDescription {
   display: block;
-  margin-bottom: 40px;
+  margin-bottom: var(--spacing-lg);
   font-size: var(--font-size-lg);
   color: var(--text-color-secondary);
   max-width: 600px;
@@ -41,9 +41,7 @@
 }
 
 .rowContainer {
-  margin-top: 24px;
-  width: 100%;
-  gap: 32px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .centeredRow {
@@ -55,7 +53,33 @@
   justify-content: center;
 }
 
+.cardContainer {
+  width: 100%;
+  height: 100%;
+  transition: var(--transition-base);
+}
+
+.equalHeight {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.equalHeight :global(.ant-card-body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.equalHeight form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .avatarCard {
+  max-width: 400px;
+  margin-bottom: var(--spacing-lg);
   width: fit-content;
   min-width: 300px;
   text-align: center;
@@ -108,23 +132,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  z-index: 1;
+  gap: var(--spacing-md);
 }
 
 .avatarCircle {
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
-  justify-content: center;
   align-items: center;
-  border: 4px solid var(--component-background);
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
-    0 0 0 4px rgba(var(--primary-6-rgb), 0.1);
+  justify-content: center;
+  margin-bottom: var(--spacing-sm);
   position: relative;
 }
 
@@ -142,18 +161,17 @@
 }
 
 .avatarCircleWithImage {
-  background: transparent;
+  background-color: transparent;
 }
 
 .avatarCircleNoImage {
-  background: linear-gradient(135deg, var(--primary-1), var(--primary-2));
+  background-color: var(--primary-6);
 }
 
 .avatarImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: all 0.3s ease;
 }
 
 .avatarImage:hover {
@@ -161,15 +179,14 @@
 }
 
 .avatarPlaceholder {
-  font-size: 54px;
-  background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 600;
+  color: #fff;
+  font-size: 48px;
+  font-weight: bold;
 }
 
 .uploadButton {
-  width: 100%;
+  min-width: 120px;
+  max-width: 200px;
   height: 44px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
@@ -181,7 +198,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 8px;
+  margin: 8px auto 0;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -212,59 +229,12 @@
   box-shadow: 0 4px 12px rgba(var(--primary-6-rgb), 0.3);
 }
 
-.cardContainer {
-  height: 100%;
-  background: var(--component-background);
-  border-radius: 24px;
-  box-shadow: var(--box-shadow-card);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(var(--primary-6-rgb), 0.1);
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-}
-
-[data-theme="dark"] .cardContainer {
-  background: rgba(31, 31, 31, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.cardContainer:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--box-shadow-card-hover);
-  border-color: rgba(var(--primary-6-rgb), 0.2);
-}
-
-[data-theme="dark"] .cardContainer:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.cardContainer :global(.ant-card-head) {
-  border-bottom: 1px solid rgba(var(--primary-6-rgb), 0.1);
-  padding: 20px 24px;
-  background: linear-gradient(135deg, var(--primary-1), transparent);
-}
-
-[data-theme="dark"] .cardContainer :global(.ant-card-head) {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--primary-7-rgb), 0.2),
-    transparent
-  );
-}
-
-.cardContainer :global(.ant-card-head-title) {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-[data-theme="dark"] .cardContainer :global(.ant-card-head-title) {
-  color: var(--neutral-8);
-}
-
 .fullWidthButton {
-  width: 100%;
+  width: auto;
+  min-width: 120px;
+  max-width: 200px;
+  margin: auto;
+  padding: 0 24px;
   height: 44px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
@@ -272,7 +242,6 @@
   color: white;
   font-weight: 500;
   transition: all 0.3s ease;
-  margin-top: 8px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -409,4 +378,18 @@
 [data-theme="dark"] .fullWidthButton:hover {
   background: linear-gradient(135deg, var(--primary-5), var(--primary-6));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .profileContainer {
+    padding: var(--spacing-md);
+  }
+
+  .rowContainer {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .avatarCard {
+    margin-bottom: var(--spacing-md);
+  }
 }

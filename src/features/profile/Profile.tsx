@@ -153,12 +153,11 @@ const Profile = () => {
           </Card>
         </Col>
       </Row>
+
       <Row
         gutter={[24, 24]}
         className={styles.rowContainer}>
-        <Col
-          xs={24}
-          lg={14}>
+        <Col span={24}>
           <Card
             title='Kişisel Bilgiler'
             bordered={false}
@@ -179,47 +178,100 @@ const Profile = () => {
                 }
               }
               onFinish={onFinish}>
-              <Form.Item
-                label='Ad Soyad'
-                name='fullName'
-                rules={[
-                  {
-                    required: true,
-                    message: "Lütfen adınızı ve soyadınızı girin!",
-                  },
-                ]}>
-                <Input />
-              </Form.Item>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <Form.Item
+                    label='Ad Soyad'
+                    name='fullName'
+                    rules={[
+                      {
+                        required: true,
+                        message: "Lütfen adınızı ve soyadınızı girin!",
+                      },
+                    ]}>
+                    <Input />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label='E-posta'
+                    name='email'
+                    rules={[
+                      {
+                        required: true,
+                        message: "Lütfen e-posta adresinizi girin!",
+                      },
+                      {
+                        type: "email",
+                        message: "Geçerli bir e-posta adresi girin!",
+                      },
+                    ]}>
+                    <Input disabled />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label='Telefon'
+                    name='phoneNumber'>
+                    <Input />
+                  </Form.Item>
+                </Col>
+              </Row>
 
-              <Form.Item
-                label='E-posta'
-                name='email'
-                rules={[
-                  {
-                    required: true,
-                    message: "Lütfen e-posta adresinizi girin!",
-                  },
-                  {
-                    type: "email",
-                    message: "Geçerli bir e-posta adresi girin!",
-                  },
-                ]}>
-                <Input disabled />
-              </Form.Item>
-
-              <Form.Item
-                label='Telefon'
-                name='phoneNumber'>
-                <Input />
-              </Form.Item>
-
-              <Form.Item>
+              <Form.Item style={{ textAlign: "right" }}>
                 <Button
                   type='primary'
                   htmlType='submit'
-                  loading={loading}
-                  className={styles.fullWidthButton}>
+                  loading={loading}>
                   Kaydet
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row
+        gutter={[24, 24]}
+        className={styles.rowContainer}>
+        <Col
+          xs={24}
+          md={12}>
+          <Card
+            title='Güvenlik'
+            bordered={false}
+            className={`${styles.cardContainer} ${styles.equalHeight}`}>
+            <Form
+              layout='vertical'
+              onFinish={handlePasswordChange}>
+              <Form.Item
+                label='Mevcut Şifre'
+                name='currentPassword'
+                rules={[
+                  {
+                    required: true,
+                    message: "Lütfen mevcut şifrenizi girin!",
+                  },
+                ]}>
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item
+                label='Yeni Şifre'
+                name='newPassword'
+                rules={[
+                  { required: true, message: "Lütfen yeni şifrenizi girin!" },
+                  { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
+                ]}>
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item style={{ textAlign: "right" }}>
+                <Button
+                  type='primary'
+                  htmlType='submit'
+                  loading={loading}>
+                  Şifreyi Değiştir
                 </Button>
               </Form.Item>
             </Form>
@@ -228,82 +280,51 @@ const Profile = () => {
 
         <Col
           xs={24}
-          lg={10}>
-          <div className={styles.preferencesContainer}>
-            <Card
-              title='Güvenlik'
-              bordered={false}>
-              <Form
-                layout='vertical'
-                onFinish={handlePasswordChange}>
-                <Form.Item
-                  label='Mevcut Şifre'
-                  name='currentPassword'
-                  rules={[
-                    {
-                      required: true,
-                      message: "Lütfen mevcut şifrenizi girin!",
-                    },
-                  ]}>
-                  <Input.Password />
-                </Form.Item>
+          md={12}>
+          <Card
+            title='Tercihler'
+            bordered={false}
+            className={`${styles.cardContainer} ${styles.equalHeight}`}>
+            <Form
+              form={form}
+              layout='vertical'
+              initialValues={user?.settings}
+              onFinish={onFinish}>
+              <Form.Item
+                label='Tema'
+                name={["settings", "theme"]}>
+                <Select className={styles.fullWidthSelect}>
+                  <Option value='light'>Açık</Option>
+                  <Option value='dark'>Koyu</Option>
+                </Select>
+              </Form.Item>
 
-                <Form.Item
-                  label='Yeni Şifre'
-                  name='newPassword'
-                  rules={[
-                    { required: true, message: "Lütfen yeni şifrenizi girin!" },
-                    { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
-                  ]}>
-                  <Input.Password />
-                </Form.Item>
+              <Form.Item
+                label='Dil'
+                name={["settings", "language"]}>
+                <Select className={styles.fullWidthSelect}>
+                  <Option value='tr'>Türkçe</Option>
+                  <Option value='en'>English</Option>
+                </Select>
+              </Form.Item>
 
-                <Form.Item>
-                  <Button
-                    type='primary'
-                    htmlType='submit'
-                    loading={loading}
-                    className={styles.fullWidthButton}>
-                    Şifreyi Değiştir
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-            <Card
-              title='Tercihler'
-              bordered={false}>
-              <Form
-                form={form}
-                layout='vertical'
-                initialValues={user?.settings}
-                onFinish={onFinish}>
-                <Form.Item
-                  label='Tema'
-                  name={["settings", "theme"]}>
-                  <Select className={styles.fullWidthSelect}>
-                    <Option value='light'>Açık</Option>
-                    <Option value='dark'>Koyu</Option>
-                  </Select>
-                </Form.Item>
+              <Form.Item
+                label='Bildirimler'
+                name={["settings", "notifications"]}
+                valuePropName='checked'>
+                <Switch />
+              </Form.Item>
 
-                <Form.Item
-                  label='Dil'
-                  name={["settings", "language"]}>
-                  <Select className={styles.fullWidthSelect}>
-                    <Option value='tr'>Türkçe</Option>
-                    <Option value='en'>English</Option>
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  label='Bildirimler'
-                  name={["settings", "notifications"]}
-                  valuePropName='checked'>
-                  <Switch />
-                </Form.Item>
-              </Form>
-            </Card>
-          </div>
+              <Form.Item style={{ textAlign: "right" }}>
+                <Button
+                  type='primary'
+                  htmlType='submit'
+                  loading={loading}>
+                  Tercihleri Kaydet
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
         </Col>
       </Row>
     </div>
