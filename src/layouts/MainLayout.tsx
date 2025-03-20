@@ -14,12 +14,12 @@ import logo from "@assets/logo.svg"
 import { PageBreadcrumb } from "@components/PageBreadcrumb/PageBreadcrumb"
 import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
-import { Avatar, Button, Dropdown, Layout, Menu } from "antd"
+import { Avatar, Button, Drawer, Dropdown, Layout, Menu } from "antd"
 import { useEffect, useState } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import styles from "./MainLayout.module.css"
 
-const { Header, Sider, Content } = Layout
+const { Header, Content } = Layout
 
 const MainLayout = () => {
   const navigate = useNavigate()
@@ -94,45 +94,51 @@ const MainLayout = () => {
     }
   }
 
+  const renderSideMenu = () => (
+    <>
+      <div
+        className={`${styles.logo} ${collapsed ? styles.logoCollapsed : ""}`}>
+        <img
+          src={logo}
+          alt='Logo'
+        />
+      </div>
+      <Menu
+        mode='inline'
+        defaultSelectedKeys={[location.pathname.slice(1)]}
+        items={menuItems}
+        onClick={handleMenuClick}
+      />
+    </>
+  )
+
   return (
     <Layout className={styles.layout}>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        className={`${styles.sider} ${!collapsed && styles.siderVisible}`}>
-        <div
-          className={`${styles.logo} ${collapsed ? styles.logoCollapsed : ""}`}>
-          <img
-            src={logo}
-            alt='Logo'
-          />
-        </div>
-        <Menu
-          mode='inline'
-          defaultSelectedKeys={[location.pathname.slice(1)]}
-          items={menuItems}
-          onClick={handleMenuClick}
-        />
-      </Sider>
-      <Layout
-        style={{
-          marginLeft: isMobile ? 0 : collapsed ? 80 : 200,
-          transition: "all 0.2s",
-        }}
-        className={styles.mainLayout}>
+      {!isMobile && (
+        <Layout.Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          className={styles.sider}>
+          {renderSideMenu()}
+        </Layout.Sider>
+      )}
+
+      <Layout style={{ marginLeft: isMobile ? 0 : collapsed ? 80 : 200 }}>
         <Header className={styles.header}>
           <div className={styles.headerContent}>
             <Button
               type='text'
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
               onClick={() => setCollapsed(!collapsed)}
+              className={styles.toggleButton}
             />
             <div className={styles.headerRight}>
               <Button
                 type='text'
                 icon={isDarkMode ? <BulbFilled /> : <BulbOutlined />}
                 onClick={toggleTheme}
+                className={styles.themeButton}
               />
               <Dropdown
                 menu={{
@@ -156,6 +162,18 @@ const MainLayout = () => {
           <Outlet />
         </Content>
       </Layout>
+
+      {isMobile && (
+        <Drawer
+          placement='left'
+          onClose={() => setCollapsed(true)}
+          open={!collapsed}
+          width={200}
+          closable={false}
+          bodyStyle={{ padding: 0 }}>
+          {renderSideMenu()}
+        </Drawer>
+      )}
     </Layout>
   )
 }
