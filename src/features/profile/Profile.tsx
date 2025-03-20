@@ -46,6 +46,7 @@ const Profile = () => {
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
+  const [preferencesForm] = Form.useForm()
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false)
 
   // Separate loading states
@@ -58,15 +59,20 @@ const Profile = () => {
   const onFinish = async (values: ProfileFormValues) => {
     try {
       setProfileLoading(true)
+
+      console.log("values", values)
+
       await firebaseAuthService.updateUserData(user!.id, {
         ...values,
         updatedAt: new Date().toISOString(),
       })
       setUser({ ...user!, ...values })
-      message.success("Profil başarıyla güncellendi!")
+      message.success("Kişisel bilgileriniz başarıyla güncellendi!")
     } catch (error: unknown) {
       if (error instanceof Error) {
-        message.error(`Profil güncellenirken bir hata oluştu: ${error.message}`)
+        message.error(
+          `Kişisel bilgileriniz güncellenirken bir hata oluştu: ${error.message}`
+        )
       }
     } finally {
       setProfileLoading(false)
@@ -359,7 +365,7 @@ const Profile = () => {
             bordered={false}
             className={styles.cardContainer}>
             <Form
-              form={form}
+              form={preferencesForm}
               layout='vertical'
               initialValues={user?.settings}
               onFinish={handlePreferencesUpdate}>
