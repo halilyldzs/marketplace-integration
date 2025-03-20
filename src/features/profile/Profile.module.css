@@ -4,13 +4,13 @@
   margin: 0 auto;
 }
 
-[data-theme="dark"] .profileContainer {
+/* [data-theme="dark"] .profileContainer {
   background: linear-gradient(
     135deg,
     var(--neutral-1) 0%,
     var(--neutral-2) 100%
   );
-}
+} */
 
 .pageTitle {
   font-size: 32px;

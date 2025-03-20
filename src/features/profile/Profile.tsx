@@ -9,6 +9,7 @@ import {
   Form,
   Input,
   message,
+  Modal,
   Row,
   Select,
   Switch,
@@ -39,8 +40,10 @@ const Profile = () => {
   const user = useAuthStore((state) => state.user)
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
+  const [passwordForm] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false)
 
   const onFinish = async (values: ProfileFormValues) => {
     try {
@@ -61,13 +64,20 @@ const Profile = () => {
   const handlePasswordChange = async (values: {
     currentPassword: string
     newPassword: string
+    confirmPassword: string
   }) => {
     try {
+      if (values.newPassword !== values.confirmPassword) {
+        message.error("Girdiğiniz şifreler eşleşmiyor!")
+        return
+      }
+
       setLoading(true)
       if (!auth.currentUser) throw new Error("No user logged in")
       await updatePassword(auth.currentUser, values.newPassword)
       message.success("Şifre başarıyla güncellendi!")
-      form.resetFields(["currentPassword", "newPassword"])
+      passwordForm.resetFields()
+      setIsPasswordModalVisible(false)
     } catch (error) {
       message.error(`Şifre güncellenirken bir hata oluştu: ${error}`)
     } finally {
@@ -220,6 +230,11 @@ const Profile = () => {
 
               <Form.Item style={{ textAlign: "right" }}>
                 <Button
+                  onClick={() => setIsPasswordModalVisible(true)}
+                  style={{ marginRight: 8 }}>
+                  Şifreyi Değiştir
+                </Button>
+                <Button
                   type='primary'
                   htmlType='submit'
                   loading={loading}>
@@ -234,86 +249,52 @@ const Profile = () => {
       <Row
         gutter={[24, 24]}
         className={styles.rowContainer}>
-        <Col
-          xs={24}
-          md={12}>
-          <Card
-            title='Güvenlik'
-            bordered={false}
-            className={`${styles.cardContainer} ${styles.equalHeight}`}>
-            <Form
-              layout='vertical'
-              onFinish={handlePasswordChange}>
-              <Form.Item
-                label='Mevcut Şifre'
-                name='currentPassword'
-                rules={[
-                  {
-                    required: true,
-                    message: "Lütfen mevcut şifrenizi girin!",
-                  },
-                ]}>
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item
-                label='Yeni Şifre'
-                name='newPassword'
-                rules={[
-                  { required: true, message: "Lütfen yeni şifrenizi girin!" },
-                  { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
-                ]}>
-                <Input.Password />
-              </Form.Item>
-
-              <Form.Item style={{ textAlign: "right" }}>
-                <Button
-                  type='primary'
-                  htmlType='submit'
-                  loading={loading}>
-                  Şifreyi Değiştir
-                </Button>
-              </Form.Item>
-            </Form>
-          </Card>
-        </Col>
-
-        <Col
-          xs={24}
-          md={12}>
+        <Col xs={24}>
           <Card
             title='Tercihler'
             bordered={false}
-            className={`${styles.cardContainer} ${styles.equalHeight}`}>
+            className={styles.cardContainer}>
             <Form
               form={form}
               layout='vertical'
               initialValues={user?.settings}
               onFinish={onFinish}>
-              <Form.Item
-                label='Tema'
-                name={["settings", "theme"]}>
-                <Select className={styles.fullWidthSelect}>
-                  <Option value='light'>Açık</Option>
-                  <Option value='dark'>Koyu</Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                label='Dil'
-                name={["settings", "language"]}>
-                <Select className={styles.fullWidthSelect}>
-                  <Option value='tr'>Türkçe</Option>
-                  <Option value='en'>English</Option>
-                </Select>
-              </Form.Item>
-
-              <Form.Item
-                label='Bildirimler'
-                name={["settings", "notifications"]}
-                valuePropName='checked'>
-                <Switch />
-              </Form.Item>
+              <Row gutter={24}>
+                <Col
+                  xs={24}
+                  md={8}>
+                  <Form.Item
+                    label='Tema'
+                    name={["settings", "theme"]}>
+                    <Select className={styles.fullWidthSelect}>
+                      <Option value='light'>Açık</Option>
+                      <Option value='dark'>Koyu</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col
+                  xs={24}
+                  md={8}>
+                  <Form.Item
+                    label='Dil'
+                    name={["settings", "language"]}>
+                    <Select className={styles.fullWidthSelect}>
+                      <Option value='tr'>Türkçe</Option>
+                      <Option value='en'>English</Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+                <Col
+                  xs={24}
+                  md={8}>
+                  <Form.Item
+                    label='Bildirimler'
+                    name={["settings", "notifications"]}
+                    valuePropName='checked'>
+                    <Switch />
+                  </Form.Item>
+                </Col>
+              </Row>
 
               <Form.Item style={{ textAlign: "right" }}>
                 <Button
@@ -327,6 +308,84 @@ const Profile = () => {
           </Card>
         </Col>
       </Row>
+
+      <Modal
+        title='Şifre Değiştir'
+        open={isPasswordModalVisible}
+        onCancel={() => {
+          setIsPasswordModalVisible(false)
+          passwordForm.resetFields()
+        }}
+        centered
+        footer={null}
+        maskClosable={false}>
+        <Form
+          form={passwordForm}
+          layout='vertical'
+          onFinish={handlePasswordChange}>
+          <Form.Item
+            label='Mevcut Şifre'
+            name='currentPassword'
+            rules={[
+              {
+                required: true,
+                message: "Lütfen mevcut şifrenizi girin!",
+              },
+            ]}>
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label='Yeni Şifre'
+            name='newPassword'
+            rules={[
+              { required: true, message: "Lütfen yeni şifrenizi girin!" },
+              { min: 6, message: "Şifre en az 6 karakter olmalıdır!" },
+            ]}>
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item
+            label='Yeni Şifre (Tekrar)'
+            name='confirmPassword'
+            dependencies={["newPassword"]}
+            rules={[
+              {
+                required: true,
+                message: "Lütfen yeni şifrenizi tekrar girin!",
+              },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("newPassword") === value) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(
+                    new Error("Girdiğiniz şifreler eşleşmiyor!")
+                  )
+                },
+              }),
+            ]}>
+            <Input.Password />
+          </Form.Item>
+
+          <Form.Item style={{ textAlign: "right", marginBottom: 0 }}>
+            <Button
+              onClick={() => {
+                setIsPasswordModalVisible(false)
+                passwordForm.resetFields()
+              }}
+              style={{ marginRight: 8 }}>
+              İptal
+            </Button>
+            <Button
+              type='primary'
+              htmlType='submit'
+              loading={loading}>
+              Şifreyi Değiştir
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   )
 }
