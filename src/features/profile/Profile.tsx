@@ -1,10 +1,10 @@
-import { User, UserSettings } from "@/types/user"
 import { UploadOutlined, UserOutlined } from "@ant-design/icons"
 import { auth } from "@config/firebase"
 import {
   DEFAULT_SETTINGS,
   firebaseAuthService,
 } from "@services/firebase-auth.service"
+import { User, UserSettings } from "@sharedTypes/user"
 import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
 import {
