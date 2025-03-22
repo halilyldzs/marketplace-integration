@@ -65,8 +65,6 @@ export const Profile = () => {
     try {
       setProfileLoading(true)
 
-      console.log("values", values)
-
       await firebaseAuthService.updateUserData(user!.id, {
         ...values,
         updatedAt: new Date().toISOString(),
