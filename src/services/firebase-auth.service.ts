@@ -9,6 +9,12 @@ import {
 } from "firebase/auth"
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore"
 
+export const DEFAULT_SETTINGS = {
+  theme: "light" as const,
+  language: "tr" as const,
+  notifications: false,
+}
+
 export interface RegisterData {
   email: string
   password: string
@@ -48,11 +54,7 @@ export const firebaseAuthService = {
       isActive: true,
       ...(phoneNumber && { phoneNumber }),
       ...(company && { company }),
-      settings: {
-        theme: "light",
-        language: "tr",
-        notifications: true,
-      },
+      settings: DEFAULT_SETTINGS,
     }
 
     // Kullanıcı bilgilerini Firestore'a kaydet
@@ -85,16 +87,24 @@ export const firebaseAuthService = {
     const userDoc = await getDoc(doc(db, "users", userId))
     if (!userDoc.exists()) return null
 
+    const userData = userDoc.data()
     return {
       id: userDoc.id,
-      ...userDoc.data(),
+      ...userData,
+      settings: userData.settings || DEFAULT_SETTINGS,
     } as User
   },
 
   async updateUserData(userId: string, data: Partial<User>): Promise<void> {
-    await updateDoc(doc(db, "users", userId), {
+    const updateData = {
       ...data,
       updatedAt: new Date().toISOString(),
-    })
+    }
+
+    if (data.settings) {
+      updateData.settings = { ...DEFAULT_SETTINGS, ...data.settings }
+    }
+
+    await updateDoc(doc(db, "users", userId), updateData)
   },
 }

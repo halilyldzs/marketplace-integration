@@ -1,7 +1,11 @@
 import { UploadOutlined, UserOutlined } from "@ant-design/icons"
 import { auth } from "@config/firebase"
-import { firebaseAuthService } from "@services/firebase-auth.service"
+import {
+  DEFAULT_SETTINGS,
+  firebaseAuthService,
+} from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
+import { useThemeStore } from "@store/theme"
 import {
   Avatar,
   Button,
@@ -27,8 +31,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage"
 import { useState } from "react"
 import styles from "./Profile.module.css"
-
-const { Option } = Select
+import { LANGUAGE_OPTIONS, THEME_OPTIONS } from "./consts/profile.options"
 const { Title, Text } = Typography
 
 interface ProfileFormValues {
@@ -44,6 +47,7 @@ interface ProfileFormValues {
 
 export const Profile = () => {
   const user = useAuthStore((state) => state.user)
+  const setTheme = useThemeStore((state) => state.setTheme)
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
@@ -202,7 +206,7 @@ export const Profile = () => {
         settings: values.settings,
         updatedAt: new Date().toISOString(),
       })
-      setUser({ ...user!, settings: values.settings })
+      setUser({ ...user!, settings: values.settings || DEFAULT_SETTINGS })
       message.success("Tercihler başarıyla güncellendi!")
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -327,7 +331,7 @@ export const Profile = () => {
           <Form
             form={preferencesForm}
             layout='vertical'
-            initialValues={user?.settings}
+            preserve={false}
             onFinish={handlePreferencesUpdate}>
             <Row gutter={24}>
               <Col
@@ -335,11 +339,14 @@ export const Profile = () => {
                 md={8}>
                 <Form.Item
                   label='Tema'
-                  name={["settings", "theme"]}>
-                  <Select>
-                    <Option value='light'>Açık</Option>
-                    <Option value='dark'>Koyu</Option>
-                  </Select>
+                  name={["settings", "theme"]}
+                  initialValue={user?.settings?.theme || "light"}>
+                  <Select
+                    onChange={(value) => {
+                      setTheme(value === "dark")
+                    }}
+                    options={THEME_OPTIONS}
+                  />
                 </Form.Item>
               </Col>
               <Col
@@ -347,11 +354,9 @@ export const Profile = () => {
                 md={8}>
                 <Form.Item
                   label='Dil'
-                  name={["settings", "language"]}>
-                  <Select>
-                    <Option value='tr'>Türkçe</Option>
-                    <Option value='en'>English</Option>
-                  </Select>
+                  name={["settings", "language"]}
+                  initialValue={user?.settings?.language || "tr"}>
+                  <Select options={LANGUAGE_OPTIONS} />
                 </Form.Item>
               </Col>
               <Col
@@ -360,7 +365,8 @@ export const Profile = () => {
                 <Form.Item
                   label='Bildirimler'
                   name={["settings", "notifications"]}
-                  valuePropName='checked'>
+                  valuePropName='checked'
+                  initialValue={user?.settings?.notifications || false}>
                   <Switch />
                 </Form.Item>
               </Col>

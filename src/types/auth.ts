@@ -43,7 +43,7 @@ export interface User {
     position: string
     department?: string
   }
-  settings?: {
+  settings: {
     theme: "light" | "dark"
     language: string
     notifications: boolean
