@@ -13,14 +13,18 @@ export interface User {
   isActive: boolean
   phoneNumber?: string
   avatar?: string
-  company?: {
-    name: string
-    position: string
-    department?: string
-  }
-  settings: {
-    theme: "light" | "dark"
-    language: string
-    notifications: boolean
-  }
+  company?: UserCompany
+  settings: UserSettings
+}
+
+export interface UserSettings {
+  theme: "light" | "dark"
+  language: string
+  notifications: boolean
+}
+
+export interface UserCompany {
+  name: string
+  position: string
+  department?: string
 }

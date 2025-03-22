@@ -1,3 +1,4 @@
+import { User, UserSettings } from "@/types/user"
 import { UploadOutlined, UserOutlined } from "@ant-design/icons"
 import { auth } from "@config/firebase"
 import {
@@ -34,24 +35,13 @@ import styles from "./Profile.module.css"
 import { LANGUAGE_OPTIONS, THEME_OPTIONS } from "./consts/profile.options"
 const { Title, Text } = Typography
 
-interface ProfileFormValues {
-  fullName: string
-  email: string
-  phoneNumber?: string
-  settings?: {
-    theme: "light" | "dark"
-    language: "tr" | "en"
-    notifications: boolean
-  }
-}
-
 export const Profile = () => {
   const user = useAuthStore((state) => state.user)
   const setTheme = useThemeStore((state) => state.setTheme)
   const setUser = useAuthStore((state) => state.setUser)
   const [form] = Form.useForm()
   const [passwordForm] = Form.useForm()
-  const [preferencesForm] = Form.useForm()
+  const [preferencesForm] = Form.useForm<UserSettings>()
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false)
 
   // Separate loading states
@@ -61,7 +51,7 @@ export const Profile = () => {
   const [preferencesLoading, setPreferencesLoading] = useState(false)
   const [fileList, setFileList] = useState<UploadFile[]>([])
 
-  const onFinish = async (values: ProfileFormValues) => {
+  const onFinish = async (values: Partial<User>) => {
     try {
       setProfileLoading(true)
 
@@ -197,17 +187,22 @@ export const Profile = () => {
     }
   }
 
-  const handlePreferencesUpdate = async (values: ProfileFormValues) => {
+  const handlePreferencesUpdate = async (values: UserSettings) => {
     try {
       setPreferencesLoading(true)
       await firebaseAuthService.updateUserData(user!.id, {
-        settings: values.settings,
+        settings: values,
         updatedAt: new Date().toISOString(),
       })
-      setUser({ ...user!, settings: values.settings || DEFAULT_SETTINGS })
+      setUser({ ...user!, settings: values || DEFAULT_SETTINGS })
+      setTheme(values.theme === "dark")
       message.success("Tercihler başarıyla güncellendi!")
     } catch (error: unknown) {
       if (error instanceof Error) {
+        // Hata durumunda eski ayarlara geri dön
+        const currentTheme = user?.settings?.theme || "light"
+        setTheme(currentTheme === "dark")
+        preferencesForm.setFieldsValue({ theme: currentTheme })
         message.error(
           `Tercihler güncellenirken bir hata oluştu: ${error.message}`
         )
@@ -330,20 +325,25 @@ export const Profile = () => {
             form={preferencesForm}
             layout='vertical'
             preserve={false}
-            onFinish={handlePreferencesUpdate}>
+            onFinish={handlePreferencesUpdate}
+            initialValues={{
+              theme: user?.settings?.theme || "light",
+              language: user?.settings?.language || "tr",
+              notifications: user?.settings?.notifications || false,
+            }}>
             <Row gutter={24}>
               <Col
                 xs={24}
                 md={8}>
                 <Form.Item
                   label='Tema'
-                  name={["settings", "theme"]}
+                  name='theme'
                   initialValue={user?.settings?.theme || "light"}>
                   <Select
+                    options={THEME_OPTIONS}
                     onChange={(value) => {
                       setTheme(value === "dark")
                     }}
-                    options={THEME_OPTIONS}
                   />
                 </Form.Item>
               </Col>
@@ -352,7 +352,7 @@ export const Profile = () => {
                 md={8}>
                 <Form.Item
                   label='Dil'
-                  name={["settings", "language"]}
+                  name='language'
                   initialValue={user?.settings?.language || "tr"}>
                   <Select options={LANGUAGE_OPTIONS} />
                 </Form.Item>
@@ -362,7 +362,7 @@ export const Profile = () => {
                 md={8}>
                 <Form.Item
                   label='Bildirimler'
-                  name={["settings", "notifications"]}
+                  name='notifications'
                   valuePropName='checked'
                   initialValue={user?.settings?.notifications || false}>
                   <Switch />
@@ -371,6 +371,16 @@ export const Profile = () => {
             </Row>
 
             <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
+              <Button
+                style={{ marginRight: 8 }}
+                onClick={() => {
+                  // İptal durumunda eski ayarlara dön
+                  const currentTheme = user?.settings?.theme || "light"
+                  setTheme(currentTheme === "dark")
+                  preferencesForm.resetFields()
+                }}>
+                İptal
+              </Button>
               <Button
                 type='primary'
                 htmlType='submit'

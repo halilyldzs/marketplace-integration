@@ -25,7 +25,7 @@ const MainLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout, user } = useAuthStore()
-  const { isDarkMode, toggleTheme } = useThemeStore()
+  const { isDarkMode, toggleTheme, setTheme } = useThemeStore()
   const [collapsed, setCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
@@ -41,6 +41,12 @@ const MainLayout = () => {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [collapsed])
+
+  useEffect(() => {
+    if (user?.settings?.theme) {
+      setTheme(user.settings.theme === "dark")
+    }
+  }, [user?.settings?.theme, setTheme])
 
   const handleLogout = async () => {
     await logout()
