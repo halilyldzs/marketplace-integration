@@ -71,7 +71,12 @@
 .modalTitle {
   border-bottom: 1px solid var(--ant-color-split);
   padding: 1rem 1.5rem;
-  margin: -1.25rem -1.5rem 1.25rem;
+  margin: -1.25rem -1.5rem 0.75rem;
+  position: sticky;
+  top: -1.25rem;
+  background: #fff;
+  z-index: 1;
+  backdrop-filter: blur(8px);
 }
 
 .modalTitleText {
@@ -79,13 +84,48 @@
 }
 
 .form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  padding: 0 1rem;
 }
 
 .formItem {
   margin-bottom: 0 !important;
+  position: relative;
+}
+
+.formItem.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formItem :global(.ant-form-item-label) {
+  padding-bottom: 2px;
+}
+
+.formItem :global(.ant-form-item-label > label) {
+  font-size: 0.9rem;
+  height: 24px !important;
+}
+
+.formItem :global(.ant-input),
+.formItem :global(.ant-input-number),
+.formItem :global(.ant-select-selector) {
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.formItem :global(.ant-input:hover),
+.formItem :global(.ant-input-number:hover),
+.formItem :global(.ant-select-selector:hover) {
+  border-color: var(--ant-color-primary) !important;
+}
+
+.formItem :global(.ant-input:focus),
+.formItem :global(.ant-input-number-focused),
+.formItem :global(.ant-select-focused .ant-select-selector) {
+  border-color: var(--ant-color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(var(--ant-color-primary-rgb), 0.1) !important;
 }
 
 .formInput {
@@ -94,20 +134,31 @@
 
 .priceInput {
   width: 100% !important;
-  height: 40px !important;
 }
 
-.priceInput input {
-  height: 100% !important;
-  font-size: 16px !important;
+.priceInput :global(.ant-input-number-input) {
+  height: 32px !important;
+  font-size: 14px !important;
+  padding: 4px 12px !important;
 }
 
 .formActions {
-  margin-top: 1rem !important;
-  margin-bottom: 0 !important;
+  grid-column: 1 / -1;
+  background: #fff;
+  margin: 0.5rem -1.25rem -1.25rem -0.5rem !important;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--ant-color-split);
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Responsive styles */
+@media screen and (max-width: 1200px) {
+  .form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media screen and (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -136,5 +187,9 @@
 
   .title {
     font-size: 1.25rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr;
   }
 }

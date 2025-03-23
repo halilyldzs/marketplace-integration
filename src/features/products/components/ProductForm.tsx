@@ -41,13 +41,13 @@ const ProductForm = ({
       <Form.Item
         name='name'
         label='Ürün Adı'
-        className={styles.formItem}
+        className={`${styles.formItem} ${styles.fullWidth}`}
         rules={[
           { required: true, message: "Lütfen ürün adı girin" },
           { type: "string" },
         ]}>
         <Input
-          size='large'
+          size='middle'
           placeholder='Ürün adını girin'
           maxLength={50}
           showCount
@@ -57,17 +57,89 @@ const ProductForm = ({
       <Form.Item
         name='description'
         label='Açıklama'
-        className={styles.formItem}
+        className={`${styles.formItem} ${styles.fullWidth}`}
         rules={[
           { required: true, message: "Lütfen açıklama girin" },
           { type: "string" },
         ]}>
         <Input.TextArea
-          size='large'
+          size='middle'
           placeholder='Ürün açıklamasını girin'
-          rows={4}
+          rows={3}
           maxLength={500}
           showCount
+        />
+      </Form.Item>
+
+      <Form.Item
+        name='sku'
+        label='Stok Kodu (SKU)'
+        className={styles.formItem}
+        rules={[
+          { required: true, message: "Lütfen stok kodu girin" },
+          {
+            type: "string",
+            min: 3,
+            message: "Stok kodu en az 3 karakter olmalıdır",
+          },
+        ]}>
+        <Input
+          size='middle'
+          placeholder='Örn: PRD-001'
+        />
+      </Form.Item>
+
+      <Form.Item
+        name='barcode'
+        label='Barkod'
+        className={styles.formItem}
+        rules={[
+          { required: true, message: "Lütfen barkod girin" },
+          {
+            type: "string",
+            min: 8,
+            message: "Barkod en az 8 karakter olmalıdır",
+          },
+        ]}>
+        <Input
+          size='middle'
+          placeholder='Örn: 8680000000000'
+        />
+      </Form.Item>
+
+      <Form.Item
+        name='categoryId'
+        label='Kategori'
+        className={styles.formItem}
+        rules={[
+          { required: true, message: "Lütfen kategori seçin" },
+          { type: "string" },
+        ]}>
+        <Select
+          size='middle'
+          placeholder='Kategori seçin'
+          options={categories.map((category) => ({
+            value: category.id,
+            label: category.name,
+          }))}
+        />
+      </Form.Item>
+
+      <Form.Item
+        name='brandId'
+        label='Marka'
+        className={styles.formItem}
+        rules={[
+          { required: true, message: "Lütfen marka seçin" },
+          { type: "string" },
+        ]}>
+        <Select
+          size='middle'
+          placeholder='Marka seçin'
+          options={brands.map((brand) => ({
+            value: brand.id,
+            label: brand.name,
+          }))}
         />
       </Form.Item>
 
@@ -81,7 +153,7 @@ const ProductForm = ({
         ]}>
         <InputNumber<number>
           className={styles.priceInput}
-          size='large'
+          size='middle'
           min={0}
           step={0.01}
           precision={2}
@@ -109,7 +181,7 @@ const ProductForm = ({
         ]}>
         <InputNumber<number>
           className={styles.priceInput}
-          size='large'
+          size='middle'
           min={0}
           step={0.01}
           precision={2}
@@ -128,42 +200,6 @@ const ProductForm = ({
       </Form.Item>
 
       <Form.Item
-        name='sku'
-        label='Stok Kodu (SKU)'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen stok kodu girin" },
-          {
-            type: "string",
-            min: 3,
-            message: "Stok kodu en az 3 karakter olmalıdır",
-          },
-        ]}>
-        <Input
-          size='large'
-          placeholder='Örn: PRD-001'
-        />
-      </Form.Item>
-
-      <Form.Item
-        name='barcode'
-        label='Barkod'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen barkod girin" },
-          {
-            type: "string",
-            min: 8,
-            message: "Barkod en az 8 karakter olmalıdır",
-          },
-        ]}>
-        <Input
-          size='large'
-          placeholder='Örn: 8680000000000'
-        />
-      </Form.Item>
-
-      <Form.Item
         name='vat'
         label='KDV Oranı (%)'
         className={styles.formItem}
@@ -173,7 +209,7 @@ const ProductForm = ({
         ]}>
         <InputNumber<number>
           className={styles.formInput}
-          size='large'
+          size='middle'
           min={0}
           max={100}
           precision={0}
@@ -191,7 +227,7 @@ const ProductForm = ({
         ]}>
         <InputNumber<number>
           className={styles.formInput}
-          size='large'
+          size='middle'
           min={0}
           step={0.1}
           precision={1}
@@ -209,46 +245,10 @@ const ProductForm = ({
         ]}>
         <InputNumber<number>
           className={styles.formInput}
-          size='large'
+          size='middle'
           min={0}
           precision={0}
           placeholder='100'
-        />
-      </Form.Item>
-
-      <Form.Item
-        name='categoryId'
-        label='Kategori'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen kategori seçin" },
-          { type: "string" },
-        ]}>
-        <Select
-          size='large'
-          placeholder='Kategori seçin'
-          options={categories.map((category) => ({
-            value: category.id,
-            label: category.name,
-          }))}
-        />
-      </Form.Item>
-
-      <Form.Item
-        name='brandId'
-        label='Marka'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen marka seçin" },
-          { type: "string" },
-        ]}>
-        <Select
-          size='large'
-          placeholder='Marka seçin'
-          options={brands.map((brand) => ({
-            value: brand.id,
-            label: brand.name,
-          }))}
         />
       </Form.Item>
 
