@@ -1,6 +1,7 @@
 import {
   AppstoreOutlined,
   DashboardOutlined,
+  ShopOutlined,
   ShoppingOutlined,
 } from "@ant-design/icons"
 import type { MenuProps } from "antd"
@@ -22,6 +23,12 @@ export const NavItems: MenuProps["items"] = [
     key: "categories",
     icon: <AppstoreOutlined />,
     label: "Kategoriler",
+    type: "item",
+  },
+  {
+    key: "brands",
+    icon: <ShopOutlined />,
+    label: "Markalar",
     type: "item",
   },
   //   {
