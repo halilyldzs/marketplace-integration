@@ -32,6 +32,8 @@ const Products = () => {
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => productsService.getAll(),
+    initialData: [],
+    staleTime: 1000 * 60, // 1 minute
   })
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -40,6 +42,8 @@ const Products = () => {
       const response = await categoriesService.getAll()
       return response.categories
     },
+    initialData: [],
+    staleTime: 1000 * 60, // 1 minute
   })
 
   const createMutation = useMutation({
@@ -199,8 +203,8 @@ const Products = () => {
 
       <Table
         columns={columns}
-        dataSource={products}
-        loading={productsLoading || categoriesLoading}
+        dataSource={products || []}
+        loading={productsLoading && !products?.length}
         rowKey='id'
         pagination={{
           defaultPageSize: 10,
@@ -208,6 +212,9 @@ const Products = () => {
           showTotal: (total) => `Toplam ${total} ürün`,
         }}
         scroll={{ x: "max-content" }}
+        locale={{
+          emptyText: productsLoading ? "Yükleniyor..." : "Ürün bulunamadı",
+        }}
       />
 
       <Modal
