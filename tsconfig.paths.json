@@ -6,16 +6,18 @@
       "@assets/*": ["src/assets/*"],
       "@components/*": ["src/components/*"],
       "@features/*": ["src/features/*"],
+      "@enums/*": ["src/enums/*"],
+      "@auth/*": ["src/auth/*"],
+      "@dashboard/*": ["src/dashboard/*"],
+      "@products/*": ["src/products/*"],
+      "@profile/*": ["src/profile/*"],
       "@layouts/*": ["src/layouts/*"],
       "@store/*": ["src/store/*"],
       "@sharedTypes/*": ["src/types/*"],
       "@services/*": ["src/services/*"],
       "@styles/*": ["src/styles/*"],
       "@lib/*": ["src/lib/*"],
-      "@config/*": ["src/config/*"],
-      "@enums/*": ["src/enums/*"],
-      "@theme/*": ["src/theme/*"],
-      "@routes/*": ["src/routes/*"]
+      "@config/*": ["src/config/*"]
     }
   }
 }

@@ -1,5 +1,5 @@
+import { UserRole } from "@/enums/UserRole"
 import { auth, db } from "@config/firebase"
-import { UserRole } from "@enums/UserRole"
 import { User } from "@sharedTypes/user"
 import {
   createUserWithEmailAndPassword,

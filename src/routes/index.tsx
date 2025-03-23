@@ -1,3 +1,4 @@
+import { categoryRoutes } from "@/features/categories/routes"
 import ProtectedRoute from "@components/ProtectedRoute"
 import { authRoutes } from "@features/auth/routes"
 import { dashboardRoutes } from "@features/dashboard/routes"
@@ -19,6 +20,7 @@ const protectedRoutes: RouteObject[] = [
     children: [
       ...dashboardRoutes,
       ...productRoutes,
+      ...categoryRoutes,
       ...userRoutes,
       ...settingRoutes,
       ...profileRoutes,

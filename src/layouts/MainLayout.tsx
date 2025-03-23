@@ -1,13 +1,9 @@
 import {
   BulbFilled,
   BulbOutlined,
-  DashboardOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  SettingOutlined,
-  ShoppingOutlined,
-  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons"
 import logo from "@assets/logo.svg"
@@ -18,6 +14,7 @@ import { Avatar, Button, Drawer, Dropdown, Layout, Menu } from "antd"
 import { useEffect, useState } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import styles from "./MainLayout.module.css"
+import { NavItems } from "./consts/NavItems"
 
 const { Header, Content } = Layout
 
@@ -52,29 +49,6 @@ const MainLayout = () => {
     await logout()
     navigate("/login")
   }
-
-  const menuItems = [
-    {
-      key: "dashboard",
-      icon: <DashboardOutlined />,
-      label: "Dashboard",
-    },
-    {
-      key: "products",
-      icon: <ShoppingOutlined />,
-      label: "Ürünler",
-    },
-    {
-      key: "users",
-      icon: <TeamOutlined />,
-      label: "Kullanıcılar",
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Ayarlar",
-    },
-  ]
 
   const userMenuItems = [
     {
@@ -112,7 +86,7 @@ const MainLayout = () => {
       <Menu
         mode='inline'
         defaultSelectedKeys={[location.pathname.slice(1)]}
-        items={menuItems}
+        items={NavItems}
         onClick={handleMenuClick}
       />
     </>
