@@ -27,6 +27,8 @@
 .searchContainer {
   display: flex;
   align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
@@ -35,11 +37,13 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--ant-color-bg-container);
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   width: 15rem;
   border: 1px solid var(--ant-color-border);
   transition: all 0.2s;
+  flex-grow: 1;
+  max-width: 20rem;
 }
 
 .searchWrapper:focus-within {
@@ -72,3 +76,37 @@
 .modalBody {
   padding: 1.5rem;
 }
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
+  .headerTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .searchContainer {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    width: 100%;
+    max-width: none;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Table responsive styles will be handled by Ant Design's built-in responsive features */

@@ -190,22 +190,26 @@ const Categories = () => {
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
+      fixed: "left",
     },
     {
       title: "Slug",
       dataIndex: "slug",
       key: "slug",
+      responsive: ["md"],
     },
     {
       title: "ID",
       dataIndex: "id",
       key: "id",
       width: 100,
+      responsive: ["lg"],
     },
     {
       title: "Oluşturulma Tarihi",
       dataIndex: "createdAt",
       key: "createdAt",
+      responsive: ["md"],
       render: (date: Date | FieldValue) =>
         date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
       sorter: (a, b) =>
@@ -217,6 +221,7 @@ const Categories = () => {
       title: "Güncellenme Tarihi",
       dataIndex: "updatedAt",
       key: "updatedAt",
+      responsive: ["lg"],
       render: (date: Date | FieldValue) =>
         date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
       sorter: (a, b) =>
@@ -227,7 +232,8 @@ const Categories = () => {
     {
       title: "İşlemler",
       key: "actions",
-      width: 150,
+      width: 100,
+      fixed: "right",
       render: (_, record) => (
         <Space>
           <Button
@@ -288,6 +294,7 @@ const Categories = () => {
           showTotal: (total) => `Toplam ${total} kategori`,
         }}
         onChange={(newPagination) => handleTableChange(newPagination)}
+        scroll={{ x: "max-content" }}
       />
 
       <Modal
@@ -303,8 +310,8 @@ const Categories = () => {
         open={isModalOpen}
         onCancel={handleModalClose}
         footer={null}
-        width={520}
-        bodyStyle={{ padding: "24px" }}>
+        width={{ xs: "90%", sm: 520 }}
+        style={{ padding: "24px" }}>
         <CategoryForm
           initialValues={selectedCategory || undefined}
           onSubmit={handleSubmit}
