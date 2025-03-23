@@ -4,6 +4,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons"
+import BrandForm from "@features/brands/components/BrandForm"
 import { brandsService } from "@features/brands/services/brands.service"
 import type {
   Brand,
@@ -291,63 +292,17 @@ const Brands = () => {
           xxl: "40%",
         }}
         style={{ padding: "24px" }}>
-        <Form
+        <BrandForm
           form={form}
           onFinish={handleSubmit}
-          layout='vertical'
-          className={styles.form}
-          requiredMark='optional'>
-          <Form.Item
-            name='name'
-            label='Marka Adı'
-            className={styles.formItem}
-            rules={[
-              { required: true, message: "Lütfen marka adı girin" },
-              { type: "string" },
-            ]}>
-            <Input
-              size='large'
-              placeholder='Marka adını girin'
-              maxLength={50}
-              showCount
-            />
-          </Form.Item>
-
-          <Form.Item
-            name='description'
-            label='Açıklama'
-            className={styles.formItem}
-            rules={[{ type: "string" }]}>
-            <Input.TextArea
-              size='large'
-              placeholder='Marka açıklamasını girin'
-              rows={4}
-              maxLength={500}
-              showCount
-            />
-          </Form.Item>
-
-          <Form.Item className={styles.formActions}>
-            <Space>
-              <Button
-                size='large'
-                onClick={() => {
-                  setIsModalOpen(false)
-                  setEditingBrand(null)
-                  form.resetFields()
-                }}>
-                İptal
-              </Button>
-              <Button
-                type='primary'
-                size='large'
-                htmlType='submit'
-                loading={createMutation.isPending || updateMutation.isPending}>
-                {editingBrand ? "Değişiklikleri Kaydet" : "Marka Oluştur"}
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+          onCancel={() => {
+            setIsModalOpen(false)
+            setEditingBrand(null)
+            form.resetFields()
+          }}
+          initialValues={editingBrand || undefined}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+        />
       </Modal>
     </div>
   )
