@@ -1,0 +1,74 @@
+.container {
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.headerTop {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ant-color-bg-container);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  width: 15rem;
+  border: 1px solid var(--ant-color-border);
+  transition: all 0.2s;
+}
+
+.searchWrapper:focus-within {
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 0 0 0.125rem rgba(var(--ant-color-primary-rgb), 0.1);
+}
+
+.searchIcon {
+  color: var(--ant-color-text-quaternary);
+}
+
+.searchInput {
+  flex: 1;
+}
+
+.searchInput input {
+  background: transparent !important;
+}
+
+.modalTitle {
+  border-bottom: 1px solid var(--ant-color-split);
+  padding: 1rem 1.5rem;
+  margin: -1.25rem -1.5rem 1.25rem;
+}
+
+.modalTitleText {
+  font-size: 1.125rem;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}

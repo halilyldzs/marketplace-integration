@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from "@ant-design/icons"
 import CategoryForm from "@features/categories/components/CategoryForm"
 import type { GetCategoriesParams } from "@features/categories/services/categories.service"
 import { categoriesService } from "@features/categories/services/categories.service"
@@ -16,7 +21,8 @@ import {
   FieldValue,
   QueryDocumentSnapshot,
 } from "firebase/firestore"
-import { useState } from "react"
+import { useRef, useState } from "react"
+import styles from "./Categories.module.css"
 
 const { Text } = Typography
 
@@ -27,6 +33,7 @@ const Categories = () => {
     null
   )
   const [searchTerm, setSearchTerm] = useState("")
+  const [inputValue, setInputValue] = useState("")
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
@@ -34,6 +41,8 @@ const Categories = () => {
   })
   const [lastVisible, setLastVisible] =
     useState<QueryDocumentSnapshot<DocumentData> | null>(null)
+
+  const searchTimeout = useRef<NodeJS.Timeout>()
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -162,18 +171,20 @@ const Categories = () => {
     }
   }
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value)
-    setPagination((prev) => ({ ...prev, current: 1 }))
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setInputValue(value)
+
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current)
+    }
+
+    searchTimeout.current = setTimeout(() => {
+      setSearchTerm(value)
+    }, 500)
   }
 
   const columns: ColumnsType<Category> = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 100,
-    },
     {
       title: "Ad",
       dataIndex: "name",
@@ -184,6 +195,12 @@ const Categories = () => {
       title: "Slug",
       dataIndex: "slug",
       key: "slug",
+    },
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 100,
     },
     {
       title: "Oluşturulma Tarihi",
@@ -230,22 +247,26 @@ const Categories = () => {
   ]
 
   return (
-    <div style={{ padding: 24 }}>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}>
-        <h1 style={{ margin: 0 }}>Kategoriler</h1>
-        <Space>
-          <Input.Search
-            placeholder='Kategori ara...'
-            allowClear
-            onSearch={handleSearch}
-            style={{ width: 300 }}
-          />
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerTop}>
+          <div className={styles.titleContainer}>
+            <h1 className={styles.title}>Kategoriler</h1>
+            <Text type='secondary'>Kategori listesi ve yönetimi</Text>
+          </div>
+        </div>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchWrapper}>
+            <SearchOutlined className={styles.searchIcon} />
+            <Input
+              placeholder='Kategori ara...'
+              bordered={false}
+              allowClear
+              onChange={handleSearch}
+              value={inputValue}
+              className={styles.searchInput}
+            />
+          </div>
           <Button
             type='primary'
             icon={<PlusOutlined />}
@@ -253,7 +274,7 @@ const Categories = () => {
             size='large'>
             Yeni Kategori
           </Button>
-        </Space>
+        </div>
       </div>
 
       <Table
@@ -271,15 +292,10 @@ const Categories = () => {
 
       <Modal
         title={
-          <div
-            style={{
-              borderBottom: "1px solid #f0f0f0",
-              padding: "16px 24px",
-              margin: "-20px -24px 20px",
-            }}>
+          <div className={styles.modalTitle}>
             <Text
               strong
-              style={{ fontSize: 18 }}>
+              className={styles.modalTitleText}>
               {selectedCategory ? "Kategori Düzenle" : "Yeni Kategori Oluştur"}
             </Text>
           </div>
@@ -288,11 +304,7 @@ const Categories = () => {
         onCancel={handleModalClose}
         footer={null}
         width={520}
-        styles={{
-          body: {
-            padding: "24px",
-          },
-        }}>
+        bodyStyle={{ padding: "24px" }}>
         <CategoryForm
           initialValues={selectedCategory || undefined}
           onSubmit={handleSubmit}

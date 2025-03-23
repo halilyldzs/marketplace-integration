@@ -1,6 +1,7 @@
 import { Button, Divider, Form, Input, Space, Typography } from "antd"
 import { useEffect } from "react"
 import { Category, CreateCategoryDTO } from "../types"
+import styles from "./CategoryForm.module.css"
 
 const { Text } = Typography
 
@@ -60,7 +61,7 @@ const CategoryForm = ({
           { required: true, message: "Lütfen kategori adını giriniz" },
           { min: 2, message: "Kategori adı en az 2 karakter olmalıdır" },
         ]}
-        style={{ marginBottom: 24 }}>
+        className={styles.formItem}>
         <Input
           size='large'
           placeholder='Örn: Elektronik'
@@ -76,7 +77,7 @@ const CategoryForm = ({
             <span>Slug</span>
             <Text
               type='secondary'
-              style={{ fontSize: 12 }}>
+              className={styles.slugLabel}>
               (Otomatik oluşturulur)
             </Text>
           </Space>
@@ -88,15 +89,15 @@ const CategoryForm = ({
             message: "Slug sadece küçük harf, rakam ve tire içerebilir",
           },
         ]}
-        style={{ marginBottom: 32 }}>
+        className={styles.formItemLarge}>
         <Input
           size='large'
           placeholder='ornek-kategori'
         />
       </Form.Item>
-      <Divider style={{ margin: "0 0 24px" }} />
-      <Form.Item style={{ marginBottom: 0 }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
+      <Divider className={styles.divider} />
+      <Form.Item className={styles.actions}>
+        <Space>
           <Button
             size='large'
             onClick={onCancel}>
@@ -109,7 +110,7 @@ const CategoryForm = ({
             loading={isSubmitting}>
             {initialValues ? "Değişiklikleri Kaydet" : "Kategori Oluştur"}
           </Button>
-        </div>
+        </Space>
       </Form.Item>
     </Form>
   )
