@@ -268,7 +268,7 @@ const Products = () => {
             <SearchOutlined className={styles.searchIcon} />
             <Input
               placeholder='Ürün ara...'
-              bordered={false}
+              variant='borderless'
               allowClear
               onChange={handleSearch}
               value={inputValue}
@@ -379,15 +379,50 @@ const Products = () => {
             rules={[
               { required: true, message: "Lütfen fiyat girin" },
               { type: "number", message: "Lütfen geçerli bir fiyat girin" },
-              { min: 0, message: "Fiyat 0'dan küçük olamaz" },
             ]}>
-            <InputNumber
+            <InputNumber<number>
               size='large'
-              className={styles.formInput}
+              className={styles.priceInput}
               min={0}
+              step={0.01}
               precision={2}
               prefix='₺'
               placeholder='0.00'
+              stringMode={false}
+              formatter={(value) => {
+                if (value === null || value === undefined) return ""
+                return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }}
+              parser={(value) => {
+                if (!value || value === "₺") return 0
+                const cleanValue = value.replace(/[^\d.]/g, "")
+                const firstDotIndex = cleanValue.indexOf(".")
+                const sanitizedValue =
+                  firstDotIndex === -1
+                    ? cleanValue
+                    : cleanValue.slice(0, firstDotIndex + 1) +
+                      cleanValue.slice(firstDotIndex + 1).replace(/\./g, "")
+                const parsed = parseFloat(sanitizedValue)
+                return isNaN(parsed) ? 0 : parsed
+              }}
+              onKeyDown={(e) => {
+                const keyCode = e.keyCode || e.which
+                if (
+                  keyCode !== 46 && // nokta
+                  keyCode !== 8 && // backspace
+                  keyCode !== 37 && // sol ok
+                  keyCode !== 39 && // sağ ok
+                  keyCode !== 9 && // tab
+                  (keyCode < 48 || keyCode > 57) // 0-9 dışındaki karakterler
+                ) {
+                  e.preventDefault()
+                }
+                // Birden fazla nokta kullanımını engelle
+                if (keyCode === 46 && e.currentTarget.value.includes(".")) {
+                  e.preventDefault()
+                }
+              }}
+              controls={false}
             />
           </Form.Item>
 
