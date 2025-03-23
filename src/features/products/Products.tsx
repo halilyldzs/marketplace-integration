@@ -405,22 +405,11 @@ const Products = () => {
                 const parsed = parseFloat(sanitizedValue)
                 return isNaN(parsed) ? 0 : parsed
               }}
-              onKeyDown={(e) => {
-                const keyCode = e.keyCode || e.which
-                if (
-                  keyCode !== 46 && // nokta
-                  keyCode !== 8 && // backspace
-                  keyCode !== 37 && // sol ok
-                  keyCode !== 39 && // sağ ok
-                  keyCode !== 9 && // tab
-                  (keyCode < 48 || keyCode > 57) // 0-9 dışındaki karakterler
-                ) {
-                  e.preventDefault()
+              onInput={(value: string) => {
+                if (!/^\d*\.?\d*$/.test(value)) {
+                  return value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1")
                 }
-                // Birden fazla nokta kullanımını engelle
-                if (keyCode === 46 && e.currentTarget.value.includes(".")) {
-                  e.preventDefault()
-                }
+                return value
               }}
               controls={false}
             />
