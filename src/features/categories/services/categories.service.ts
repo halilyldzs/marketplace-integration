@@ -15,13 +15,27 @@ const COLLECTION_NAME = "categories"
 
 export const categoriesService = {
   async getAll(): Promise<Category[]> {
-    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME))
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate(),
-    })) as Category[]
+    try {
+      console.log("Attempting to fetch categories from Firestore...")
+      const querySnapshot = await getDocs(collection(db, COLLECTION_NAME))
+      console.log(
+        "Raw categories data:",
+        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      )
+
+      const categories = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate(),
+        updatedAt: doc.data().updatedAt?.toDate(),
+      })) as Category[]
+
+      console.log("Processed categories:", categories)
+      return categories
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+      throw error
+    }
   },
 
   async getById(id: string): Promise<Category | null> {

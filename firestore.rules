@@ -3,12 +3,12 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Kullanıcılar koleksiyonu için kurallar
     match /users/{userId} {
-      // Kullanıcı kendi verilerini okuyabilir ve güncelleyebilir
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // Admin tüm kullanıcıları okuyabilir ve yönetebilir
-      allow read, write: if request.auth != null && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      allow read, write: if true;
+    }
+
+    // Kategoriler koleksiyonu için kurallar
+    match /categories/{categoryId} {
+      allow read, write: if true;
     }
   }
 } 

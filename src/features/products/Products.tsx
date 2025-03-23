@@ -1,6 +1,11 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
+import { categoriesService } from "@features/categories/services/categories.service"
 import { productsService } from "@features/products/services/products.service"
-import { Product, ProductFormValues } from "@features/products/types"
+import {
+  CreateProductDTO,
+  Product,
+  ProductFormValues,
+} from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Button,
@@ -8,6 +13,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Select,
   Space,
   Table,
   message,
@@ -21,13 +27,18 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const queryClient = useQueryClient()
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => productsService.getAll(),
   })
 
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => categoriesService.getAll(),
+  })
+
   const createMutation = useMutation({
-    mutationFn: productsService.create,
+    mutationFn: (data: CreateProductDTO) => productsService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla oluşturuldu")
@@ -37,7 +48,7 @@ const Products = () => {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, values }: { id: string; values: ProductFormValues }) =>
+    mutationFn: ({ id, values }: { id: string; values: CreateProductDTO }) =>
       productsService.update({ id, ...values }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
@@ -49,7 +60,7 @@ const Products = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: productsService.delete,
+    mutationFn: (id: string) => productsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla silindi")
@@ -121,6 +132,8 @@ const Products = () => {
       title: "Kategori",
       dataIndex: "categoryId",
       key: "categoryId",
+      render: (categoryId: string) =>
+        categories?.find((c) => c.id === categoryId)?.name || categoryId,
     },
     {
       title: "Oluşturulma Tarihi",
@@ -178,7 +191,7 @@ const Products = () => {
       <Table
         columns={columns}
         dataSource={products}
-        loading={isLoading}
+        loading={productsLoading || categoriesLoading}
         rowKey='id'
         pagination={{
           defaultPageSize: 10,
@@ -221,19 +234,18 @@ const Products = () => {
             />
           </Form.Item>
           <Form.Item
-            name='stock'
-            label='Stok'
-            rules={[{ required: true, message: "Lütfen stok miktarı girin" }]}>
-            <InputNumber
-              style={{ width: "100%" }}
-              min={0}
-            />
-          </Form.Item>
-          <Form.Item
-            name='category'
+            name='categoryId'
             label='Kategori'
-            rules={[{ required: true, message: "Lütfen kategori girin" }]}>
-            <Input />
+            rules={[{ required: true, message: "Lütfen kategori seçin" }]}>
+            <Select loading={categoriesLoading}>
+              {categories?.map((category) => (
+                <Select.Option
+                  key={category.id}
+                  value={category.id}>
+                  {category.name}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

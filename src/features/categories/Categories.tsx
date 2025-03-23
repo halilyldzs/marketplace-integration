@@ -14,6 +14,7 @@ import {
   message,
 } from "antd"
 import type { ColumnsType } from "antd/es/table"
+import { FirebaseError } from "firebase/app"
 import { useState } from "react"
 
 const { Text } = Typography
@@ -25,16 +26,35 @@ const Categories = () => {
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["categories"],
-    queryFn: () => categoriesService.getAll(),
+    queryFn: async () => {
+      try {
+        console.log("Fetching categories...")
+        const result = await categoriesService.getAll()
+        console.log("Categories fetched successfully:", result)
+        return result
+      } catch (error) {
+        console.error("Failed to fetch categories:", error)
+        message.error("Kategoriler yüklenemedi")
+        throw error
+      }
+    },
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
   })
 
   const createMutation = useMutation({
     mutationFn: (data: CreateCategoryDTO) => categoriesService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
-      message.success("Kategori başarıyla oluşturuldu")
+      message.success("Kategori eklendi")
       setIsModalOpen(false)
       form.resetFields()
+    },
+    onError: (error: FirebaseError) => {
+      console.error("Category creation error details:", error)
+      message.error("Kategori eklenirken bir sorun oluştu")
     },
   })
 
@@ -42,16 +62,21 @@ const Categories = () => {
     mutationFn: (id: string) => categoriesService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
-      message.success("Kategori başarıyla silindi")
+      message.success("Kategori silindi")
+    },
+    onError: (error) => {
+      console.error("Category deletion error details:", error)
+      message.error("Kategori silinirken bir sorun oluştu")
     },
   })
 
   const handleDelete = (id: string) => {
     Modal.confirm({
-      title: "Kategoriyi silmek istediğinize emin misiniz?",
-      content: "Bu işlem geri alınamaz.",
-      okText: "Evet",
-      cancelText: "Hayır",
+      title: "Kategoriyi silmek istediğinizden emin misiniz?",
+      content: "Bu işlem geri alınamaz",
+      okText: "Sil",
+      cancelText: "İptal",
+      okButtonProps: { danger: true },
       onOk: () => deleteMutation.mutate(id),
     })
   }
@@ -59,9 +84,9 @@ const Categories = () => {
   const handleCreate = async (values: CreateCategoryDTO) => {
     try {
       await createMutation.mutateAsync(values)
+      await queryClient.invalidateQueries({ queryKey: ["categories"] })
     } catch (error) {
       console.error("Failed to create category:", error)
-      message.error("Kategori oluşturulurken bir hata oluştu")
     }
   }
 
