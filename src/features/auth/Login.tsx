@@ -1,15 +1,38 @@
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
-import { Button, Form, Input, message } from "antd"
+import { Button, Checkbox, Form, Input, message } from "antd"
+import CryptoJS from "crypto-js"
 import { useNavigate } from "react-router-dom"
 import styles from "./Login.module.css"
+
+const STORAGE_KEY = "auth_credentials"
 
 const Login = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
   const setUser = useAuthStore((state) => state.setUser)
+  const [form] = Form.useForm()
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  // Load saved credentials on form mount
+  const savedData = localStorage.getItem(STORAGE_KEY)
+  if (savedData) {
+    try {
+      const decrypted = CryptoJS.AES.decrypt(
+        savedData,
+        window.location.hostname
+      ).toString(CryptoJS.enc.Utf8)
+      const { email, password } = JSON.parse(decrypted)
+      form.setFieldsValue({ email, password, remember: true })
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }
+
+  const onFinish = async (values: {
+    email: string
+    password: string
+    remember: boolean
+  }) => {
     try {
       const userCredential = await firebaseAuthService.login(values)
       const userData = await firebaseAuthService.getUserData(
@@ -18,6 +41,20 @@ const Login = () => {
 
       if (!userData) {
         throw new Error("Kullanıcı bilgileri bulunamadı!")
+      }
+
+      // Save credentials if remember is checked
+      if (values.remember) {
+        const encrypted = CryptoJS.AES.encrypt(
+          JSON.stringify({
+            email: values.email,
+            password: values.password,
+          }),
+          window.location.hostname
+        ).toString()
+        localStorage.setItem(STORAGE_KEY, encrypted)
+      } else {
+        localStorage.removeItem(STORAGE_KEY)
       }
 
       login(userCredential.user.uid)
@@ -40,8 +77,8 @@ const Login = () => {
           className={styles.image}
         />
         <div className={styles.overlay}>
-          <h1>Lojistik YS</h1>
-          <p>Lojistik süreçlerinizi kolayca yönetin</p>
+          <h1>Pazaryeri 360</h1>
+          <p>E-ticaret süreçlerinizi kolayca yönetin</p>
         </div>
       </div>
 
@@ -51,6 +88,7 @@ const Login = () => {
           <p className={styles.subtitle}>Devam etmek için giriş yapın</p>
 
           <Form
+            form={form}
             name='login'
             onFinish={onFinish}
             layout='vertical'>
@@ -69,6 +107,12 @@ const Login = () => {
               name='password'
               rules={[{ required: true, message: "Lütfen şifrenizi girin!" }]}>
               <Input.Password size='large' />
+            </Form.Item>
+
+            <Form.Item
+              name='remember'
+              valuePropName='checked'>
+              <Checkbox>Beni Hatırla</Checkbox>
             </Form.Item>
 
             <Form.Item>
