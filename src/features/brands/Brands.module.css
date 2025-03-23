@@ -26,11 +26,13 @@
   display: flex;
   gap: 16px;
   align-items: center;
+  justify-content: space-between;
 }
 
 .searchWrapper {
   position: relative;
-  flex: 1;
+  max-width: 300px;
+  width: 100%;
 }
 
 .searchIcon {
