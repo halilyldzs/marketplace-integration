@@ -1,5 +1,6 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
 import { categoriesService } from "@features/categories/services/categories.service"
+import { Category } from "@features/categories/types"
 import { productsService } from "@features/products/services/products.service"
 import {
   CreateProductDTO,
@@ -34,7 +35,10 @@ const Products = () => {
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
-    queryFn: () => categoriesService.getAll(),
+    queryFn: async () => {
+      const response = await categoriesService.getAll()
+      return response.categories
+    },
   })
 
   const createMutation = useMutation({
@@ -133,7 +137,8 @@ const Products = () => {
       dataIndex: "categoryId",
       key: "categoryId",
       render: (categoryId: string) =>
-        categories?.find((c) => c.id === categoryId)?.name || categoryId,
+        categories?.find((c: Category) => c.id === categoryId)?.name ||
+        categoryId,
     },
     {
       title: "Oluşturulma Tarihi",
@@ -238,7 +243,7 @@ const Products = () => {
             label='Kategori'
             rules={[{ required: true, message: "Lütfen kategori seçin" }]}>
             <Select loading={categoriesLoading}>
-              {categories?.map((category) => (
+              {categories?.map((category: Category) => (
                 <Select.Option
                   key={category.id}
                   value={category.id}>
