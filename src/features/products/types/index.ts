@@ -14,14 +14,6 @@ export interface ProductsResponse {
   total: number
 }
 
-export interface ProductFormValues {
-  name: string
-  description: string
-  price: number
-  stock: number
-  category: string
-}
-
 export interface CreateProductDTO {
   name: string
   description: string
@@ -33,3 +25,5 @@ export interface CreateProductDTO {
 export interface UpdateProductDTO extends Partial<CreateProductDTO> {
   id: string
 }
+
+export type ProductFormValues = CreateProductDTO

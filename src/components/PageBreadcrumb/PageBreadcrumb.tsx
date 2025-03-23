@@ -23,13 +23,7 @@ export const PageBreadcrumb = () => {
     }
   })
 
-  const breadcrumbItems = [
-    {
-      title: <Link to='/dashboard'>Ana Sayfa</Link>,
-      key: "home",
-    },
-    ...extraBreadcrumbItems,
-  ]
+  const breadcrumbItems = [...extraBreadcrumbItems]
 
   return (
     <div className={styles.breadcrumbContainer}>

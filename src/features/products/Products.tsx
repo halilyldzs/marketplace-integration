@@ -12,6 +12,7 @@ import {
   Table,
   message,
 } from "antd"
+import type { ColumnsType } from "antd/es/table"
 import { useState } from "react"
 
 const Products = () => {
@@ -20,13 +21,13 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: productsService.getProducts,
+    queryFn: () => productsService.getAll(),
   })
 
   const createMutation = useMutation({
-    mutationFn: productsService.createProduct,
+    mutationFn: productsService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla oluşturuldu")
@@ -37,7 +38,7 @@ const Products = () => {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, values }: { id: string; values: ProductFormValues }) =>
-      productsService.updateProduct(id, values),
+      productsService.update({ id, ...values }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla güncellendi")
@@ -48,7 +49,7 @@ const Products = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: productsService.deleteProduct,
+    mutationFn: productsService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla silindi")
@@ -78,50 +79,76 @@ const Products = () => {
   }
 
   const handleSubmit = (values: ProductFormValues) => {
+    const productData = {
+      ...values,
+      images: [], // Şimdilik boş array
+    }
+
     if (editingProduct) {
-      updateMutation.mutate({ id: editingProduct.id, values })
+      updateMutation.mutate({ id: editingProduct.id, values: productData })
     } else {
-      createMutation.mutate(values)
+      createMutation.mutate(productData)
     }
   }
 
-  const columns = [
+  const columns: ColumnsType<Product> = [
     {
-      title: "Ürün Adı",
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+      width: 100,
+    },
+    {
+      title: "Ad",
       dataIndex: "name",
       key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Açıklama",
       dataIndex: "description",
       key: "description",
+      ellipsis: true,
     },
     {
       title: "Fiyat",
       dataIndex: "price",
       key: "price",
-      render: (price: number) => `₺${price.toFixed(2)}`,
-    },
-    {
-      title: "Stok",
-      dataIndex: "stock",
-      key: "stock",
+      render: (price: number) => `₺${price.toLocaleString("tr-TR")}`,
+      sorter: (a, b) => a.price - b.price,
     },
     {
       title: "Kategori",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "categoryId",
+      key: "categoryId",
+    },
+    {
+      title: "Oluşturulma Tarihi",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: Date) => date.toLocaleDateString("tr-TR"),
+      sorter: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    },
+    {
+      title: "Güncellenme Tarihi",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      render: (date: Date) => date.toLocaleDateString("tr-TR"),
+      sorter: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
     },
     {
       title: "İşlemler",
       key: "actions",
-      render: (_: unknown, record: Product) => (
+      width: 150,
+      render: (_, record) => (
         <Space>
           <Button
+            type='text'
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           />
           <Button
+            type='text'
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record.id)}
@@ -132,8 +159,14 @@ const Products = () => {
   ]
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
+    <div style={{ padding: 24 }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
+        }}>
+        <h1>Ürünler</h1>
         <Button
           type='primary'
           icon={<PlusOutlined />}
@@ -144,9 +177,14 @@ const Products = () => {
 
       <Table
         columns={columns}
-        dataSource={data?.products}
+        dataSource={products}
         loading={isLoading}
         rowKey='id'
+        pagination={{
+          defaultPageSize: 10,
+          showSizeChanger: true,
+          showTotal: (total) => `Toplam ${total} ürün`,
+        }}
       />
 
       <Modal
