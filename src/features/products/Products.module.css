@@ -1,0 +1,78 @@
+.container {
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modalTitle {
+  border-bottom: 1px solid var(--ant-color-split);
+  padding: 1rem 1.5rem;
+  margin: -1.25rem -1.5rem 1.25rem;
+}
+
+.modalTitleText {
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formItem {
+  margin-bottom: 0 !important;
+}
+
+.formInput {
+  width: 100%;
+}
+
+.formActions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .modalTitle {
+    padding: 0.75rem 1rem;
+    margin: -1rem -1rem 1rem;
+  }
+
+  .modalTitleText {
+    font-size: 1rem;
+  }
+
+  .formActions {
+    margin-top: 1rem;
+  }
+}

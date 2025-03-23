@@ -21,6 +21,7 @@ import {
 } from "antd"
 import type { ColumnsType } from "antd/es/table"
 import { useState } from "react"
+import styles from "./Products.module.css"
 
 const Products = () => {
   const [form] = Form.useForm<ProductFormValues>()
@@ -112,18 +113,21 @@ const Products = () => {
       dataIndex: "id",
       key: "id",
       width: 100,
+      responsive: ["lg"],
     },
     {
       title: "Ad",
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
+      fixed: "left",
     },
     {
       title: "Açıklama",
       dataIndex: "description",
       key: "description",
       ellipsis: true,
+      responsive: ["md"],
     },
     {
       title: "Fiyat",
@@ -136,6 +140,7 @@ const Products = () => {
       title: "Kategori",
       dataIndex: "categoryId",
       key: "categoryId",
+      responsive: ["md"],
       render: (categoryId: string) =>
         categories?.find((c: Category) => c.id === categoryId)?.name ||
         categoryId,
@@ -144,6 +149,7 @@ const Products = () => {
       title: "Oluşturulma Tarihi",
       dataIndex: "createdAt",
       key: "createdAt",
+      responsive: ["lg"],
       render: (date: Date) => date.toLocaleDateString("tr-TR"),
       sorter: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
     },
@@ -151,13 +157,15 @@ const Products = () => {
       title: "Güncellenme Tarihi",
       dataIndex: "updatedAt",
       key: "updatedAt",
+      responsive: ["lg"],
       render: (date: Date) => date.toLocaleDateString("tr-TR"),
       sorter: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
     },
     {
       title: "İşlemler",
       key: "actions",
-      width: 150,
+      width: 100,
+      fixed: "right",
       render: (_, record) => (
         <Space>
           <Button
@@ -177,18 +185,14 @@ const Products = () => {
   ]
 
   return (
-    <div style={{ padding: 24 }}>
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-        }}>
-        <h1>Ürünler</h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Ürünler</h1>
         <Button
           type='primary'
           icon={<PlusOutlined />}
-          onClick={handleCreate}>
+          onClick={handleCreate}
+          size='large'>
           Yeni Ürün
         </Button>
       </div>
@@ -203,46 +207,75 @@ const Products = () => {
           showSizeChanger: true,
           showTotal: (total) => `Toplam ${total} ürün`,
         }}
+        scroll={{ x: "max-content" }}
       />
 
       <Modal
-        title={editingProduct ? "Ürün Düzenle" : "Yeni Ürün"}
+        title={
+          <div className={styles.modalTitle}>
+            <h3 className={styles.modalTitleText}>
+              {editingProduct ? "Ürün Düzenle" : "Yeni Ürün"}
+            </h3>
+          </div>
+        }
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
-        onOk={form.submit}
-        confirmLoading={createMutation.isPending || updateMutation.isPending}>
+        footer={null}
+        width={520}>
         <Form
           form={form}
           layout='vertical'
-          onFinish={handleSubmit}>
+          onFinish={handleSubmit}
+          className={styles.form}>
           <Form.Item
             name='name'
             label='Ürün Adı'
+            className={styles.formItem}
             rules={[{ required: true, message: "Lütfen ürün adı girin" }]}>
-            <Input />
+            <Input
+              size='large'
+              placeholder='Ürün adını girin'
+            />
           </Form.Item>
+
           <Form.Item
             name='description'
             label='Açıklama'
+            className={styles.formItem}
             rules={[{ required: true, message: "Lütfen açıklama girin" }]}>
-            <Input.TextArea />
+            <Input.TextArea
+              size='large'
+              placeholder='Ürün açıklamasını girin'
+              rows={4}
+            />
           </Form.Item>
+
           <Form.Item
             name='price'
             label='Fiyat'
+            className={styles.formItem}
             rules={[{ required: true, message: "Lütfen fiyat girin" }]}>
             <InputNumber
-              style={{ width: "100%" }}
+              size='large'
+              className={styles.formInput}
               min={0}
               precision={2}
               prefix='₺'
+              placeholder='0.00'
             />
           </Form.Item>
+
           <Form.Item
             name='categoryId'
             label='Kategori'
+            className={styles.formItem}
             rules={[{ required: true, message: "Lütfen kategori seçin" }]}>
-            <Select loading={categoriesLoading}>
+            <Select
+              size='large'
+              loading={categoriesLoading}
+              placeholder='Kategori seçin'
+              showSearch
+              optionFilterProp='children'>
               {categories?.map((category: Category) => (
                 <Select.Option
                   key={category.id}
@@ -252,6 +285,16 @@ const Products = () => {
               ))}
             </Select>
           </Form.Item>
+
+          <div className={styles.formActions}>
+            <Button onClick={() => setIsModalOpen(false)}>İptal</Button>
+            <Button
+              type='primary'
+              htmlType='submit'
+              loading={createMutation.isPending || updateMutation.isPending}>
+              {editingProduct ? "Güncelle" : "Oluştur"}
+            </Button>
+          </div>
         </Form>
       </Modal>
     </div>
