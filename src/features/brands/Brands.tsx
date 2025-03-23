@@ -51,7 +51,9 @@ const Brands = () => {
         orderByField: "createdAt",
         orderDirection: "desc",
       }),
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
     initialData: {
       brands: [],
       total: 0,
@@ -252,7 +254,7 @@ const Brands = () => {
         dataSource={brandsData?.brands || []}
         columns={columns}
         rowKey='id'
-        loading={brandsLoading && !brandsData?.brands.length}
+        loading={brandsLoading}
         scroll={{ x: "max-content" }}
         pagination={false}
         locale={{

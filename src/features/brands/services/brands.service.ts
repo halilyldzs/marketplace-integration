@@ -23,9 +23,9 @@ import type {
   UpdateBrandDTO,
 } from "../types"
 
-class BrandsService {
-  private collection = collection(db, "brands")
+const brandsCollection = collection(db, "brands")
 
+export const brandsService = {
   async getAll({
     searchTerm = "",
     pageSize = 10,
@@ -33,14 +33,14 @@ class BrandsService {
     orderDirection = "desc" as OrderByDirection,
   } = {}): Promise<GetBrandsResponse> {
     let q = query(
-      this.collection,
+      brandsCollection,
       orderBy(orderByField, orderDirection),
       limit(pageSize)
     )
 
     if (searchTerm) {
       q = query(
-        this.collection,
+        brandsCollection,
         where("name", ">=", searchTerm),
         where("name", "<=", searchTerm + "\uf8ff"),
         orderBy("name"),
@@ -48,8 +48,10 @@ class BrandsService {
       )
     }
 
-    const snapshot = await getDocs(q)
-    const countSnapshot = await getCountFromServer(this.collection)
+    const [snapshot, countSnapshot] = await Promise.all([
+      getDocs(q),
+      getCountFromServer(brandsCollection),
+    ])
 
     const brands = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -64,7 +66,7 @@ class BrandsService {
       hasMore: snapshot.docs.length === pageSize,
       lastVisible: snapshot.docs[snapshot.docs.length - 1],
     }
-  }
+  },
 
   async loadMore(
     lastVisible: QueryDocumentSnapshot<DocumentData>,
@@ -76,7 +78,7 @@ class BrandsService {
     } = {}
   ): Promise<GetBrandsResponse> {
     let q = query(
-      this.collection,
+      brandsCollection,
       orderBy(orderByField, orderDirection),
       startAfter(lastVisible),
       limit(pageSize)
@@ -84,7 +86,7 @@ class BrandsService {
 
     if (searchTerm) {
       q = query(
-        this.collection,
+        brandsCollection,
         where("name", ">=", searchTerm),
         where("name", "<=", searchTerm + "\uf8ff"),
         orderBy("name"),
@@ -93,8 +95,10 @@ class BrandsService {
       )
     }
 
-    const snapshot = await getDocs(q)
-    const countSnapshot = await getCountFromServer(this.collection)
+    const [snapshot, countSnapshot] = await Promise.all([
+      getDocs(q),
+      getCountFromServer(brandsCollection),
+    ])
 
     const brands = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -109,11 +113,11 @@ class BrandsService {
       hasMore: snapshot.docs.length === pageSize,
       lastVisible: snapshot.docs[snapshot.docs.length - 1],
     }
-  }
+  },
 
   async create(data: CreateBrandDTO): Promise<Brand> {
     const now = new Date()
-    const docRef = await addDoc(this.collection, {
+    const docRef = await addDoc(brandsCollection, {
       ...data,
       createdAt: now,
       updatedAt: now,
@@ -125,20 +129,18 @@ class BrandsService {
       createdAt: now,
       updatedAt: now,
     }
-  }
+  },
 
   async update({ id, ...data }: UpdateBrandDTO): Promise<void> {
-    const docRef = doc(this.collection, id)
+    const docRef = doc(brandsCollection, id)
     await updateDoc(docRef, {
       ...data,
       updatedAt: new Date(),
     })
-  }
+  },
 
   async delete(id: string): Promise<void> {
-    const docRef = doc(this.collection, id)
+    const docRef = doc(brandsCollection, id)
     await deleteDoc(docRef)
-  }
+  },
 }
-
-export const brandsService = new BrandsService()
