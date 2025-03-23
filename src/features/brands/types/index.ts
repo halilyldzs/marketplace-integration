@@ -1,11 +1,16 @@
-import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore"
+import {
+  DocumentData,
+  FieldValue,
+  QueryDocumentSnapshot,
+} from "firebase/firestore"
 
 export interface Brand {
   id: string
   name: string
+  nameLower: string
   description?: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date | FieldValue
+  updatedAt: Date | FieldValue
 }
 
 export interface CreateBrandDTO {
@@ -13,7 +18,7 @@ export interface CreateBrandDTO {
   description?: string
 }
 
-export interface UpdateBrandDTO extends CreateBrandDTO {
+export interface UpdateBrandDTO extends Partial<CreateBrandDTO> {
   id: string
 }
 
