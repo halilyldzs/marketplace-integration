@@ -1,4 +1,5 @@
 import { StyleProvider } from "@ant-design/cssinjs"
+import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { App as AntApp, ConfigProvider, theme } from "antd"
@@ -16,20 +17,29 @@ const AppRoutesComponent = () => {
 
 const AppContent = () => {
   const { isDarkMode, setTheme } = useThemeStore()
+  const { user } = useAuthStore()
 
   useEffect(() => {
-    // Sistem temasını kontrol et
+    // Kullanıcı ayarları varsa onları kullan
+    if (user?.settings?.theme) {
+      setTheme(user.settings.theme === "dark")
+      return
+    }
+
+    // Kullanıcı ayarları yoksa sistem temasını kullan
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
     setTheme(mediaQuery.matches)
 
-    // Tema değişikliklerini dinle
     const handleChange = (e: MediaQueryListEvent) => {
-      setTheme(e.matches)
+      // Sadece kullanıcı ayarları yoksa sistem temasını takip et
+      if (!user?.settings?.theme) {
+        setTheme(e.matches)
+      }
     }
     mediaQuery.addEventListener("change", handleChange)
 
     return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [setTheme])
+  }, [setTheme, user?.settings?.theme])
 
   useEffect(() => {
     // HTML elementine tema attribute'unu ekle
