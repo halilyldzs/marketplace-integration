@@ -49,7 +49,6 @@ const Products = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: 1000 * 60, // 1 minute
     initialData: {
       categories: [],
       total: 0,
@@ -68,7 +67,7 @@ const Products = () => {
           orderByField: "createdAt",
           orderDirection: "desc",
         }),
-      staleTime: 1000 * 60, // 1 minute
+
       initialData: {
         products: [],
         total: 0,
