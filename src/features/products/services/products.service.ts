@@ -6,6 +6,7 @@ import {
   deleteDoc,
   doc,
   DocumentData,
+  FieldValue,
   getDoc,
   getDocs,
   limit,
@@ -47,6 +48,7 @@ export interface GetProductsResponse {
 export const productsService = {
   async getAll(params?: GetProductsParams): Promise<GetProductsResponse> {
     try {
+      console.log("Fetching products with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
@@ -70,14 +72,15 @@ export const productsService = {
 
       // Add search term filter if provided
       if (searchTerm?.trim()) {
-        constraints.push(where("name", ">=", searchTerm))
+        const searchLower = searchTerm.toLowerCase().trim()
+        constraints.push(where("nameLower", ">=", searchLower))
       }
 
       // Add ordering
       if (searchTerm) {
-        constraints.push(orderBy("name"))
+        constraints.push(orderBy("nameLower"))
       }
-      if (orderByField !== "name") {
+      if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
@@ -106,6 +109,8 @@ export const productsService = {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as Product[]
+
+      console.log("Processed products:", products)
 
       return {
         products,
@@ -147,14 +152,15 @@ export const productsService = {
 
       // Add search term filter if provided
       if (searchTerm?.trim()) {
-        constraints.push(where("name", ">=", searchTerm))
+        const searchLower = searchTerm.toLowerCase().trim()
+        constraints.push(where("nameLower", ">=", searchLower))
       }
 
       // Add ordering
       if (searchTerm) {
-        constraints.push(orderBy("name"))
+        constraints.push(orderBy("nameLower"))
       }
-      if (orderByField !== "name") {
+      if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
@@ -235,6 +241,7 @@ export const productsService = {
 
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...data,
+      nameLower: data.name.toLowerCase(),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -242,6 +249,7 @@ export const productsService = {
     return {
       id: docRef.id,
       ...data,
+      nameLower: data.name.toLowerCase(),
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -259,10 +267,16 @@ export const productsService = {
     }
 
     const docRef = doc(db, COLLECTION_NAME, id)
-    await updateDoc(docRef, {
+    const updates: Partial<Product> & { updatedAt: FieldValue } = {
       ...updateData,
       updatedAt: serverTimestamp(),
-    })
+    }
+
+    if (updateData.name) {
+      updates.nameLower = updateData.name.toLowerCase()
+    }
+
+    await updateDoc(docRef, updates)
   },
 
   async delete(id: string): Promise<void> {

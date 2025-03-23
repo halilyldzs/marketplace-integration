@@ -5,7 +5,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "name",
+          "fieldPath": "nameLower",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
           "order": "ASCENDING"
         },
         {
@@ -15,11 +19,11 @@
       ]
     },
     {
-      "collectionGroup": "products",
+      "collectionGroup": "categories",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "categoryId",
+          "fieldPath": "nameLower",
           "order": "ASCENDING"
         },
         {
@@ -33,7 +37,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "name",
+          "fieldPath": "nameLower",
           "order": "ASCENDING"
         },
         {
