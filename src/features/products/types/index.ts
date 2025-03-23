@@ -3,10 +3,10 @@ export interface Product {
   name: string
   description: string
   price: number
-  stock: number
-  category: string
-  createdAt: string
-  updatedAt: string
+  categoryId: string
+  images: string[]
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface ProductsResponse {
@@ -20,4 +20,16 @@ export interface ProductFormValues {
   price: number
   stock: number
   category: string
+}
+
+export interface CreateProductDTO {
+  name: string
+  description: string
+  price: number
+  categoryId: string
+  images: string[]
+}
+
+export interface UpdateProductDTO extends Partial<CreateProductDTO> {
+  id: string
 }
