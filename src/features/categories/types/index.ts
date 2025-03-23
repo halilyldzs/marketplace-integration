@@ -1,9 +1,12 @@
+import { FieldValue } from "firebase/firestore"
+
 export interface Category {
   id: string
   name: string
   slug: string
-  createdAt: Date
-  updatedAt: Date
+  nameLower: string
+  createdAt: Date | FieldValue
+  updatedAt: Date | FieldValue
 }
 
 export interface CreateCategoryDTO {

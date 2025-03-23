@@ -1,4 +1,6 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
+import CategoryForm from "@features/categories/components/CategoryForm"
+import type { GetCategoriesParams } from "@features/categories/services/categories.service"
 import { categoriesService } from "@features/categories/services/categories.service"
 import {
   Category,
@@ -6,19 +8,14 @@ import {
   UpdateCategoryDTO,
 } from "@features/categories/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Typography,
-  message,
-} from "antd"
-import type { ColumnsType } from "antd/es/table"
+import { Button, Input, Modal, Space, Table, Typography, message } from "antd"
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table"
 import { FirebaseError } from "firebase/app"
+import {
+  DocumentData,
+  FieldValue,
+  QueryDocumentSnapshot,
+} from "firebase/firestore"
 import { useState } from "react"
 
 const { Text } = Typography
@@ -29,26 +26,36 @@ const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   )
-  const [form] = Form.useForm<CreateCategoryDTO>()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  })
+  const [lastVisible, setLastVisible] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
 
-  const { data: categories, isLoading } = useQuery({
-    queryKey: ["categories"],
+  const { data, isLoading } = useQuery({
+    queryKey: [
+      "categories",
+      pagination.current,
+      pagination.pageSize,
+      searchTerm,
+    ],
     queryFn: async () => {
-      try {
-        console.log("Fetching categories...")
-        const result = await categoriesService.getAll()
-        console.log("Categories fetched successfully:", result)
-        return result
-      } catch (error) {
-        console.error("Failed to fetch categories:", error)
-        message.error("Kategoriler yüklenemedi")
-        throw error
+      const params: GetCategoriesParams = {
+        page: pagination.current,
+        pageSize: pagination.pageSize,
+        orderByField: "createdAt",
+        orderDirection: "desc",
+        searchTerm: searchTerm || undefined,
       }
+
+      const result = await categoriesService.getAll(params)
+      setLastVisible(result.lastVisible)
+      setPagination((prev) => ({ ...prev, total: result.total }))
+      return result
     },
-    retry: 1,
-    retryDelay: 1000,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: true,
   })
 
   const createMutation = useMutation({
@@ -103,23 +110,17 @@ const Categories = () => {
 
   const handleEdit = (category: Category) => {
     setSelectedCategory(category)
-    form.setFieldsValue({
-      name: category.name,
-      slug: category.slug,
-    })
     setIsModalOpen(true)
   }
 
   const handleAdd = () => {
     setSelectedCategory(null)
-    form.resetFields()
     setIsModalOpen(true)
   }
 
   const handleModalClose = () => {
     setIsModalOpen(false)
     setSelectedCategory(null)
-    form.resetFields()
   }
 
   const handleDelete = (id: string) => {
@@ -133,20 +134,37 @@ const Categories = () => {
     })
   }
 
-  const generateSlug = (name: string) => {
-    const lastPart = name.split("/").pop() || name
-    return lastPart
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
+  const handleTableChange = async (newPagination: TablePaginationConfig) => {
+    if (newPagination.current! > pagination.current!) {
+      // Next page
+      const params: Omit<GetCategoriesParams, "page"> = {
+        pageSize: pagination.pageSize,
+        orderByField: "createdAt",
+        orderDirection: "desc",
+        searchTerm: searchTerm || undefined,
+      }
+
+      const result = await categoriesService.loadMore(lastVisible, params)
+      setLastVisible(result.lastVisible)
+      setPagination((prev) => ({
+        ...prev,
+        current: newPagination.current,
+      }))
+
+      // Update cache manually
+      queryClient.setQueryData(
+        ["categories", newPagination.current, pagination.pageSize, searchTerm],
+        result
+      )
+    } else {
+      // Previous page or page size change
+      setPagination(newPagination)
+    }
   }
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value
-    const slug = generateSlug(name)
-    form.setFieldsValue({ slug })
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+    setPagination((prev) => ({ ...prev, current: 1 }))
   }
 
   const columns: ColumnsType<Category> = [
@@ -171,15 +189,23 @@ const Categories = () => {
       title: "Oluşturulma Tarihi",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date: Date) => date.toLocaleDateString("tr-TR"),
-      sorter: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      render: (date: Date | FieldValue) =>
+        date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
+      sorter: (a, b) =>
+        a.createdAt instanceof Date && b.createdAt instanceof Date
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : 0,
     },
     {
       title: "Güncellenme Tarihi",
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (date: Date) => date.toLocaleDateString("tr-TR"),
-      sorter: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
+      render: (date: Date | FieldValue) =>
+        date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
+      sorter: (a, b) =>
+        a.updatedAt instanceof Date && b.updatedAt instanceof Date
+          ? a.updatedAt.getTime() - b.updatedAt.getTime()
+          : 0,
     },
     {
       title: "İşlemler",
@@ -213,25 +239,34 @@ const Categories = () => {
           alignItems: "center",
         }}>
         <h1 style={{ margin: 0 }}>Kategoriler</h1>
-        <Button
-          type='primary'
-          icon={<PlusOutlined />}
-          onClick={handleAdd}
-          size='large'>
-          Yeni Kategori
-        </Button>
+        <Space>
+          <Input.Search
+            placeholder='Kategori ara...'
+            allowClear
+            onSearch={handleSearch}
+            style={{ width: 300 }}
+          />
+          <Button
+            type='primary'
+            icon={<PlusOutlined />}
+            onClick={handleAdd}
+            size='large'>
+            Yeni Kategori
+          </Button>
+        </Space>
       </div>
 
       <Table
         columns={columns}
-        dataSource={categories}
+        dataSource={data?.categories}
         loading={isLoading}
         rowKey='id'
         pagination={{
-          defaultPageSize: 10,
+          ...pagination,
           showSizeChanger: true,
           showTotal: (total) => `Toplam ${total} kategori`,
         }}
+        onChange={(newPagination) => handleTableChange(newPagination)}
       />
 
       <Modal
@@ -253,75 +288,17 @@ const Categories = () => {
         onCancel={handleModalClose}
         footer={null}
         width={520}
-        bodyStyle={{ padding: "24px" }}>
-        <Form
-          form={form}
-          layout='vertical'
-          onFinish={handleSubmit}
-          autoComplete='off'
-          requiredMark='optional'>
-          <Form.Item
-            name='name'
-            label='Kategori Adı'
-            rules={[
-              { required: true, message: "Lütfen kategori adını giriniz" },
-              { min: 2, message: "Kategori adı en az 2 karakter olmalıdır" },
-            ]}
-            style={{ marginBottom: 24 }}>
-            <Input
-              size='large'
-              placeholder='Örn: Elektronik'
-              onChange={handleNameChange}
-              maxLength={50}
-              showCount
-            />
-          </Form.Item>
-          <Form.Item
-            name='slug'
-            label={
-              <Space>
-                <span>Slug</span>
-                <Text
-                  type='secondary'
-                  style={{ fontSize: 12 }}>
-                  (Otomatik oluşturulur)
-                </Text>
-              </Space>
-            }
-            rules={[
-              { required: true, message: "Lütfen slug giriniz" },
-              {
-                pattern: /^[a-z0-9-]+$/,
-                message: "Slug sadece küçük harf, rakam ve tire içerebilir",
-              },
-            ]}
-            style={{ marginBottom: 32 }}>
-            <Input
-              size='large'
-              placeholder='ornek-kategori'
-            />
-          </Form.Item>
-          <Divider style={{ margin: "0 0 24px" }} />
-          <Form.Item style={{ marginBottom: 0 }}>
-            <div
-              style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
-              <Button
-                size='large'
-                onClick={handleModalClose}>
-                İptal
-              </Button>
-              <Button
-                type='primary'
-                size='large'
-                htmlType='submit'
-                loading={createMutation.isPending || updateMutation.isPending}>
-                {selectedCategory
-                  ? "Değişiklikleri Kaydet"
-                  : "Kategori Oluştur"}
-              </Button>
-            </div>
-          </Form.Item>
-        </Form>
+        styles={{
+          body: {
+            padding: "24px",
+          },
+        }}>
+        <CategoryForm
+          initialValues={selectedCategory || undefined}
+          onSubmit={handleSubmit}
+          onCancel={handleModalClose}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
+        />
       </Modal>
     </div>
   )
