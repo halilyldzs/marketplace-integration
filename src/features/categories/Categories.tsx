@@ -1,6 +1,10 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
 import { categoriesService } from "@features/categories/services/categories.service"
-import { Category, CreateCategoryDTO } from "@features/categories/types"
+import {
+  Category,
+  CreateCategoryDTO,
+  UpdateCategoryDTO,
+} from "@features/categories/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Button,
@@ -22,6 +26,9 @@ const { Text } = Typography
 const Categories = () => {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  )
   const [form] = Form.useForm<CreateCategoryDTO>()
 
   const { data: categories, isLoading } = useQuery({
@@ -49,12 +56,24 @@ const Categories = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
       message.success("Kategori eklendi")
-      setIsModalOpen(false)
-      form.resetFields()
+      handleModalClose()
     },
     onError: (error: FirebaseError) => {
       console.error("Category creation error details:", error)
       message.error("Kategori eklenirken bir sorun oluştu")
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (data: UpdateCategoryDTO) => categoriesService.update(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] })
+      message.success("Kategori güncellendi")
+      handleModalClose()
+    },
+    onError: (error) => {
+      console.error("Category update error details:", error)
+      message.error("Kategori güncellenirken bir sorun oluştu")
     },
   })
 
@@ -70,6 +89,39 @@ const Categories = () => {
     },
   })
 
+  const handleSubmit = async (values: CreateCategoryDTO) => {
+    try {
+      if (selectedCategory) {
+        await updateMutation.mutateAsync({ ...values, id: selectedCategory.id })
+      } else {
+        await createMutation.mutateAsync(values)
+      }
+    } catch (error) {
+      console.error("Failed to save category:", error)
+    }
+  }
+
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category)
+    form.setFieldsValue({
+      name: category.name,
+      slug: category.slug,
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleAdd = () => {
+    setSelectedCategory(null)
+    form.resetFields()
+    setIsModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setIsModalOpen(false)
+    setSelectedCategory(null)
+    form.resetFields()
+  }
+
   const handleDelete = (id: string) => {
     Modal.confirm({
       title: "Kategoriyi silmek istediğinizden emin misiniz?",
@@ -81,24 +133,8 @@ const Categories = () => {
     })
   }
 
-  const handleCreate = async (values: CreateCategoryDTO) => {
-    try {
-      await createMutation.mutateAsync(values)
-      await queryClient.invalidateQueries({ queryKey: ["categories"] })
-    } catch (error) {
-      console.error("Failed to create category:", error)
-    }
-  }
-
-  const handleModalCancel = () => {
-    setIsModalOpen(false)
-    form.resetFields()
-  }
-
   const generateSlug = (name: string) => {
-    // Get the last part after the final slash, or use the whole string if no slash exists
     const lastPart = name.split("/").pop() || name
-
     return lastPart
       .toLowerCase()
       .trim()
@@ -154,7 +190,7 @@ const Categories = () => {
           <Button
             type='text'
             icon={<EditOutlined />}
-            onClick={() => console.log("Edit", record)}
+            onClick={() => handleEdit(record)}
           />
           <Button
             type='text'
@@ -180,7 +216,7 @@ const Categories = () => {
         <Button
           type='primary'
           icon={<PlusOutlined />}
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleAdd}
           size='large'>
           Yeni Kategori
         </Button>
@@ -209,19 +245,19 @@ const Categories = () => {
             <Text
               strong
               style={{ fontSize: 18 }}>
-              Yeni Kategori Oluştur
+              {selectedCategory ? "Kategori Düzenle" : "Yeni Kategori Oluştur"}
             </Text>
           </div>
         }
         open={isModalOpen}
-        onCancel={handleModalCancel}
+        onCancel={handleModalClose}
         footer={null}
         width={520}
         bodyStyle={{ padding: "24px" }}>
         <Form
           form={form}
           layout='vertical'
-          onFinish={handleCreate}
+          onFinish={handleSubmit}
           autoComplete='off'
           requiredMark='optional'>
           <Form.Item
@@ -271,15 +307,17 @@ const Categories = () => {
               style={{ display: "flex", justifyContent: "flex-end", gap: 12 }}>
               <Button
                 size='large'
-                onClick={handleModalCancel}>
+                onClick={handleModalClose}>
                 İptal
               </Button>
               <Button
                 type='primary'
                 size='large'
                 htmlType='submit'
-                loading={createMutation.isPending}>
-                Kategori Oluştur
+                loading={createMutation.isPending || updateMutation.isPending}>
+                {selectedCategory
+                  ? "Değişiklikleri Kaydet"
+                  : "Kategori Oluştur"}
               </Button>
             </div>
           </Form.Item>
