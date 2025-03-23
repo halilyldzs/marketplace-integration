@@ -10,7 +10,14 @@ export interface Product {
   nameLower: string
   description: string
   price: number
+  listPrice: number
+  sku: string
+  barcode: string
+  vat: number
+  deci: number
+  stock: number
   categoryId: string
+  brandId: string
   images: string[]
   createdAt: Date | FieldValue
   updatedAt: Date | FieldValue
@@ -25,7 +32,14 @@ export interface CreateProductDTO {
   name: string
   description: string
   price: number
+  listPrice: number
+  sku: string
+  barcode: string
+  vat: number
+  deci: number
+  stock: number
   categoryId: string
+  brandId: string
   images: string[]
 }
 

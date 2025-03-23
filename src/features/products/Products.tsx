@@ -4,6 +4,8 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons"
+import { brandsService } from "@features/brands/services/brands.service"
+import type { Brand } from "@features/brands/types"
 import { categoriesService } from "@features/categories/services/categories.service"
 import type { Category } from "@features/categories/types"
 import type { GetProductsResponse } from "@features/products/services/products.service"
@@ -49,12 +51,21 @@ const Products = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    initialData: {
-      categories: [],
-      total: 0,
-      hasMore: false,
-      lastVisible: null,
-    },
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  })
+
+  const { data: brandsData } = useQuery({
+    queryKey: ["brands"],
+    queryFn: () => brandsService.getAll(),
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   })
 
   const { data: productsData, isLoading: productsLoading } =
@@ -203,16 +214,59 @@ const Products = () => {
       fixed: "left",
     },
     {
+      title: "SKU",
+      dataIndex: "sku",
+      key: "sku",
+      width: 120,
+    },
+    {
+      title: "Barkod",
+      dataIndex: "barcode",
+      key: "barcode",
+      width: 140,
+      responsive: ["lg"],
+    },
+    {
+      title: "Satış Fiyatı",
+      dataIndex: "price",
+      key: "price",
+      width: 120,
+      render: (price: number) => `₺${price.toFixed(2)}`,
+    },
+    {
+      title: "Liste Fiyatı",
+      dataIndex: "listPrice",
+      key: "listPrice",
+      width: 120,
+      responsive: ["lg"],
+      render: (listPrice: number) => `₺${listPrice.toFixed(2)}`,
+    },
+    {
+      title: "KDV",
+      dataIndex: "vat",
+      key: "vat",
+      width: 80,
+      responsive: ["lg"],
+      render: (vat: number) => `%${vat}`,
+    },
+    {
+      title: "Desi",
+      dataIndex: "deci",
+      key: "deci",
+      width: 80,
+      responsive: ["lg"],
+    },
+    {
+      title: "Stok",
+      dataIndex: "stock",
+      key: "stock",
+      width: 100,
+    },
+    {
       title: "Açıklama",
       dataIndex: "description",
       key: "description",
       responsive: ["md"],
-    },
-    {
-      title: "Fiyat",
-      dataIndex: "price",
-      key: "price",
-      render: (price: number) => `₺${price.toFixed(2)}`,
     },
     {
       title: "Kategori",
@@ -222,6 +276,14 @@ const Products = () => {
       render: (categoryId: string) =>
         categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
         "-",
+    },
+    {
+      title: "Marka",
+      dataIndex: "brandId",
+      key: "brandId",
+      responsive: ["md"],
+      render: (brandId: string) =>
+        brandsData?.brands.find((b) => b.id === brandId)?.name || "-",
     },
     {
       title: "Oluşturulma Tarihi",
@@ -373,44 +435,146 @@ const Products = () => {
 
           <Form.Item
             name='price'
-            label='Fiyat'
+            label='Satış Fiyatı'
             className={styles.formItem}
             rules={[
-              { required: true, message: "Lütfen fiyat girin" },
+              { required: true, message: "Lütfen satış fiyatı girin" },
               { type: "number", message: "Lütfen geçerli bir fiyat girin" },
             ]}>
             <InputNumber<number>
-              size='large'
               className={styles.priceInput}
+              size='large'
               min={0}
               step={0.01}
               precision={2}
               prefix='₺'
               placeholder='0.00'
-              stringMode={false}
               formatter={(value) => {
-                if (value === null || value === undefined) return ""
+                if (value === undefined || value === null) return ""
                 return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
               }}
               parser={(value) => {
-                if (!value || value === "₺") return 0
-                const cleanValue = value.replace(/[^\d.]/g, "")
-                const firstDotIndex = cleanValue.indexOf(".")
-                const sanitizedValue =
-                  firstDotIndex === -1
-                    ? cleanValue
-                    : cleanValue.slice(0, firstDotIndex + 1) +
-                      cleanValue.slice(firstDotIndex + 1).replace(/\./g, "")
-                const parsed = parseFloat(sanitizedValue)
+                const parsed = parseFloat(value!.replace(/[^\d.]/g, ""))
                 return isNaN(parsed) ? 0 : parsed
               }}
-              onInput={(value: string) => {
-                if (!/^\d*\.?\d*$/.test(value)) {
-                  return value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1")
-                }
-                return value
+              controls={false}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='listPrice'
+            label='Liste Fiyatı'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen liste fiyatı girin" },
+              { type: "number", message: "Lütfen geçerli bir fiyat girin" },
+            ]}>
+            <InputNumber<number>
+              className={styles.priceInput}
+              size='large'
+              min={0}
+              step={0.01}
+              precision={2}
+              prefix='₺'
+              placeholder='0.00'
+              formatter={(value) => {
+                if (value === undefined || value === null) return ""
+                return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }}
+              parser={(value) => {
+                const parsed = parseFloat(value!.replace(/[^\d.]/g, ""))
+                return isNaN(parsed) ? 0 : parsed
               }}
               controls={false}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='sku'
+            label='Stok Kodu (SKU)'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen stok kodu girin" },
+              {
+                type: "string",
+                min: 3,
+                message: "Stok kodu en az 3 karakter olmalıdır",
+              },
+            ]}>
+            <Input
+              size='large'
+              placeholder='Örn: PRD-001'
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='barcode'
+            label='Barkod'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen barkod girin" },
+              {
+                type: "string",
+                min: 8,
+                message: "Barkod en az 8 karakter olmalıdır",
+              },
+            ]}>
+            <Input
+              size='large'
+              placeholder='Örn: 8680000000000'
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='vat'
+            label='KDV Oranı (%)'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen KDV oranı girin" },
+              { type: "number", message: "Lütfen geçerli bir oran girin" },
+            ]}>
+            <InputNumber<number>
+              className={styles.formInput}
+              size='large'
+              min={0}
+              max={100}
+              precision={0}
+              placeholder='18'
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='deci'
+            label='Desi'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen desi değeri girin" },
+              { type: "number", message: "Lütfen geçerli bir değer girin" },
+            ]}>
+            <InputNumber<number>
+              className={styles.formInput}
+              size='large'
+              min={0}
+              step={0.1}
+              precision={1}
+              placeholder='1.0'
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='stock'
+            label='Stok Miktarı'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen stok miktarı girin" },
+              { type: "number", message: "Lütfen geçerli bir miktar girin" },
+            ]}>
+            <InputNumber<number>
+              className={styles.formInput}
+              size='large'
+              min={0}
+              precision={0}
+              placeholder='100'
             />
           </Form.Item>
 
@@ -428,6 +592,24 @@ const Products = () => {
               options={categoriesData?.categories.map((category: Category) => ({
                 value: category.id,
                 label: category.name,
+              }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name='brandId'
+            label='Marka'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen marka seçin" },
+              { type: "string" },
+            ]}>
+            <Select
+              size='large'
+              placeholder='Marka seçin'
+              options={brandsData?.brands.map((brand: Brand) => ({
+                value: brand.id,
+                label: brand.name,
               }))}
             />
           </Form.Item>
