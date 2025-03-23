@@ -1,11 +1,18 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons"
-import { categoriesService } from "@features/categories/services/categories.service"
-import { Category } from "@features/categories/types"
-import { productsService } from "@features/products/services/products.service"
 import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  SearchOutlined,
+} from "@ant-design/icons"
+import { categoriesService } from "@features/categories/services/categories.service"
+import type { Category } from "@features/categories/types"
+import type { GetProductsResponse } from "@features/products/services/products.service"
+import { productsService } from "@features/products/services/products.service"
+import type {
   CreateProductDTO,
   Product,
   ProductFormValues,
+  UpdateProductDTO,
 } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -17,35 +24,60 @@ import {
   Select,
   Space,
   Table,
+  Typography,
   message,
 } from "antd"
 import type { ColumnsType } from "antd/es/table"
-import { useState } from "react"
+import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore"
+import { useCallback, useRef, useState } from "react"
 import styles from "./Products.module.css"
 
+const { Text } = Typography
+
 const Products = () => {
-  const [form] = Form.useForm<ProductFormValues>()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [form] = Form.useForm<ProductFormValues>()
   const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [inputValue, setInputValue] = useState("")
+  const [lastVisible, setLastVisible] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
+  const searchTimeout = useRef<NodeJS.Timeout>()
 
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: () => productsService.getAll(),
-    initialData: [],
-    staleTime: 1000 * 60, // 1 minute
-  })
-
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  // Queries
+  const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await categoriesService.getAll()
-      return response.categories
-    },
-    initialData: [],
+    queryFn: () => categoriesService.getAll(),
     staleTime: 1000 * 60, // 1 minute
+    initialData: {
+      categories: [],
+      total: 0,
+      hasMore: false,
+      lastVisible: null,
+    },
   })
 
+  const { data: productsData, isLoading: productsLoading } =
+    useQuery<GetProductsResponse>({
+      queryKey: ["products", searchTerm],
+      queryFn: () =>
+        productsService.getAll({
+          searchTerm,
+          pageSize: 10,
+          orderByField: "createdAt",
+          orderDirection: "desc",
+        }),
+      staleTime: 1000 * 60, // 1 minute
+      initialData: {
+        products: [],
+        total: 0,
+        hasMore: false,
+        lastVisible: null,
+      },
+    })
+
+  // Mutations
   const createMutation = useMutation({
     mutationFn: (data: CreateProductDTO) => productsService.create(data),
     onSuccess: () => {
@@ -54,17 +86,22 @@ const Products = () => {
       setIsModalOpen(false)
       form.resetFields()
     },
+    onError: (error: Error) => {
+      message.error(`Ürün oluşturulamadı: ${error.message}`)
+    },
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, values }: { id: string; values: CreateProductDTO }) =>
-      productsService.update({ id, ...values }),
+    mutationFn: (data: UpdateProductDTO) => productsService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla güncellendi")
       setIsModalOpen(false)
       setEditingProduct(null)
       form.resetFields()
+    },
+    onError: (error: Error) => {
+      message.error(`Ürün güncellenemedi: ${error.message}`)
     },
   })
 
@@ -74,12 +111,62 @@ const Products = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       message.success("Ürün başarıyla silindi")
     },
+    onError: (error: Error) => {
+      message.error(`Ürün silinemedi: ${error.message}`)
+    },
   })
 
-  const handleCreate = () => {
-    setEditingProduct(null)
-    form.resetFields()
-    setIsModalOpen(true)
+  // Event handlers
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setInputValue(value)
+
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current)
+    }
+
+    searchTimeout.current = setTimeout(() => {
+      setSearchTerm(value)
+    }, 500)
+  }
+
+  const handleLoadMore = useCallback(async () => {
+    if (!lastVisible) return
+
+    const moreProducts = await productsService.loadMore(lastVisible, {
+      searchTerm,
+      pageSize: 10,
+      orderByField: "createdAt",
+      orderDirection: "desc",
+    })
+
+    setLastVisible(moreProducts.lastVisible)
+    queryClient.setQueryData<GetProductsResponse>(
+      ["products", searchTerm],
+      (oldData) => {
+        if (!oldData) return moreProducts
+        return {
+          ...moreProducts,
+          products: [...oldData.products, ...moreProducts.products],
+          total: oldData.total,
+        }
+      }
+    )
+  }, [lastVisible, queryClient, searchTerm])
+
+  const handleSubmit = (values: ProductFormValues) => {
+    console.log("Form values:", values)
+    const productData = {
+      ...values,
+      images: [], // Şimdilik boş array
+    }
+    console.log("Product data to be sent:", productData)
+
+    if (editingProduct) {
+      updateMutation.mutate({ id: editingProduct.id, ...productData })
+    } else {
+      createMutation.mutate(productData)
+    }
   }
 
   const handleEdit = (record: Product) => {
@@ -93,52 +180,40 @@ const Products = () => {
       title: "Ürünü silmek istediğinize emin misiniz?",
       content: "Bu işlem geri alınamaz.",
       okText: "Evet",
+      okType: "danger",
       cancelText: "Hayır",
-      onOk: () => deleteMutation.mutate(id),
+      onOk() {
+        deleteMutation.mutate(id)
+      },
     })
   }
 
-  const handleSubmit = (values: ProductFormValues) => {
-    const productData = {
-      ...values,
-      images: [], // Şimdilik boş array
-    }
-
-    if (editingProduct) {
-      updateMutation.mutate({ id: editingProduct.id, values: productData })
-    } else {
-      createMutation.mutate(productData)
-    }
-  }
-
+  // Table columns
   const columns: ColumnsType<Product> = [
     {
       title: "ID",
       dataIndex: "id",
       key: "id",
-      width: 100,
+      width: 220,
       responsive: ["lg"],
     },
     {
       title: "Ad",
       dataIndex: "name",
       key: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
       fixed: "left",
     },
     {
       title: "Açıklama",
       dataIndex: "description",
       key: "description",
-      ellipsis: true,
       responsive: ["md"],
     },
     {
       title: "Fiyat",
       dataIndex: "price",
       key: "price",
-      render: (price: number) => `₺${price.toLocaleString("tr-TR")}`,
-      sorter: (a, b) => a.price - b.price,
+      render: (price: number) => `₺${price.toFixed(2)}`,
     },
     {
       title: "Kategori",
@@ -146,31 +221,22 @@ const Products = () => {
       key: "categoryId",
       responsive: ["md"],
       render: (categoryId: string) =>
-        categories?.find((c: Category) => c.id === categoryId)?.name ||
-        categoryId,
+        categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
+        "-",
     },
     {
       title: "Oluşturulma Tarihi",
       dataIndex: "createdAt",
       key: "createdAt",
       responsive: ["lg"],
-      render: (date: Date) => date.toLocaleDateString("tr-TR"),
-      sorter: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
-    },
-    {
-      title: "Güncellenme Tarihi",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      responsive: ["lg"],
-      render: (date: Date) => date.toLocaleDateString("tr-TR"),
-      sorter: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
+      render: (date: Date) => date.toLocaleString(),
     },
     {
       title: "İşlemler",
       key: "actions",
-      width: 100,
       fixed: "right",
-      render: (_, record) => (
+      width: 100,
+      render: (_: unknown, record: Product) => (
         <Space>
           <Button
             type='text'
@@ -191,57 +257,101 @@ const Products = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Ürünler</h1>
-        <Button
-          type='primary'
-          icon={<PlusOutlined />}
-          onClick={handleCreate}
-          size='large'>
-          Yeni Ürün
-        </Button>
+        <div className={styles.headerTop}>
+          <div className={styles.titleContainer}>
+            <h1 className={styles.title}>Ürünler</h1>
+            <Text type='secondary'>Ürün listesi ve yönetimi</Text>
+          </div>
+        </div>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchWrapper}>
+            <SearchOutlined className={styles.searchIcon} />
+            <Input
+              placeholder='Ürün ara...'
+              bordered={false}
+              allowClear
+              onChange={handleSearch}
+              value={inputValue}
+              className={styles.searchInput}
+            />
+          </div>
+          <Button
+            type='primary'
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setEditingProduct(null)
+              form.resetFields()
+              setIsModalOpen(true)
+            }}
+            size='large'>
+            Yeni Ürün
+          </Button>
+        </div>
       </div>
 
-      <Table
+      <Table<Product>
+        dataSource={productsData?.products || []}
         columns={columns}
-        dataSource={products || []}
-        loading={productsLoading && !products?.length}
         rowKey='id'
-        pagination={{
-          defaultPageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Toplam ${total} ürün`,
-        }}
+        loading={productsLoading && !productsData?.products.length}
         scroll={{ x: "max-content" }}
+        pagination={false}
         locale={{
           emptyText: productsLoading ? "Yükleniyor..." : "Ürün bulunamadı",
         }}
       />
 
+      {productsData?.hasMore && (
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <Button onClick={handleLoadMore}>Daha Fazla Yükle</Button>
+        </div>
+      )}
+
       <Modal
         title={
           <div className={styles.modalTitle}>
-            <h3 className={styles.modalTitleText}>
-              {editingProduct ? "Ürün Düzenle" : "Yeni Ürün"}
-            </h3>
+            <Text
+              strong
+              className={styles.modalTitleText}>
+              {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Oluştur"}
+            </Text>
           </div>
         }
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false)
+          setEditingProduct(null)
+          form.resetFields()
+        }}
         footer={null}
-        width={520}>
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
+        style={{ padding: "24px" }}>
         <Form
           form={form}
-          layout='vertical'
           onFinish={handleSubmit}
-          className={styles.form}>
+          layout='vertical'
+          className={styles.form}
+          requiredMark='optional'>
           <Form.Item
             name='name'
             label='Ürün Adı'
             className={styles.formItem}
-            rules={[{ required: true, message: "Lütfen ürün adı girin" }]}>
+            rules={[
+              { required: true, message: "Lütfen ürün adı girin" },
+              { type: "string" },
+            ]}>
             <Input
               size='large'
               placeholder='Ürün adını girin'
+              maxLength={50}
+              showCount
             />
           </Form.Item>
 
@@ -249,11 +359,16 @@ const Products = () => {
             name='description'
             label='Açıklama'
             className={styles.formItem}
-            rules={[{ required: true, message: "Lütfen açıklama girin" }]}>
+            rules={[
+              { required: true, message: "Lütfen açıklama girin" },
+              { type: "string" },
+            ]}>
             <Input.TextArea
               size='large'
               placeholder='Ürün açıklamasını girin'
               rows={4}
+              maxLength={500}
+              showCount
             />
           </Form.Item>
 
@@ -261,7 +376,11 @@ const Products = () => {
             name='price'
             label='Fiyat'
             className={styles.formItem}
-            rules={[{ required: true, message: "Lütfen fiyat girin" }]}>
+            rules={[
+              { required: true, message: "Lütfen fiyat girin" },
+              { type: "number", message: "Lütfen geçerli bir fiyat girin" },
+              { min: 0, message: "Fiyat 0'dan küçük olamaz" },
+            ]}>
             <InputNumber
               size='large'
               className={styles.formInput}
@@ -276,32 +395,40 @@ const Products = () => {
             name='categoryId'
             label='Kategori'
             className={styles.formItem}
-            rules={[{ required: true, message: "Lütfen kategori seçin" }]}>
+            rules={[
+              { required: true, message: "Lütfen kategori seçin" },
+              { type: "string" },
+            ]}>
             <Select
               size='large'
-              loading={categoriesLoading}
               placeholder='Kategori seçin'
-              showSearch
-              optionFilterProp='children'>
-              {categories?.map((category: Category) => (
-                <Select.Option
-                  key={category.id}
-                  value={category.id}>
-                  {category.name}
-                </Select.Option>
-              ))}
-            </Select>
+              options={categoriesData?.categories.map((category: Category) => ({
+                value: category.id,
+                label: category.name,
+              }))}
+            />
           </Form.Item>
 
-          <div className={styles.formActions}>
-            <Button onClick={() => setIsModalOpen(false)}>İptal</Button>
-            <Button
-              type='primary'
-              htmlType='submit'
-              loading={createMutation.isPending || updateMutation.isPending}>
-              {editingProduct ? "Güncelle" : "Oluştur"}
-            </Button>
-          </div>
+          <Form.Item className={styles.formActions}>
+            <Space>
+              <Button
+                size='large'
+                onClick={() => {
+                  setIsModalOpen(false)
+                  setEditingProduct(null)
+                  form.resetFields()
+                }}>
+                İptal
+              </Button>
+              <Button
+                type='primary'
+                size='large'
+                htmlType='submit'
+                loading={createMutation.isPending || updateMutation.isPending}>
+                {editingProduct ? "Değişiklikleri Kaydet" : "Ürün Oluştur"}
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Modal>
     </div>

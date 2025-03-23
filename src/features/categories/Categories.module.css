@@ -37,13 +37,14 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--ant-color-bg-container);
-  padding: 0.75rem 1rem;
+  padding: 0;
   border-radius: 0.5rem;
   width: 15rem;
   border: 1px solid var(--ant-color-border);
   transition: all 0.2s;
   flex-grow: 1;
   max-width: 20rem;
+  height: 40px;
 }
 
 .searchWrapper:focus-within {
@@ -53,14 +54,18 @@
 
 .searchIcon {
   color: var(--ant-color-text-quaternary);
+  margin-left: 12px;
 }
 
 .searchInput {
   flex: 1;
+  height: 100%;
 }
 
 .searchInput input {
   background: transparent !important;
+  height: 100% !important;
+  padding: 4px 11px !important;
 }
 
 .modalTitle {

@@ -4,14 +4,68 @@
 
 .header {
   margin-bottom: 1.5rem;
+}
+
+.headerTop {
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+}
+
 .title {
   margin: 0;
   font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ant-color-bg-container);
+  padding: 0;
+  border-radius: 0.5rem;
+  width: 15rem;
+  border: 1px solid var(--ant-color-border);
+  transition: all 0.2s;
+  flex-grow: 1;
+  max-width: 20rem;
+  height: 40px;
+}
+
+.searchWrapper:focus-within {
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 0 0 0.125rem rgba(var(--ant-color-primary-rgb), 0.1);
+}
+
+.searchIcon {
+  color: var(--ant-color-text-quaternary);
+  margin-left: 12px;
+}
+
+.searchInput {
+  flex: 1;
+  height: 100%;
+}
+
+.searchInput input {
+  background: transparent !important;
+  height: 100% !important;
+  padding: 4px 11px !important;
 }
 
 .modalTitle {
@@ -22,7 +76,6 @@
 
 .modalTitleText {
   font-size: 1.125rem;
-  margin: 0;
 }
 
 .form {
@@ -36,14 +89,12 @@
 }
 
 .formInput {
-  width: 100%;
+  width: 100% !important;
 }
 
 .formActions {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
+  margin-top: 1rem !important;
+  margin-bottom: 0 !important;
 }
 
 /* Responsive styles */
@@ -54,25 +105,26 @@
 
   .header {
     margin-bottom: 1rem;
+  }
+
+  .headerTop {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
+  .searchContainer {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchWrapper {
+    width: 100%;
+    max-width: none;
+  }
+
   .title {
     font-size: 1.25rem;
-  }
-
-  .modalTitle {
-    padding: 0.75rem 1rem;
-    margin: -1rem -1rem 1rem;
-  }
-
-  .modalTitleText {
-    font-size: 1rem;
-  }
-
-  .formActions {
-    margin-top: 1rem;
   }
 }
