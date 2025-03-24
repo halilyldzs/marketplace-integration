@@ -1,4 +1,4 @@
-import { getProductTableColumns } from "@/features/products/components/table/consts/product-table-columns"
+import { getProductTableColumns } from "@/features/products/consts/product-table-columns"
 import { TableEvent } from "@/types/table/table-event-types"
 import { TableDataSource, TableStore } from "@/types/table/table-store"
 import { TableTypes } from "@/types/table/table-type"

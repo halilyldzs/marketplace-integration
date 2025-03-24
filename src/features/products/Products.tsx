@@ -1,4 +1,6 @@
+import { GlobalTable } from "@/components/global-table/global-table"
 import { TableEvent, TableEventTypes } from "@/types/table/table-event-types"
+import { TableTypes } from "@/types/table/table-type"
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
@@ -15,7 +17,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Form, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import styles from "./Products.module.css"
-import { ProductTable } from "./components/table/ProductTable"
 
 const { Text } = Typography
 
@@ -198,7 +199,8 @@ const Products = () => {
         </div>
       </div>
 
-      <ProductTable
+      <GlobalTable
+        tableType={TableTypes.PRODUCT}
         tableStore={{
           categories: categoriesData?.categories || [],
           brands: brandsData?.brands || [],
