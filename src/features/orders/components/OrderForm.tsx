@@ -1,3 +1,4 @@
+import { Product } from "@/features/products/types"
 import type { FormInstance } from "antd"
 import { Button, Form, Input, Select, Space } from "antd"
 import { useEffect } from "react"
@@ -14,6 +15,7 @@ export interface OrderFormValues {
 
 interface OrderFormProps {
   form: FormInstance<OrderFormValues>
+  products: Product[]
   onSubmit: (values: OrderFormValues) => void
   onCancel: () => void
   isSubmitting: boolean
@@ -23,6 +25,7 @@ const OrderForm = ({
   form,
   onSubmit,
   onCancel,
+  products,
   isSubmitting,
 }: OrderFormProps) => {
   useEffect(() => {
@@ -117,7 +120,10 @@ const OrderForm = ({
         <Select
           mode='multiple'
           placeholder='Ürün seçin'
-          options={[]} // TODO: Ürün listesi eklenecek
+          options={products.map((product) => ({
+            label: product.name,
+            value: product.id,
+          }))}
         />
       </Form.Item>
 
