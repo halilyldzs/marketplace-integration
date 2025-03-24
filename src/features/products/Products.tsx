@@ -192,13 +192,6 @@ const Products = () => {
   // Table columns
   const columns: ColumnsType<Product> = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 220,
-      responsive: ["lg"],
-    },
-    {
       title: "Ad",
       dataIndex: "name",
       key: "name",
@@ -252,12 +245,6 @@ const Products = () => {
       dataIndex: "stock",
       key: "stock",
       width: 100,
-    },
-    {
-      title: "Açıklama",
-      dataIndex: "description",
-      key: "description",
-      responsive: ["md"],
     },
     {
       title: "Kategori",
