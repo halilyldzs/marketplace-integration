@@ -46,7 +46,7 @@ const OrderForm = ({
         orderByField: "createdAt",
         orderDirection: "desc",
         searchFields: productSearchTerm
-          ? ["name", "sku", "barcode"]
+          ? ["name", "sku", "barcode", "id"]
           : undefined,
       }),
   })
@@ -54,7 +54,6 @@ const OrderForm = ({
   useEffect(() => {
     if (isEditing && order) {
       const selectedProductIds = order.items.map((item) => item.productId)
-      setProductSearchTerm(selectedProductIds.join(","))
       form.setFieldsValue({
         ...order,
         selectedProductIds,
@@ -62,7 +61,6 @@ const OrderForm = ({
     }
     return () => {
       form.resetFields()
-      setProductSearchTerm("")
     }
   }, [isEditing, order, form])
 
