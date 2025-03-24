@@ -310,7 +310,14 @@ const Categories = () => {
         open={isModalOpen}
         onCancel={handleModalClose}
         footer={null}
-        width={{ xs: "90%", sm: 520 }}
+        width={{
+          xs: "90%",
+          sm: "80%",
+          md: "70%",
+          lg: "60%",
+          xl: "50%",
+          xxl: "40%",
+        }}
         style={{ padding: "24px" }}>
         <CategoryForm
           initialValues={selectedCategory || undefined}

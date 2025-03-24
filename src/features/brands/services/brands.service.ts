@@ -1,5 +1,4 @@
 import { db } from "@config/firebase"
-import { categoriesService } from "@features/categories/services/categories.service"
 import {
   addDoc,
   collection,
@@ -20,42 +19,40 @@ import {
   type QueryConstraint,
   type WhereFilterOp,
 } from "firebase/firestore"
-import type { CreateProductDTO, Product, UpdateProductDTO } from "../types"
+import type { Brand, CreateBrandDTO, UpdateBrandDTO } from "../types"
 
-const COLLECTION_NAME = "products"
+const COLLECTION_NAME = "brands"
 
-export interface GetProductsParams {
+export interface GetBrandsParams {
   page?: number
   pageSize?: number
-  orderByField?: keyof Product
+  orderByField?: keyof Brand
   orderDirection?: "asc" | "desc"
   filters?: Array<{
-    field: keyof Product
+    field: keyof Brand
     operator: WhereFilterOp
     value: string | number | boolean | Date
   }>
   searchTerm?: string
-  categoryId?: string
 }
 
-export interface GetProductsResponse {
-  products: Product[]
+export interface GetBrandsResponse {
+  brands: Brand[]
   total: number
   hasMore: boolean
   lastVisible: QueryDocumentSnapshot<DocumentData> | null
 }
 
-export const productsService = {
-  async getAll(params?: GetProductsParams): Promise<GetProductsResponse> {
+export const brandsService = {
+  async getAll(params?: GetBrandsParams): Promise<GetBrandsResponse> {
     try {
-      console.log("Fetching products with params:", params)
+      console.log("Fetching brands with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
         orderDirection = "desc",
         filters = [],
         searchTerm,
-        categoryId,
       } = params || {}
 
       const constraints: QueryConstraint[] = []
@@ -64,11 +61,6 @@ export const productsService = {
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
-
-      // Add category filter if provided
-      if (categoryId) {
-        constraints.push(where("categoryId", "==", categoryId))
-      }
 
       // Add search term filter if provided
       if (searchTerm?.trim()) {
@@ -80,7 +72,7 @@ export const productsService = {
       if (searchTerm) {
         constraints.push(orderBy("nameLower"))
       }
-      if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
+      if (orderByField && orderByField !== ("nameLower" as keyof Brand)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
@@ -103,31 +95,31 @@ export const productsService = {
       const lastVisible =
         querySnapshot.docs[querySnapshot.docs.length - 1] || null
 
-      const products = querySnapshot.docs.map((doc) => ({
+      const brands = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Product[]
+      })) as Brand[]
 
-      console.log("Processed products:", products)
+      console.log("Processed brands:", brands)
 
       return {
-        products,
+        brands,
         total,
-        hasMore: products.length === pageSize,
+        hasMore: brands.length === pageSize,
         lastVisible,
       }
     } catch (error) {
-      console.error("Error fetching products:", error)
+      console.error("Error fetching brands:", error)
       throw error
     }
   },
 
   async loadMore(
     lastVisible: QueryDocumentSnapshot<DocumentData> | null,
-    params?: Omit<GetProductsParams, "page">
-  ): Promise<GetProductsResponse> {
+    params?: Omit<GetBrandsParams, "page">
+  ): Promise<GetBrandsResponse> {
     try {
       const {
         pageSize = 10,
@@ -135,7 +127,6 @@ export const productsService = {
         orderDirection = "desc",
         filters = [],
         searchTerm,
-        categoryId,
       } = params || {}
 
       const constraints: QueryConstraint[] = []
@@ -144,11 +135,6 @@ export const productsService = {
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
-
-      // Add category filter if provided
-      if (categoryId) {
-        constraints.push(where("categoryId", "==", categoryId))
-      }
 
       // Add search term filter if provided
       if (searchTerm?.trim()) {
@@ -160,7 +146,7 @@ export const productsService = {
       if (searchTerm) {
         constraints.push(orderBy("nameLower"))
       }
-      if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
+      if (orderByField && orderByField !== ("nameLower" as keyof Brand)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
@@ -178,26 +164,26 @@ export const productsService = {
       const newLastVisible =
         querySnapshot.docs[querySnapshot.docs.length - 1] || null
 
-      const products = querySnapshot.docs.map((doc) => ({
+      const brands = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
-      })) as Product[]
+      })) as Brand[]
 
       return {
-        products,
+        brands,
         total: 0, // Not needed for load more
-        hasMore: products.length === pageSize,
+        hasMore: brands.length === pageSize,
         lastVisible: newLastVisible,
       }
     } catch (error) {
-      console.error("Error loading more products:", error)
+      console.error("Error loading more brands:", error)
       throw error
     }
   },
 
-  async getById(id: string): Promise<Product | null> {
+  async getById(id: string): Promise<Brand | null> {
     const docRef = doc(db, COLLECTION_NAME, id)
     const docSnap = await getDoc(docRef)
 
@@ -208,37 +194,10 @@ export const productsService = {
       ...docSnap.data(),
       createdAt: docSnap.data().createdAt?.toDate(),
       updatedAt: docSnap.data().updatedAt?.toDate(),
-    } as Product
+    } as Brand
   },
 
-  async getByCategory(categoryId: string): Promise<Product[]> {
-    // Kategori var mı kontrol et
-    const category = await categoriesService.getById(categoryId)
-    if (!category) {
-      throw new Error("Category not found")
-    }
-
-    const q = query(
-      collection(db, COLLECTION_NAME),
-      where("categoryId", "==", categoryId)
-    )
-
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate(),
-    })) as Product[]
-  },
-
-  async create(data: CreateProductDTO): Promise<Product> {
-    // Kategori var mı kontrol et
-    const category = await categoriesService.getById(data.categoryId)
-    if (!category) {
-      throw new Error("Category not found")
-    }
-
+  async create(data: CreateBrandDTO): Promise<Brand> {
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...data,
       nameLower: data.name.toLowerCase(),
@@ -255,19 +214,11 @@ export const productsService = {
     }
   },
 
-  async update(data: UpdateProductDTO): Promise<void> {
+  async update(data: UpdateBrandDTO): Promise<void> {
     const { id, ...updateData } = data
-
-    // Eğer categoryId değişiyorsa, kategorinin varlığını kontrol et
-    if (updateData.categoryId) {
-      const category = await categoriesService.getById(updateData.categoryId)
-      if (!category) {
-        throw new Error("Category not found")
-      }
-    }
-
     const docRef = doc(db, COLLECTION_NAME, id)
-    const updates: Partial<Product> & { updatedAt: FieldValue } = {
+
+    const updates: Partial<Brand> & { updatedAt: FieldValue } = {
       ...updateData,
       updatedAt: serverTimestamp(),
     }

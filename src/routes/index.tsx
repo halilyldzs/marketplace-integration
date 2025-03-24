@@ -1,3 +1,4 @@
+import { brandsRoutes } from "@/features/brands/routes"
 import { categoryRoutes } from "@/features/categories/routes"
 import ProtectedRoute from "@components/ProtectedRoute"
 import { authRoutes } from "@features/auth/routes"
@@ -34,6 +35,7 @@ const protectedRoutes: RouteObject[] = [
       ...userRoutes,
       ...settingRoutes,
       ...profileRoutes,
+      ...brandsRoutes,
     ],
   },
 ]

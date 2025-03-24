@@ -4,8 +4,9 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from "@ant-design/icons"
+import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
-import type { Category } from "@features/categories/types"
+import ProductForm from "@features/products/components/ProductForm"
 import type { GetProductsResponse } from "@features/products/services/products.service"
 import { productsService } from "@features/products/services/products.service"
 import type {
@@ -19,9 +20,7 @@ import {
   Button,
   Form,
   Input,
-  InputNumber,
   Modal,
-  Select,
   Space,
   Table,
   Typography,
@@ -49,13 +48,21 @@ const Products = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: 1000 * 60, // 1 minute
-    initialData: {
-      categories: [],
-      total: 0,
-      hasMore: false,
-      lastVisible: null,
-    },
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  })
+
+  const { data: brandsData } = useQuery({
+    queryKey: ["brands"],
+    queryFn: () => brandsService.getAll(),
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60, // 1 hour
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   })
 
   const { data: productsData, isLoading: productsLoading } =
@@ -68,7 +75,7 @@ const Products = () => {
           orderByField: "createdAt",
           orderDirection: "desc",
         }),
-      staleTime: 1000 * 60, // 1 minute
+
       initialData: {
         products: [],
         total: 0,
@@ -204,16 +211,59 @@ const Products = () => {
       fixed: "left",
     },
     {
+      title: "SKU",
+      dataIndex: "sku",
+      key: "sku",
+      width: 120,
+    },
+    {
+      title: "Barkod",
+      dataIndex: "barcode",
+      key: "barcode",
+      width: 140,
+      responsive: ["lg"],
+    },
+    {
+      title: "Satış Fiyatı",
+      dataIndex: "price",
+      key: "price",
+      width: 120,
+      render: (price: number) => `₺${price.toFixed(2)}`,
+    },
+    {
+      title: "Liste Fiyatı",
+      dataIndex: "listPrice",
+      key: "listPrice",
+      width: 120,
+      responsive: ["lg"],
+      render: (listPrice: number) => `₺${listPrice.toFixed(2)}`,
+    },
+    {
+      title: "KDV",
+      dataIndex: "vat",
+      key: "vat",
+      width: 80,
+      responsive: ["lg"],
+      render: (vat: number) => `%${vat}`,
+    },
+    {
+      title: "Desi",
+      dataIndex: "deci",
+      key: "deci",
+      width: 80,
+      responsive: ["lg"],
+    },
+    {
+      title: "Stok",
+      dataIndex: "stock",
+      key: "stock",
+      width: 100,
+    },
+    {
       title: "Açıklama",
       dataIndex: "description",
       key: "description",
       responsive: ["md"],
-    },
-    {
-      title: "Fiyat",
-      dataIndex: "price",
-      key: "price",
-      render: (price: number) => `₺${price.toFixed(2)}`,
     },
     {
       title: "Kategori",
@@ -223,6 +273,14 @@ const Products = () => {
       render: (categoryId: string) =>
         categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
         "-",
+    },
+    {
+      title: "Marka",
+      dataIndex: "brandId",
+      key: "brandId",
+      responsive: ["md"],
+      render: (brandId: string) =>
+        brandsData?.brands.find((b) => b.id === brandId)?.name || "-",
     },
     {
       title: "Oluşturulma Tarihi",
@@ -333,127 +391,19 @@ const Products = () => {
           xxl: "40%",
         }}
         style={{ padding: "24px" }}>
-        <Form
+        <ProductForm
           form={form}
-          onFinish={handleSubmit}
-          layout='vertical'
-          className={styles.form}
-          requiredMark='optional'>
-          <Form.Item
-            name='name'
-            label='Ürün Adı'
-            className={styles.formItem}
-            rules={[
-              { required: true, message: "Lütfen ürün adı girin" },
-              { type: "string" },
-            ]}>
-            <Input
-              size='large'
-              placeholder='Ürün adını girin'
-              maxLength={50}
-              showCount
-            />
-          </Form.Item>
-
-          <Form.Item
-            name='description'
-            label='Açıklama'
-            className={styles.formItem}
-            rules={[
-              { required: true, message: "Lütfen açıklama girin" },
-              { type: "string" },
-            ]}>
-            <Input.TextArea
-              size='large'
-              placeholder='Ürün açıklamasını girin'
-              rows={4}
-              maxLength={500}
-              showCount
-            />
-          </Form.Item>
-
-          <Form.Item
-            name='price'
-            label='Fiyat'
-            className={styles.formItem}
-            rules={[
-              { required: true, message: "Lütfen fiyat girin" },
-              { type: "number", message: "Lütfen geçerli bir fiyat girin" },
-            ]}>
-            <InputNumber<number>
-              size='large'
-              className={styles.priceInput}
-              min={0}
-              step={0.01}
-              precision={2}
-              prefix='₺'
-              placeholder='0.00'
-              stringMode={false}
-              formatter={(value) => {
-                if (value === null || value === undefined) return ""
-                return `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-              }}
-              parser={(value) => {
-                if (!value || value === "₺") return 0
-                const cleanValue = value.replace(/[^\d.]/g, "")
-                const firstDotIndex = cleanValue.indexOf(".")
-                const sanitizedValue =
-                  firstDotIndex === -1
-                    ? cleanValue
-                    : cleanValue.slice(0, firstDotIndex + 1) +
-                      cleanValue.slice(firstDotIndex + 1).replace(/\./g, "")
-                const parsed = parseFloat(sanitizedValue)
-                return isNaN(parsed) ? 0 : parsed
-              }}
-              onInput={(value: string) => {
-                if (!/^\d*\.?\d*$/.test(value)) {
-                  return value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1")
-                }
-                return value
-              }}
-              controls={false}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name='categoryId'
-            label='Kategori'
-            className={styles.formItem}
-            rules={[
-              { required: true, message: "Lütfen kategori seçin" },
-              { type: "string" },
-            ]}>
-            <Select
-              size='large'
-              placeholder='Kategori seçin'
-              options={categoriesData?.categories.map((category: Category) => ({
-                value: category.id,
-                label: category.name,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item className={styles.formActions}>
-            <Space>
-              <Button
-                size='large'
-                onClick={() => {
-                  setIsModalOpen(false)
-                  setEditingProduct(null)
-                  form.resetFields()
-                }}>
-                İptal
-              </Button>
-              <Button
-                type='primary'
-                size='large'
-                htmlType='submit'
-                loading={createMutation.isPending || updateMutation.isPending}>
-                {editingProduct ? "Değişiklikleri Kaydet" : "Ürün Oluştur"}
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setIsModalOpen(false)
+            setEditingProduct(null)
+            form.resetFields()
+          }}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
+          editMode={!!editingProduct}
+          categories={categoriesData?.categories || []}
+          brands={brandsData?.brands || []}
+        />
       </Modal>
     </div>
   )
