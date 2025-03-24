@@ -2,16 +2,18 @@ import { productsService } from "@/features/products/services/products.service"
 import { GetProductsResponse } from "@/features/products/types"
 import { useQuery } from "@tanstack/react-query"
 import type { FormInstance } from "antd"
-import { Button, Form, Input, Select, Space } from "antd"
+import { Button, Form, Input, InputNumber, Select, Space } from "antd"
 import { useEffect, useState } from "react"
 import styles from "../Orders.module.css"
 
 export interface OrderFormValues {
+  id?: string
   customerName: string
   customerEmail: string
   customerPhone: string
   shippingAddress: string
   items: string[]
+  totalAmount: number
   notes?: string
 }
 
@@ -20,6 +22,7 @@ interface OrderFormProps {
   onSubmit: (values: OrderFormValues) => void
   onCancel: () => void
   isSubmitting: boolean
+  isEditing?: boolean
 }
 
 const OrderForm = ({
@@ -27,6 +30,7 @@ const OrderForm = ({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: OrderFormProps) => {
   const [productSearchTerm, setProductSearchTerm] = useState("")
 
@@ -52,131 +56,160 @@ const OrderForm = ({
   }, [form])
 
   return (
-    <Form
-      form={form}
-      onFinish={onSubmit}
-      layout='vertical'
-      className={styles.form}
-      requiredMark='optional'>
-      <Form.Item
-        name='customerName'
-        label='Müşteri Adı'
-        className={`${styles.formItem} ${styles.fullWidth}`}
-        rules={[
-          { required: true, message: "Lütfen müşteri adı girin" },
-          { type: "string" },
-          { whitespace: true, message: "Müşteri adı boşluk olamaz" },
-          { min: 3, message: "Müşteri adı en az 3 karakter olmalıdır" },
-        ]}>
-        <Input
-          size='middle'
-          placeholder='Müşteri adını girin'
-          maxLength={50}
-          showCount
-        />
-      </Form.Item>
+    <div className={styles.formContainer}>
+      <Form
+        form={form}
+        onFinish={onSubmit}
+        layout='vertical'
+        className={styles.form}
+        requiredMark='optional'>
+        <div className={styles.formGrid}>
+          <Form.Item
+            name='customerName'
+            label='Müşteri Adı'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen müşteri adı girin" },
+              { type: "string" },
+              { whitespace: true, message: "Müşteri adı boşluk olamaz" },
+              { min: 3, message: "Müşteri adı en az 3 karakter olmalıdır" },
+            ]}>
+            <Input
+              size='large'
+              placeholder='Müşteri adını girin'
+              maxLength={50}
+              showCount
+            />
+          </Form.Item>
 
-      <Form.Item
-        name='customerEmail'
-        label='E-posta'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen e-posta adresi girin" },
-          { type: "email", message: "Geçerli bir e-posta adresi girin" },
-        ]}>
-        <Input
-          size='middle'
-          placeholder='ornek@email.com'
-        />
-      </Form.Item>
+          <Form.Item
+            name='customerEmail'
+            label='E-posta'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen e-posta adresi girin" },
+              { type: "email", message: "Geçerli bir e-posta adresi girin" },
+            ]}>
+            <Input
+              size='large'
+              placeholder='ornek@email.com'
+            />
+          </Form.Item>
 
-      <Form.Item
-        name='customerPhone'
-        label='Telefon'
-        className={styles.formItem}
-        rules={[
-          { required: true, message: "Lütfen telefon numarası girin" },
-          {
-            pattern: /^[0-9]{10}$/,
-            message: "Geçerli bir telefon numarası girin",
-          },
-        ]}>
-        <Input
-          size='middle'
-          placeholder='5XX XXX XX XX'
-        />
-      </Form.Item>
+          <Form.Item
+            name='customerPhone'
+            label='Telefon'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen telefon numarası girin" },
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Geçerli bir telefon numarası girin",
+              },
+            ]}>
+            <Input
+              size='large'
+              placeholder='5XX XXX XX XX'
+            />
+          </Form.Item>
 
-      <Form.Item
-        name='shippingAddress'
-        label='Teslimat Adresi'
-        className={`${styles.formItem} ${styles.fullWidth}`}
-        rules={[
-          { required: true, message: "Lütfen teslimat adresi girin" },
-          { type: "string" },
-          { whitespace: true, message: "Teslimat adresi boşluk olamaz" },
-          { min: 10, message: "Teslimat adresi en az 10 karakter olmalıdır" },
-        ]}>
-        <Input.TextArea
-          size='middle'
-          placeholder='Teslimat adresini girin'
-          rows={3}
-          maxLength={200}
-          showCount
-        />
-      </Form.Item>
+          <Form.Item
+            name='totalAmount'
+            label='Toplam Tutar'
+            className={styles.formItem}
+            rules={[
+              { required: true, message: "Lütfen toplam tutarı girin" },
+              {
+                type: "number",
+                min: 0,
+                message: "Toplam tutar 0'dan küçük olamaz",
+              },
+            ]}>
+            <InputNumber
+              size='large'
+              style={{ width: "100%" }}
+              placeholder='0.00'
+              formatter={(value) =>
+                `₺ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value!.replace(/₺\s?|(,*)/g, "")}
+              precision={2}
+            />
+          </Form.Item>
+        </div>
 
-      <Form.Item
-        name='items'
-        label='Sipariş Ürünleri'
-        className={`${styles.formItem} ${styles.fullWidth}`}
-        rules={[
-          { required: true, message: "Lütfen en az bir ürün ekleyin" },
-          { type: "array", min: 1, message: "En az bir ürün eklemelisiniz" },
-        ]}>
-        <Select
-          mode='multiple'
-          placeholder='Ürün adı, stok kodu veya barkod ile arayın...'
-          showSearch
-          onSearch={setProductSearchTerm}
-          filterOption={false}
-          options={productsData?.products?.map((product) => ({
-            label: `${product.name} (SKU: ${product.sku}, Barkod: ${product.barcode})`,
-            value: product.id,
-          }))}
-        />
-      </Form.Item>
-
-      <Form.Item
-        name='notes'
-        label='Sipariş Notları'
-        className={`${styles.formItem} ${styles.fullWidth}`}>
-        <Input.TextArea
-          size='middle'
-          placeholder='Sipariş notlarını girin'
-          rows={3}
-          maxLength={500}
-          showCount
-        />
-      </Form.Item>
-
-      <Form.Item className={styles.formActions}>
-        <Space>
-          <Button
+        <Form.Item
+          name='shippingAddress'
+          label='Teslimat Adresi'
+          className={styles.formItem}
+          rules={[
+            { required: true, message: "Lütfen teslimat adresi girin" },
+            { type: "string" },
+            { whitespace: true, message: "Teslimat adresi boşluk olamaz" },
+            { min: 10, message: "Teslimat adresi en az 10 karakter olmalıdır" },
+          ]}>
+          <Input.TextArea
             size='large'
-            onClick={onCancel}>
-            İptal
-          </Button>
-          <Button
-            type='primary'
+            placeholder='Teslimat adresini girin'
+            rows={3}
+            maxLength={200}
+            showCount
+          />
+        </Form.Item>
+
+        <Form.Item
+          name='items'
+          label='Sipariş Ürünleri'
+          className={styles.formItem}
+          rules={[
+            { required: true, message: "Lütfen en az bir ürün ekleyin" },
+            { type: "array", min: 1, message: "En az bir ürün eklemelisiniz" },
+          ]}>
+          <Select
+            mode='multiple'
             size='large'
-            htmlType='submit'
-            loading={isSubmitting}>
-            Sipariş Oluştur
-          </Button>
-        </Space>
-      </Form.Item>
-    </Form>
+            placeholder='Ürün adı, stok kodu veya barkod ile arayın...'
+            showSearch
+            onSearch={setProductSearchTerm}
+            filterOption={false}
+            options={productsData?.products?.map((product) => ({
+              label: `${product.name} (SKU: ${product.sku}, Barkod: ${product.barcode})`,
+              value: product.id,
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name='notes'
+          label='Sipariş Notları'
+          className={styles.formItem}>
+          <Input.TextArea
+            size='large'
+            placeholder='Sipariş notlarını girin'
+            rows={3}
+            maxLength={500}
+            showCount
+          />
+        </Form.Item>
+
+        <Form.Item className={styles.formActions}>
+          <Space>
+            <Button
+              size='large'
+              onClick={onCancel}>
+              İptal
+            </Button>
+            <Button
+              type='primary'
+              size='large'
+              htmlType='submit'
+              loading={isSubmitting}>
+              {isEditing ? "Güncelle" : "Oluştur"}
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    </div>
   )
 }
 
