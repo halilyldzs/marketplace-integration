@@ -1,10 +1,20 @@
+import type { FormInstance } from "antd"
 import { Button, Form, Input, Select, Space } from "antd"
 import { useEffect } from "react"
 import styles from "../Orders.module.css"
 
+interface OrderFormValues {
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  shippingAddress: string
+  items: string[]
+  notes?: string
+}
+
 interface OrderFormProps {
-  form: any
-  onSubmit: (values: any) => void
+  form: FormInstance<OrderFormValues>
+  onSubmit: (values: OrderFormValues) => void
   onCancel: () => void
   isSubmitting: boolean
 }
