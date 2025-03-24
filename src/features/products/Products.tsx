@@ -1,4 +1,5 @@
 import { GlobalTable } from "@/components/global-table/global-table"
+import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
   TableEvent,
@@ -34,6 +35,7 @@ const Products = () => {
   const [inputValue, setInputValue] = useState("")
   const searchTimeout = useRef<NodeJS.Timeout>()
   const [searchParams] = useSearchParams()
+  const { invalidateQueries } = useBroadcast()
 
   // Queries
   const { data: categoriesData } = useQuery({
@@ -90,6 +92,7 @@ const Products = () => {
     mutationFn: (data: CreateProductDTO) => productsService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla oluşturuldu")
       setIsModalOpen(false)
       form.resetFields()
@@ -103,6 +106,7 @@ const Products = () => {
     mutationFn: (data: UpdateProductDTO) => productsService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla güncellendi")
       setIsModalOpen(false)
       setEditingProduct(null)
@@ -117,6 +121,7 @@ const Products = () => {
     mutationFn: (id: string) => productsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla silindi")
     },
     onError: (error: Error) => {
