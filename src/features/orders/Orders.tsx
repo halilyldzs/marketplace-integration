@@ -13,7 +13,10 @@ import {
   Tag,
   Tooltip,
 } from "antd"
+import type { ColumnsType } from "antd/es/table"
+import type { Key } from "react"
 import { useState } from "react"
+import type { OrderFormValues } from "./components/OrderForm"
 import OrderForm from "./components/OrderForm"
 import styles from "./Orders.module.css"
 
@@ -40,7 +43,7 @@ const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
 
-  const columns = [
+  const columns: ColumnsType<Order> = [
     {
       title: "Sipariş No",
       dataIndex: "orderNumber",
@@ -63,7 +66,8 @@ const Orders = () => {
         text,
         value,
       })),
-      onFilter: (value: string, record: Order) => record.status === value,
+      onFilter: (value: boolean | Key, record: Order) =>
+        record.status === value,
       render: (status: OrderStatus) => (
         <Tag color={statusColors[status]}>{statusLabels[status]}</Tag>
       ),
@@ -87,7 +91,7 @@ const Orders = () => {
     {
       title: "İşlemler",
       key: "actions",
-      fixed: "right",
+      fixed: "right" as const,
       width: 150,
       render: (_: unknown, record: Order) => (
         <Space>
@@ -130,7 +134,7 @@ const Orders = () => {
     // TODO: Reset search
   }
 
-  const handleCreateOrder = async (values: any) => {
+  const handleCreateOrder = async (values: OrderFormValues) => {
     try {
       setLoading(true)
       // TODO: Implement order creation

@@ -3,7 +3,7 @@ import { Button, Form, Input, Select, Space } from "antd"
 import { useEffect } from "react"
 import styles from "../Orders.module.css"
 
-interface OrderFormValues {
+export interface OrderFormValues {
   customerName: string
   customerEmail: string
   customerPhone: string
