@@ -216,6 +216,27 @@ const Products = () => {
       key: "price",
       width: 120,
       render: (price: number) => `₺${price.toFixed(2)}`,
+      filters: [
+        { text: "0-100₺", value: "0-100" },
+        { text: "100-500₺", value: "100-500" },
+        { text: "500-1000₺", value: "500-1000" },
+        { text: "1000₺ ve üzeri", value: "1000+" },
+      ],
+      onFilter: (value, record) => {
+        const price = record.price
+        switch (value) {
+          case "0-100":
+            return price >= 0 && price <= 100
+          case "100-500":
+            return price > 100 && price <= 500
+          case "500-1000":
+            return price > 500 && price <= 1000
+          case "1000+":
+            return price > 1000
+          default:
+            return true
+        }
+      },
     },
     {
       title: "Liste Fiyatı",
@@ -232,6 +253,13 @@ const Products = () => {
       width: 80,
       responsive: ["lg"],
       render: (vat: number) => `%${vat}`,
+      filters: [
+        { text: "%0", value: 0 },
+        { text: "%1", value: 1 },
+        { text: "%8", value: 8 },
+        { text: "%18", value: 18 },
+      ],
+      onFilter: (value, record) => record.vat === value,
     },
     {
       title: "Desi",
@@ -245,6 +273,27 @@ const Products = () => {
       dataIndex: "stock",
       key: "stock",
       width: 100,
+      filters: [
+        { text: "Stokta Yok", value: "0" },
+        { text: "1-10", value: "1-10" },
+        { text: "11-50", value: "11-50" },
+        { text: "50+", value: "50+" },
+      ],
+      onFilter: (value, record) => {
+        const stock = record.stock
+        switch (value) {
+          case "0":
+            return stock === 0
+          case "1-10":
+            return stock > 0 && stock <= 10
+          case "11-50":
+            return stock > 10 && stock <= 50
+          case "50+":
+            return stock > 50
+          default:
+            return true
+        }
+      },
     },
     {
       title: "Kategori",
@@ -254,6 +303,12 @@ const Products = () => {
       render: (categoryId: string) =>
         categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
         "-",
+      filters:
+        categoriesData?.categories.map((category) => ({
+          text: category.name,
+          value: category.id,
+        })) || [],
+      onFilter: (value, record) => record.categoryId === value,
     },
     {
       title: "Marka",
@@ -262,6 +317,12 @@ const Products = () => {
       responsive: ["md"],
       render: (brandId: string) =>
         brandsData?.brands.find((b) => b.id === brandId)?.name || "-",
+      filters:
+        brandsData?.brands.map((brand) => ({
+          text: brand.name,
+          value: brand.id,
+        })) || [],
+      onFilter: (value, record) => record.brandId === value,
     },
     {
       title: "Oluşturulma Tarihi",
