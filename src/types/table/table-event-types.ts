@@ -1,3 +1,5 @@
+import { FilterValue } from "antd/es/table/interface"
+
 export const TableEventTypes = {
   EDIT: "edit",
   DELETE: "delete",
@@ -12,9 +14,19 @@ export const TableEventTypes = {
 export type TableEventTypes =
   (typeof TableEventTypes)[keyof typeof TableEventTypes]
 
-export type TableEventPayload = unknown
-
-export type TableEvent<T = unknown> = {
+export interface TableEvent<T> {
   type: TableEventTypes
   payload: T
+}
+
+export interface FilterEventPayload {
+  filters: Record<string, FilterValue | null>
+  pagination: {
+    current: number
+    pageSize: number
+  }
+  sorter: {
+    field?: string
+    order?: "ascend" | "descend"
+  }
 }

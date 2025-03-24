@@ -4,15 +4,15 @@ import { TableStore } from "@/types/table/table-store"
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { Button, Space, TableColumnsType } from "antd"
 
-interface ProductTableColumnsProps {
-  onEvent: (event: TableEvent<Product | string>) => void
+interface ProductTableColumnsProps<T> {
+  onEvent: (event: TableEvent<T | string>) => void
   tableStore: TableStore
 }
 
-export const getProductTableColumns = ({
+export const getProductTableColumns = <T extends Product>({
   onEvent,
   tableStore,
-}: ProductTableColumnsProps): TableColumnsType<Product> => {
+}: ProductTableColumnsProps<T>): TableColumnsType<T> => {
   const { categories, brands } = tableStore
   return [
     {
@@ -167,7 +167,7 @@ export const getProductTableColumns = ({
             onClick={() =>
               onEvent({
                 type: TableEventTypes.EDIT,
-                payload: record,
+                payload: record as T,
               })
             }
           />

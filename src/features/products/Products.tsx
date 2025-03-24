@@ -1,5 +1,9 @@
 import { GlobalTable } from "@/components/global-table/global-table"
-import { TableEvent, TableEventTypes } from "@/types/table/table-event-types"
+import {
+  FilterEventPayload,
+  TableEvent,
+  TableEventTypes,
+} from "@/types/table/table-event-types"
 import { TableTypes } from "@/types/table/table-type"
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
@@ -16,6 +20,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Form, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
 
 const { Text } = Typography
@@ -28,6 +33,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
   const searchTimeout = useRef<NodeJS.Timeout>()
+  const [searchParams] = useSearchParams()
 
   // Queries
   const { data: categoriesData } = useQuery({
@@ -52,13 +58,27 @@ const Products = () => {
 
   const { data: productsData, isLoading: productsLoading } =
     useQuery<GetProductsResponse>({
-      queryKey: ["products", searchTerm],
+      queryKey: ["products", searchTerm, searchParams.toString()],
       queryFn: () =>
         productsService.getAll({
           searchTerm,
-          pageSize: 10,
-          orderByField: "createdAt",
-          orderDirection: "desc",
+          pageSize: Number(searchParams.get("pageSize")) || 10,
+          page: Number(searchParams.get("page")) || 1,
+          orderByField:
+            (searchParams.get("orderByField") as keyof Product) || "createdAt",
+          orderDirection:
+            (searchParams.get("orderDirection") as "asc" | "desc") || "desc",
+          ...Object.fromEntries(
+            Array.from(searchParams.entries()).filter(
+              ([key]) =>
+                ![
+                  "page",
+                  "pageSize",
+                  "orderByField",
+                  "orderDirection",
+                ].includes(key)
+            )
+          ),
         }),
       initialData: undefined,
       staleTime: 1000 * 60 * 5, // 5 minutes
@@ -118,14 +138,18 @@ const Products = () => {
     }, 500)
   }
 
-  const handleEvent = (event: TableEvent<Product | string>) => {
-    console.log(event)
+  const handleEvent = (
+    event: TableEvent<Product | string | FilterEventPayload>
+  ) => {
     switch (event.type) {
       case TableEventTypes.EDIT:
         handleEdit(event.payload as Product)
         break
       case TableEventTypes.DELETE:
         handleDelete(event.payload as string)
+        break
+      case TableEventTypes.FILTER:
+        // Filter event is handled by URL params
         break
     }
   }
