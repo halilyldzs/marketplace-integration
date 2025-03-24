@@ -31,6 +31,19 @@ const ProductForm = ({
     }
   }, [form])
 
+  const validatePrices = (_: unknown, value: number) => {
+    try {
+      const listPrice = form.getFieldValue("listPrice")
+
+      if (value > listPrice) {
+        return Promise.reject("Satış fiyatı liste fiyatından büyük olamaz")
+      }
+      return Promise.resolve()
+    } catch {
+      return Promise.resolve()
+    }
+  }
+
   return (
     <Form
       form={form}
@@ -45,6 +58,8 @@ const ProductForm = ({
         rules={[
           { required: true, message: "Lütfen ürün adı girin" },
           { type: "string" },
+          { whitespace: true, message: "Ürün adı boşluk olamaz" },
+          { min: 3, message: "Ürün adı en az 3 karakter olmalıdır" },
         ]}>
         <Input
           size='middle'
@@ -61,6 +76,8 @@ const ProductForm = ({
         rules={[
           { required: true, message: "Lütfen açıklama girin" },
           { type: "string" },
+          { whitespace: true, message: "Açıklama boşluk olamaz" },
+          { min: 10, message: "Açıklama en az 10 karakter olmalıdır" },
         ]}>
         <Input.TextArea
           size='middle'
@@ -150,6 +167,7 @@ const ProductForm = ({
         rules={[
           { required: true, message: "Lütfen satış fiyatı girin" },
           { type: "number", message: "Lütfen geçerli bir fiyat girin" },
+          { validator: validatePrices },
         ]}>
         <InputNumber<number>
           className={styles.priceInput}
@@ -196,6 +214,9 @@ const ProductForm = ({
             return isNaN(parsed) ? 0 : parsed
           }}
           controls={false}
+          onChange={() => {
+            form.validateFields(["price"])
+          }}
         />
       </Form.Item>
 
