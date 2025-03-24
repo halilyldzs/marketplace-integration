@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Form, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import styles from "./Products.module.css"
-import ProductTable from "./components/table/ProductTable"
+import { ProductTable } from "./components/table/ProductTable"
 
 const { Text } = Typography
 
@@ -207,7 +207,7 @@ const Products = () => {
           data: productsData?.products || [],
           isLoading: productsLoading,
         }}
-        handleEvent={handleEvent}
+        onEvent={handleEvent}
       />
 
       <Modal

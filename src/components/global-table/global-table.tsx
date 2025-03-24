@@ -1,27 +1,24 @@
 import { TableEvent } from "@/types/table/table-event-types"
 import { TableDataSource, TableStore } from "@/types/table/table-store"
+import { TableTypes } from "@/types/table/table-type"
+import { getTableFunction } from "@/utils/get-product-table-function"
 import { Product } from "@features/products/types"
 import { Table } from "antd"
-import { getProductTableColumns } from "./consts/product-table-columns"
 
-interface ProductTableProps<T> {
+interface GlobalTableProps<T> {
+  tableType: TableTypes
   tableStore: TableStore
   tableDataSource: TableDataSource<T>
   onEvent: (event: TableEvent<Product | string>) => void
 }
 
-export const ProductTable = <T extends Product>({
+export const GlobalTable = <T extends Product>({
+  tableType,
   tableStore,
   tableDataSource,
   onEvent,
-}: ProductTableProps<T>) => {
-  const columns = getProductTableColumns({
-    onEvent,
-    tableStore: {
-      categories: tableStore.categories ?? [],
-      brands: tableStore.brands ?? [],
-    },
-  })
+}: GlobalTableProps<T>) => {
+  const columns = getTableFunction(tableType, tableStore, onEvent)
 
   return (
     <Table
