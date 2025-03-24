@@ -5,6 +5,7 @@ import type { FormInstance } from "antd"
 import { Button, Form, Input, InputNumber, Select, Space } from "antd"
 import { useEffect, useState } from "react"
 import styles from "../Orders.module.css"
+import { OrderItem } from "../types"
 
 export interface OrderFormValues {
   id?: string
@@ -12,7 +13,8 @@ export interface OrderFormValues {
   customerEmail: string
   customerPhone: string
   shippingAddress: string
-  items: string[]
+  selectedProductIds: string[]
+  items: OrderItem[]
   totalAmount: number
   notes?: string
 }
@@ -52,8 +54,11 @@ const OrderForm = ({
     if (isEditing) {
       const formValues = form.getFieldsValue()
       if (formValues.items?.length > 0) {
-        const selectedProductIds = formValues.items.join(",")
-        setProductSearchTerm(selectedProductIds)
+        const selectedProductIds = formValues.items.map(
+          (item) => item.productId
+        )
+        setProductSearchTerm(selectedProductIds.join(","))
+        form.setFieldValue("selectedProductIds", selectedProductIds)
       }
     }
     return () => {
@@ -62,11 +67,34 @@ const OrderForm = ({
     }
   }, [isEditing, form])
 
+  const handleSubmit = (values: OrderFormValues) => {
+    const selectedProducts =
+      productsData?.products?.filter((product) =>
+        values.selectedProductIds.includes(product.id)
+      ) || []
+
+    const orderItems: OrderItem[] = selectedProducts.map((product) => ({
+      id: product.id,
+      productId: product.id,
+      productName: product.name,
+      quantity: 1,
+      price: product.price,
+      total: product.price,
+    }))
+
+    console.log(orderItems)
+
+    onSubmit({
+      ...values,
+      items: orderItems,
+    })
+  }
+
   return (
     <div className={styles.formContainer}>
       <Form
         form={form}
-        onFinish={onSubmit}
+        onFinish={handleSubmit}
         layout='vertical'
         className={styles.form}
         requiredMark='optional'>
@@ -165,7 +193,7 @@ const OrderForm = ({
         </Form.Item>
 
         <Form.Item
-          name='items'
+          name='selectedProductIds'
           label='Sipariş Ürünleri'
           className={styles.formItem}
           rules={[
@@ -180,10 +208,10 @@ const OrderForm = ({
             onSearch={setProductSearchTerm}
             filterOption={false}
             options={productsData?.products?.map((product) => ({
+              key: product.id,
               label: `${product.name} (SKU: ${product.sku}, Barkod: ${product.barcode})`,
               value: product.id,
             }))}
-            value={form.getFieldValue("items")}
             loading={!productsData}
           />
         </Form.Item>

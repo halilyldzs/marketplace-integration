@@ -51,7 +51,6 @@ export interface GetOrdersResponse {
 export const ordersService = {
   async getAll(params?: GetOrdersParams): Promise<GetOrdersResponse> {
     try {
-      console.log("Fetching orders with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
@@ -284,6 +283,8 @@ export const ordersService = {
       if (!orderDoc.exists()) {
         throw new Error("Order not found")
       }
+
+      console.log(data)
 
       const updateData = {
         ...data,
