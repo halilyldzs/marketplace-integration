@@ -49,7 +49,6 @@ export interface GetProductsResponse {
 export const productsService = {
   async getAll(params?: GetProductsParams): Promise<GetProductsResponse> {
     try {
-      console.log("Fetching products with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",

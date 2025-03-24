@@ -162,12 +162,10 @@ const Products = () => {
   }, [lastVisible, queryClient, searchTerm])
 
   const handleSubmit = (values: ProductFormValues) => {
-    console.log("Form values:", values)
     const productData = {
       ...values,
       images: [], // Şimdilik boş array
     }
-    console.log("Product data to be sent:", productData)
 
     if (editingProduct) {
       updateMutation.mutate({ id: editingProduct.id, ...productData })
