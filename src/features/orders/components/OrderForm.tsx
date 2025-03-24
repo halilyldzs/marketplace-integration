@@ -28,12 +28,6 @@ const OrderForm = ({
   onCancel,
   isSubmitting,
 }: OrderFormProps) => {
-  useEffect(() => {
-    return () => {
-      form.resetFields()
-    }
-  }, [form])
-
   const [productSearchTerm, setProductSearchTerm] = useState("")
 
   const { data: productsData } = useQuery<GetProductsResponse>({
@@ -44,8 +38,18 @@ const OrderForm = ({
         pageSize: 10,
         orderByField: "createdAt",
         orderDirection: "desc",
+        searchFields: productSearchTerm
+          ? ["name", "sku", "barcode"]
+          : undefined,
       }),
   })
+
+  useEffect(() => {
+    return () => {
+      form.resetFields()
+      setProductSearchTerm("")
+    }
+  }, [form])
 
   return (
     <Form
@@ -132,12 +136,12 @@ const OrderForm = ({
         ]}>
         <Select
           mode='multiple'
-          placeholder='Ürün seçin'
+          placeholder='Ürün adı, stok kodu veya barkod ile arayın...'
           showSearch
           onSearch={setProductSearchTerm}
           filterOption={false}
           options={productsData?.products?.map((product) => ({
-            label: `${product.name} (${product.sku})`,
+            label: `${product.name} (SKU: ${product.sku}, Barkod: ${product.barcode})`,
             value: product.id,
           }))}
         />

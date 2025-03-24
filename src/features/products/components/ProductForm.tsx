@@ -35,7 +35,7 @@ const ProductForm = ({
     try {
       const listPrice = form.getFieldValue("listPrice")
 
-      if (value > listPrice) {
+      if (listPrice > 0 && value > listPrice) {
         return Promise.reject("Satış fiyatı liste fiyatından büyük olamaz")
       }
       return Promise.resolve()
