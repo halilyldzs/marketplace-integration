@@ -296,11 +296,18 @@ const Orders = () => {
 
   const handleSubmit = async (values: OrderFormValues) => {
     const orderData: Omit<Order, "id" | "createdAt" | "updatedAt"> = {
-      ...values,
-      orderNumber: `ORD-${Date.now()}`,
+      customerName: values.customerName,
+      customerEmail: values.customerEmail,
+      customerPhone: values.customerPhone,
+      shippingAddress: values.shippingAddress,
+      notes: values.notes || "",
       status: OrderStatus.NEW,
-      totalAmount: 0, // This should be calculated based on items
-      items: [], // This should be transformed from the form values
+      totalAmount: values.items.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      ),
+      items: values.items,
+      orderNumber: `ORD-${Date.now()}`,
     }
 
     if (editingOrder) {

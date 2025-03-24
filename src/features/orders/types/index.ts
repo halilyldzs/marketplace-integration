@@ -11,6 +11,8 @@ export interface Order {
   customerName: string
   customerEmail: string
   customerPhone: string
+  shippingAddress: string
+  notes: string
   status: OrderStatus
   totalAmount: number
   createdAt: string
