@@ -1,7 +1,9 @@
-import { Product } from "@/features/products/types"
+import { productsService } from "@/features/products/services/products.service"
+import { GetProductsResponse } from "@/features/products/types"
+import { useQuery } from "@tanstack/react-query"
 import type { FormInstance } from "antd"
 import { Button, Form, Input, Select, Space } from "antd"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import styles from "../Orders.module.css"
 
 export interface OrderFormValues {
@@ -15,7 +17,6 @@ export interface OrderFormValues {
 
 interface OrderFormProps {
   form: FormInstance<OrderFormValues>
-  products: Product[]
   onSubmit: (values: OrderFormValues) => void
   onCancel: () => void
   isSubmitting: boolean
@@ -25,7 +26,6 @@ const OrderForm = ({
   form,
   onSubmit,
   onCancel,
-  products,
   isSubmitting,
 }: OrderFormProps) => {
   useEffect(() => {
@@ -33,6 +33,19 @@ const OrderForm = ({
       form.resetFields()
     }
   }, [form])
+
+  const [productSearchTerm, setProductSearchTerm] = useState("")
+
+  const { data: productsData } = useQuery<GetProductsResponse>({
+    queryKey: ["products", productSearchTerm],
+    queryFn: () =>
+      productsService.getAll({
+        searchTerm: productSearchTerm,
+        pageSize: 10,
+        orderByField: "createdAt",
+        orderDirection: "desc",
+      }),
+  })
 
   return (
     <Form
@@ -120,8 +133,11 @@ const OrderForm = ({
         <Select
           mode='multiple'
           placeholder='Ürün seçin'
-          options={products.map((product) => ({
-            label: product.name,
+          showSearch
+          onSearch={setProductSearchTerm}
+          filterOption={false}
+          options={productsData?.products?.map((product) => ({
+            label: `${product.name} (${product.sku})`,
             value: product.id,
           }))}
         />

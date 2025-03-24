@@ -1,6 +1,5 @@
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { Order, OrderFilters, OrderStatus } from "@features/orders/types"
-import { useQuery } from "@tanstack/react-query"
 import {
   Button,
   Card,
@@ -17,8 +16,6 @@ import {
 import type { ColumnsType } from "antd/es/table"
 import type { Key } from "react"
 import { useState } from "react"
-import { productsService } from "../products/services/products.service"
-import { GetProductsResponse } from "../products/types"
 import type { OrderFormValues } from "./components/OrderForm"
 import OrderForm from "./components/OrderForm"
 import styles from "./Orders.module.css"
@@ -43,20 +40,8 @@ const Orders = () => {
   const [filters, setFilters] = useState<OrderFilters>({})
   const [loading, setLoading] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
-
-  const { data: productsData } = useQuery<GetProductsResponse>({
-    queryKey: ["products", searchTerm],
-    queryFn: () =>
-      productsService.getAll({
-        searchTerm,
-        pageSize: 10,
-        orderByField: "createdAt",
-        orderDirection: "desc",
-      }),
-  })
 
   const columns: ColumnsType<Order> = [
     {
@@ -256,7 +241,6 @@ const Orders = () => {
         width={800}>
         <OrderForm
           form={form}
-          products={productsData?.products || []}
           onSubmit={handleCreateOrder}
           onCancel={() => {
             setIsModalOpen(false)
