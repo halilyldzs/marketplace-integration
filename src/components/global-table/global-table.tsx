@@ -1,3 +1,4 @@
+import { useTableUrlParams } from "@/hooks/use-table-url-params"
 import {
   FilterEventPayload,
   TableEvent,
@@ -13,7 +14,6 @@ import type {
   SorterResult,
   TablePaginationConfig,
 } from "antd/lib/table/interface"
-import { useSearchParams } from "react-router-dom"
 
 interface GlobalTableProps<T extends Product> {
   tableType: TableTypes
@@ -28,7 +28,7 @@ export const GlobalTable = <T extends Product>({
   tableDataSource,
   onEvent,
 }: GlobalTableProps<T>) => {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { searchParams, updateUrlParams } = useTableUrlParams<T>(onEvent)
   const columns = getTableFunction<T>(tableType, tableStore, onEvent)
 
   const handleTableChange = (
@@ -36,43 +36,19 @@ export const GlobalTable = <T extends Product>({
     filters: Record<string, FilterValue | null>,
     sorter: SorterResult<T> | SorterResult<T>[]
   ) => {
-    // Update URL search parameters
-    const newParams = new URLSearchParams(searchParams)
-
-    // Handle filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        newParams.set(
-          key,
-          Array.isArray(value) ? value.join(",") : String(value)
-        )
-      } else {
-        newParams.delete(key)
-      }
-    })
-
-    // Handle sorting
     const sortResult = Array.isArray(sorter) ? sorter[0] : sorter
-    if (sortResult.field) {
-      newParams.set("orderByField", sortResult.field as string)
-      newParams.set(
-        "orderDirection",
-        sortResult.order === "ascend" ? "asc" : "desc"
-      )
-    } else {
-      newParams.delete("orderByField")
-      newParams.delete("orderDirection")
-    }
 
-    // Handle pagination
-    if (pagination.current) {
-      newParams.set("page", String(pagination.current))
-    }
-    if (pagination.pageSize) {
-      newParams.set("pageSize", String(pagination.pageSize))
-    }
-
-    setSearchParams(newParams)
+    updateUrlParams(
+      {
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+      },
+      filters,
+      {
+        field: sortResult.field as string,
+        order: sortResult.order as "ascend" | "descend",
+      }
+    )
 
     // Trigger filter event
     onEvent({
