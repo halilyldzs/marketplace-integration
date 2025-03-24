@@ -1,5 +1,5 @@
 .container {
-  padding: 1.5rem;
+  padding: 24px;
 }
 
 .card {
@@ -9,21 +9,77 @@
 }
 
 .header {
-  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
-.header :global(.ant-space) {
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.form {
+  max-width: 100%;
+}
+
+.formItem {
+  margin-bottom: 16px;
+}
+
+.fullWidth {
   width: 100%;
 }
 
-.header :global(.ant-input),
-.header :global(.ant-select),
-.header :global(.ant-picker) {
-  width: 100%;
+.formActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.header :global(.ant-btn) {
+.statusTag {
   min-width: 80px;
+  text-align: center;
+}
+
+.statusTag.new {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.statusTag.shipped {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.statusTag.cancelled {
+  background-color: #fff1f0;
+  color: #f5222d;
+}
+
+.statusTag.returned {
+  background-color: #f9f0ff;
+  color: #722ed1;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.searchBar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 :global(.ant-table-wrapper) {

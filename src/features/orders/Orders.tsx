@@ -1,11 +1,13 @@
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { Order, OrderFilters, OrderStatus } from "@features/orders/types"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   Button,
   Card,
   DatePicker,
   Form,
   Input,
+  message,
   Modal,
   Select,
   Space,
@@ -19,6 +21,7 @@ import { useState } from "react"
 import type { OrderFormValues } from "./components/OrderForm"
 import OrderForm from "./components/OrderForm"
 import styles from "./Orders.module.css"
+import { ordersService } from "./services/orders.service"
 
 const { RangePicker } = DatePicker
 
@@ -42,6 +45,81 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null)
+  const queryClient = useQueryClient()
+
+  // Siparişleri getir
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ["orders", currentPage, pageSize, searchTerm, statusFilter],
+    queryFn: () =>
+      ordersService.getAll({
+        page: currentPage,
+        pageSize,
+        searchTerm,
+        status: statusFilter || undefined,
+      }),
+  })
+
+  // Sipariş oluştur
+  const createMutation = useMutation({
+    mutationFn: (values: any) => ordersService.create(values),
+    onSuccess: () => {
+      message.success("Sipariş başarıyla oluşturuldu")
+      setIsModalOpen(false)
+      form.resetFields()
+      queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+    onError: (error: any) => {
+      message.error(error.message || "Sipariş oluşturulurken bir hata oluştu")
+    },
+  })
+
+  // Sipariş güncelle
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      ordersService.update(id, data),
+    onSuccess: () => {
+      message.success("Sipariş başarıyla güncellendi")
+      setIsModalOpen(false)
+      form.resetFields()
+      setEditingOrder(null)
+      queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+    onError: (error: any) => {
+      message.error(error.message || "Sipariş güncellenirken bir hata oluştu")
+    },
+  })
+
+  // Sipariş sil
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => ordersService.delete(id),
+    onSuccess: () => {
+      message.success("Sipariş başarıyla silindi")
+      queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+    onError: (error: any) => {
+      message.error(error.message || "Sipariş silinirken bir hata oluştu")
+    },
+  })
+
+  // Sipariş durumu güncelle
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: OrderStatus }) =>
+      ordersService.updateStatus(id, status),
+    onSuccess: () => {
+      message.success("Sipariş durumu başarıyla güncellendi")
+      queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+    onError: (error: any) => {
+      message.error(
+        error.message || "Sipariş durumu güncellenirken bir hata oluştu"
+      )
+    },
+  })
 
   const columns: ColumnsType<Order> = [
     {
@@ -57,6 +135,16 @@ const Orders = () => {
       key: "customerName",
       sorter: (a: Order, b: Order) =>
         a.customerName.localeCompare(b.customerName),
+    },
+    {
+      title: "E-posta",
+      dataIndex: "customerEmail",
+      key: "customerEmail",
+    },
+    {
+      title: "Telefon",
+      dataIndex: "customerPhone",
+      key: "customerPhone",
     },
     {
       title: "Durum",
@@ -109,6 +197,21 @@ const Orders = () => {
               Durum
             </Button>
           </Tooltip>
+          <Tooltip title='Düzenle'>
+            <Button
+              type='text'
+              onClick={() => handleEdit(record)}>
+              Düzenle
+            </Button>
+          </Tooltip>
+          <Tooltip title='Sil'>
+            <Button
+              type='text'
+              danger
+              onClick={() => handleDelete(record.id)}>
+              Sil
+            </Button>
+          </Tooltip>
         </Space>
       ),
     },
@@ -148,6 +251,39 @@ const Orders = () => {
     }
   }
 
+  const handleCreate = () => {
+    setEditingOrder(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEdit = (order: Order) => {
+    setEditingOrder(order)
+    form.setFieldsValue(order)
+    setIsModalOpen(true)
+  }
+
+  const handleDelete = (id: string) => {
+    Modal.confirm({
+      title: "Siparişi Sil",
+      content: "Bu siparişi silmek istediğinizden emin misiniz?",
+      okText: "Evet",
+      cancelText: "Hayır",
+      onOk: () => deleteMutation.mutate(id),
+    })
+  }
+
+  const handleStatusChange = (id: string, status: OrderStatus) => {
+    updateStatusMutation.mutate({ id, status })
+  }
+
+  const handleSubmit = async (values: any) => {
+    if (editingOrder) {
+      updateMutation.mutate({ id: editingOrder.id, data: values })
+    } else {
+      createMutation.mutate(values)
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Card
@@ -158,7 +294,7 @@ const Orders = () => {
             <Button
               type='primary'
               icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}>
+              onClick={handleCreate}>
               Yeni Sipariş
             </Button>
           </Tooltip>
@@ -216,37 +352,41 @@ const Orders = () => {
 
         <Table
           columns={columns}
-          dataSource={orders}
+          dataSource={ordersData?.orders}
           rowKey='id'
-          loading={loading}
+          loading={isLoading}
           scroll={{ x: 1200 }}
           pagination={{
-            total: orders.length,
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `Toplam ${total} sipariş`,
+            current: currentPage,
+            pageSize,
+            total: ordersData?.total,
+            onChange: (page, size) => {
+              setCurrentPage(page)
+              setPageSize(size)
+            },
           }}
         />
       </Card>
 
       <Modal
-        title='Yeni Sipariş'
+        title={editingOrder ? "Sipariş Düzenle" : "Yeni Sipariş"}
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false)
           form.resetFields()
+          setEditingOrder(null)
         }}
         footer={null}
         width={800}>
         <OrderForm
           form={form}
-          onSubmit={handleCreateOrder}
+          onSubmit={handleSubmit}
           onCancel={() => {
             setIsModalOpen(false)
             form.resetFields()
+            setEditingOrder(null)
           }}
-          isSubmitting={loading}
+          isSubmitting={createMutation.isPending || updateMutation.isPending}
         />
       </Modal>
     </div>
