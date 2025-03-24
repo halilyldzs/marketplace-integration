@@ -5,13 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { App as AntApp, ConfigProvider, theme } from "antd"
 import { useEffect } from "react"
 import { BrowserRouter, useRoutes } from "react-router-dom"
-import AppRoutes from "./routes"
+import { routes } from "./routes"
 import "./styles/global.css"
 
 const queryClient = new QueryClient()
 
 const AppRoutesComponent = () => {
-  const element = useRoutes(AppRoutes)
+  const element = useRoutes(routes)
   return element
 }
 

@@ -35,6 +35,7 @@ export interface GetProductsParams {
     value: string | number | boolean | Date
   }>
   searchTerm?: string
+  searchFields?: Array<keyof Product>
   categoryId?: string
 }
 
@@ -48,13 +49,13 @@ export interface GetProductsResponse {
 export const productsService = {
   async getAll(params?: GetProductsParams): Promise<GetProductsResponse> {
     try {
-      console.log("Fetching products with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
         orderDirection = "desc",
         filters = [],
         searchTerm,
+        searchFields = [],
         categoryId,
       } = params || {}
 
@@ -73,32 +74,56 @@ export const productsService = {
       // Add search term filter if provided
       if (searchTerm?.trim()) {
         const searchLower = searchTerm.toLowerCase().trim()
-        constraints.push(where("nameLower", ">=", searchLower))
+
+        // Her alan için ayrı sorgu oluştur
+        const searchQueries = searchFields.map((field) => {
+          const fieldConstraints = [...constraints]
+          if (field === "name") {
+            fieldConstraints.push(where("nameLower", ">=", searchLower))
+          } else {
+            fieldConstraints.push(where(field, ">=", searchLower))
+          }
+          return query(collection(db, COLLECTION_NAME), ...fieldConstraints)
+        })
+
+        // Tüm sorguları paralel olarak çalıştır
+        const searchResults = await Promise.all(
+          searchQueries.map((q) => getDocs(q))
+        )
+
+        // Sonuçları birleştir ve tekrar edenleri kaldır
+        const uniqueProducts = new Map()
+        searchResults.forEach((snapshot) => {
+          snapshot.docs.forEach((doc) => {
+            if (!uniqueProducts.has(doc.id)) {
+              uniqueProducts.set(doc.id, {
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate(),
+                updatedAt: doc.data().updatedAt?.toDate(),
+              })
+            }
+          })
+        })
+
+        const products = Array.from(uniqueProducts.values())
+        const total = products.length
+
+        return {
+          products: products.slice(0, pageSize),
+          total,
+          hasMore: total > pageSize,
+          lastVisible: null,
+        }
       }
 
-      // Add ordering
-      if (searchTerm) {
-        constraints.push(orderBy("nameLower"))
-      }
+      // Normal sorgu (arama yoksa)
       if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
-
-      // Add pagination
       constraints.push(limit(pageSize))
 
-      // Create query
       const q = query(collection(db, COLLECTION_NAME), ...constraints)
-
-      // Get total count (without pagination)
-      const totalQuery = query(
-        collection(db, COLLECTION_NAME),
-        ...constraints.filter((c) => c.type !== "limit")
-      )
-      const totalSnapshot = await getDocs(totalQuery)
-      const total = totalSnapshot.size
-
-      // Get paginated data
       const querySnapshot = await getDocs(q)
       const lastVisible =
         querySnapshot.docs[querySnapshot.docs.length - 1] || null
@@ -110,11 +135,9 @@ export const productsService = {
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as Product[]
 
-      console.log("Processed products:", products)
-
       return {
         products,
-        total,
+        total: products.length,
         hasMore: products.length === pageSize,
         lastVisible,
       }

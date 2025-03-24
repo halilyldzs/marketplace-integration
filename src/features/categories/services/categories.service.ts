@@ -46,7 +46,6 @@ export interface GetCategoriesResponse {
 export const categoriesService = {
   async getAll(params?: GetCategoriesParams): Promise<GetCategoriesResponse> {
     try {
-      console.log("Fetching categories with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
@@ -101,8 +100,6 @@ export const categoriesService = {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as Category[]
-
-      console.log("Processed categories:", categories)
 
       return {
         categories,
