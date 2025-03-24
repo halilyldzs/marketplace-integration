@@ -75,13 +75,9 @@ const Products = () => {
           orderByField: "createdAt",
           orderDirection: "desc",
         }),
-
-      initialData: {
-        products: [],
-        total: 0,
-        hasMore: false,
-        lastVisible: null,
-      },
+      initialData: undefined,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
     })
 
   // Mutations
@@ -349,7 +345,7 @@ const Products = () => {
         dataSource={productsData?.products || []}
         columns={columns}
         rowKey='id'
-        loading={productsLoading && !productsData?.products.length}
+        loading={productsLoading}
         scroll={{ x: "max-content" }}
         pagination={false}
         locale={{
