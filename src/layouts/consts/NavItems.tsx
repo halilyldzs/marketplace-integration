@@ -33,7 +33,7 @@ export const NavItems: MenuProps["items"] = [
   },
   {
     key: "orders",
-    icon: <ShopOutlined />,
+    icon: <ShoppingOutlined />,
     label: "Siparişler",
     type: "item",
   },
