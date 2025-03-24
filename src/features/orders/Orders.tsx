@@ -56,13 +56,6 @@ const Orders = () => {
         orderByField: "createdAt",
         orderDirection: "desc",
       }),
-
-    initialData: {
-      products: [],
-      total: 0,
-      hasMore: false,
-      lastVisible: null,
-    },
   })
 
   const columns: ColumnsType<Order> = [
