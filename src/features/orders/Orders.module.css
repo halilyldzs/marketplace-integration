@@ -1,0 +1,64 @@
+.container {
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--ant-color-bg-container);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.header :global(.ant-space) {
+  width: 100%;
+}
+
+.header :global(.ant-input),
+.header :global(.ant-select),
+.header :global(.ant-picker) {
+  width: 100%;
+}
+
+.header :global(.ant-btn) {
+  min-width: 80px;
+}
+
+:global(.ant-table-wrapper) {
+  background: var(--ant-color-bg-container);
+  border-radius: 8px;
+}
+
+:global(.ant-table-thead > tr > th) {
+  background: var(--ant-color-bg-container);
+  font-weight: 600;
+}
+
+:global(.ant-table-tbody > tr:hover > td) {
+  background: var(--ant-color-bg-container-hover);
+}
+
+:global(.ant-tag) {
+  min-width: 80px;
+  text-align: center;
+}
+
+:global(.ant-btn-link) {
+  padding: 4px 8px;
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header :global(.ant-space) {
+    flex-direction: column;
+  }
+
+  .header :global(.ant-space-item) {
+    width: 100%;
+  }
+}

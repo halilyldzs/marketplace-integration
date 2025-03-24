@@ -10,6 +10,7 @@ const breadcrumbNameMap: Record<string, string> = {
   "/profile": "Profil",
   "/categories": "Kategoriler",
   "/brands": "Markalar",
+  "/orders": "Siparişler",
 }
 
 export const PageBreadcrumb = () => {

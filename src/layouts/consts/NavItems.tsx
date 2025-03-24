@@ -31,6 +31,12 @@ export const NavItems: MenuProps["items"] = [
     label: "Markalar",
     type: "item",
   },
+  {
+    key: "orders",
+    icon: <ShopOutlined />,
+    label: "Siparişler",
+    type: "item",
+  },
   //   {
   //     key: "users",
   //     icon: <TeamOutlined />,
