@@ -1,4 +1,4 @@
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import { EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { Order, OrderFilters, OrderStatus } from "@features/orders/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -212,9 +212,8 @@ const Orders = () => {
           <Tooltip title='Düzenle'>
             <Button
               type='text'
-              onClick={() => handleEdit(record)}>
-              Düzenle
-            </Button>
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}></Button>
           </Tooltip>
           <Tooltip title='Sil'>
             <Button
