@@ -41,8 +41,6 @@ const statusLabels = {
 
 const Orders = () => {
   const [filters, setFilters] = useState<OrderFilters>({})
-  const [loading, setLoading] = useState(false)
-  const [orders, setOrders] = useState<Order[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [form] = Form.useForm()
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
@@ -66,22 +64,28 @@ const Orders = () => {
 
   // Sipariş oluştur
   const createMutation = useMutation({
-    mutationFn: (values: any) => ordersService.create(values),
+    mutationFn: (values: Omit<Order, "id" | "createdAt" | "updatedAt">) =>
+      ordersService.create(values),
     onSuccess: () => {
       message.success("Sipariş başarıyla oluşturuldu")
       setIsModalOpen(false)
       form.resetFields()
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       message.error(error.message || "Sipariş oluşturulurken bir hata oluştu")
     },
   })
 
   // Sipariş güncelle
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
-      ordersService.update(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string
+      data: Partial<Omit<Order, "id" | "createdAt" | "updatedAt">>
+    }) => ordersService.update(id, data),
     onSuccess: () => {
       message.success("Sipariş başarıyla güncellendi")
       setIsModalOpen(false)
@@ -89,7 +93,7 @@ const Orders = () => {
       setEditingOrder(null)
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       message.error(error.message || "Sipariş güncellenirken bir hata oluştu")
     },
   })
@@ -101,7 +105,7 @@ const Orders = () => {
       message.success("Sipariş başarıyla silindi")
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       message.error(error.message || "Sipariş silinirken bir hata oluştu")
     },
   })
@@ -114,7 +118,7 @@ const Orders = () => {
       message.success("Sipariş durumu başarıyla güncellendi")
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       message.error(
         error.message || "Sipariş durumu güncellenirken bir hata oluştu"
       )
@@ -166,7 +170,7 @@ const Orders = () => {
       key: "totalAmount",
       sorter: (a: Order, b: Order) => a.totalAmount - b.totalAmount,
       render: (amount: number) =>
-        `₺${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`,
+        `₺${amount?.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`,
     },
     {
       title: "Tarih",
@@ -223,32 +227,39 @@ const Orders = () => {
   }
 
   const handleUpdateStatus = (order: Order) => {
-    // TODO: Implement status update
-    console.log("Update status:", order)
+    Modal.confirm({
+      title: "Sipariş Durumu Güncelle",
+      content: (
+        <Select
+          defaultValue={order.status}
+          style={{ width: "100%" }}
+          onChange={(value) => handleStatusChange(order.id, value)}>
+          {Object.entries(statusLabels).map(([value, label]) => (
+            <Select.Option
+              key={value}
+              value={value}>
+              {label}
+            </Select.Option>
+          ))}
+        </Select>
+      ),
+      onOk: () => {
+        // Status will be updated by handleStatusChange
+      },
+    })
   }
 
   const handleSearch = () => {
-    // TODO: Implement search
-    console.log("Search with filters:", filters)
+    setSearchTerm(filters.search || "")
+    setStatusFilter(filters.status || null)
+    setCurrentPage(1)
   }
 
   const handleReset = () => {
     setFilters({})
-    // TODO: Reset search
-  }
-
-  const handleCreateOrder = async (values: OrderFormValues) => {
-    try {
-      setLoading(true)
-      // TODO: Implement order creation
-      console.log("Create order:", values)
-      setIsModalOpen(false)
-      form.resetFields()
-    } catch (error) {
-      console.error("Error creating order:", error)
-    } finally {
-      setLoading(false)
-    }
+    setSearchTerm("")
+    setStatusFilter(null)
+    setCurrentPage(1)
   }
 
   const handleCreate = () => {
@@ -276,11 +287,19 @@ const Orders = () => {
     updateStatusMutation.mutate({ id, status })
   }
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: OrderFormValues) => {
+    const orderData: Omit<Order, "id" | "createdAt" | "updatedAt"> = {
+      ...values,
+      orderNumber: `ORD-${Date.now()}`,
+      status: OrderStatus.NEW,
+      totalAmount: 0, // This should be calculated based on items
+      items: [], // This should be transformed from the form values
+    }
+
     if (editingOrder) {
-      updateMutation.mutate({ id: editingOrder.id, data: values })
+      updateMutation.mutate({ id: editingOrder.id, data: orderData })
     } else {
-      createMutation.mutate(values)
+      createMutation.mutate(orderData)
     }
   }
 
