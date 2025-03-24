@@ -151,6 +151,21 @@ const Orders = () => {
       key: "customerPhone",
     },
     {
+      title: "Teslimat Adresi",
+      dataIndex: "shippingAddress",
+      key: "shippingAddress",
+      ellipsis: true,
+      width: 200,
+    },
+    {
+      title: "Ürünler",
+      dataIndex: "items",
+      key: "items",
+      ellipsis: true,
+      width: 150,
+      render: (items: string[]) => `${items.length} ürün`,
+    },
+    {
       title: "Durum",
       dataIndex: "status",
       key: "status",
@@ -184,16 +199,9 @@ const Orders = () => {
       title: "İşlemler",
       key: "actions",
       fixed: "right" as const,
-      width: 150,
+      width: 300,
       render: (_: unknown, record: Order) => (
         <Space>
-          <Tooltip title='Siparişi Görüntüle'>
-            <Button
-              type='text'
-              onClick={() => handleViewOrder(record)}>
-              Görüntüle
-            </Button>
-          </Tooltip>
           <Tooltip title='Durumu Güncelle'>
             <Button
               type='text'
@@ -221,19 +229,16 @@ const Orders = () => {
     },
   ]
 
-  const handleViewOrder = (order: Order) => {
-    // TODO: Implement order view
-    console.log("View order:", order)
-  }
-
   const handleUpdateStatus = (order: Order) => {
+    let selectedStatus = order.status
+
     Modal.confirm({
       title: "Sipariş Durumu Güncelle",
       content: (
         <Select
           defaultValue={order.status}
           style={{ width: "100%" }}
-          onChange={(value) => handleStatusChange(order.id, value)}>
+          onChange={(value) => (selectedStatus = value)}>
           {Object.entries(statusLabels).map(([value, label]) => (
             <Select.Option
               key={value}
@@ -244,7 +249,9 @@ const Orders = () => {
         </Select>
       ),
       onOk: () => {
-        // Status will be updated by handleStatusChange
+        if (selectedStatus !== order.status) {
+          handleStatusChange(order.id, selectedStatus)
+        }
       },
     })
   }
