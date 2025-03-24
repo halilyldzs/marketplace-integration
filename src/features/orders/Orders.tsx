@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   DatePicker,
-  Form,
   Input,
   message,
   Modal,
@@ -42,7 +41,6 @@ const statusLabels = {
 const Orders = () => {
   const [filters, setFilters] = useState<OrderFilters>({})
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [form] = Form.useForm()
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -69,7 +67,7 @@ const Orders = () => {
     onSuccess: () => {
       message.success("Sipariş başarıyla oluşturuldu")
       setIsModalOpen(false)
-      form.resetFields()
+      setEditingOrder(null)
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
     onError: (error: Error) => {
@@ -89,7 +87,6 @@ const Orders = () => {
     onSuccess: () => {
       message.success("Sipariş başarıyla güncellendi")
       setIsModalOpen(false)
-      form.resetFields()
       setEditingOrder(null)
       queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
@@ -275,7 +272,6 @@ const Orders = () => {
 
   const handleEdit = (order: Order) => {
     setEditingOrder(order)
-    form.setFieldsValue(order)
     setIsModalOpen(true)
   }
 
@@ -301,12 +297,9 @@ const Orders = () => {
       shippingAddress: values.shippingAddress,
       notes: values.notes || "",
       status: OrderStatus.NEW,
-      totalAmount: values.items.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      ),
+      totalAmount: values.totalAmount,
       items: values.items,
-      orderNumber: `ORD-${Date.now()}`,
+      orderNumber: editingOrder?.orderNumber || `ORD-${Date.now()}`,
     }
 
     if (editingOrder) {
@@ -405,20 +398,19 @@ const Orders = () => {
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false)
-          form.resetFields()
           setEditingOrder(null)
         }}
         footer={null}
         width={800}>
         <OrderForm
-          form={form}
+          order={editingOrder || undefined}
           onSubmit={handleSubmit}
           onCancel={() => {
             setIsModalOpen(false)
-            form.resetFields()
             setEditingOrder(null)
           }}
           isSubmitting={createMutation.isPending || updateMutation.isPending}
+          isEditing={!!editingOrder}
         />
       </Modal>
     </div>

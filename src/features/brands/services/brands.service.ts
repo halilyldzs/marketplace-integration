@@ -46,7 +46,6 @@ export interface GetBrandsResponse {
 export const brandsService = {
   async getAll(params?: GetBrandsParams): Promise<GetBrandsResponse> {
     try {
-      console.log("Fetching brands with params:", params)
       const {
         pageSize = 10,
         orderByField = "createdAt",
@@ -101,8 +100,6 @@ export const brandsService = {
         createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as Brand[]
-
-      console.log("Processed brands:", brands)
 
       return {
         brands,

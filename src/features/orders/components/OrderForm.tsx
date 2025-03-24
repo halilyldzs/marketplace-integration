@@ -1,11 +1,11 @@
 import { productsService } from "@/features/products/services/products.service"
 import { GetProductsResponse } from "@/features/products/types"
 import { useQuery } from "@tanstack/react-query"
-import type { FormInstance } from "antd"
+
 import { Button, Form, Input, InputNumber, Select, Space } from "antd"
 import { useEffect, useState } from "react"
 import styles from "../Orders.module.css"
-import { OrderItem } from "../types"
+import { Order, OrderItem } from "../types"
 
 export interface OrderFormValues {
   id?: string
@@ -20,7 +20,7 @@ export interface OrderFormValues {
 }
 
 interface OrderFormProps {
-  form: FormInstance<OrderFormValues>
+  order?: Order
   onSubmit: (values: OrderFormValues) => void
   onCancel: () => void
   isSubmitting: boolean
@@ -28,12 +28,13 @@ interface OrderFormProps {
 }
 
 const OrderForm = ({
-  form,
+  order,
   onSubmit,
   onCancel,
   isSubmitting,
   isEditing = false,
 }: OrderFormProps) => {
+  const [form] = Form.useForm<OrderFormValues>()
   const [productSearchTerm, setProductSearchTerm] = useState("")
 
   const { data: productsData } = useQuery<GetProductsResponse>({
@@ -51,21 +52,19 @@ const OrderForm = ({
   })
 
   useEffect(() => {
-    if (isEditing) {
-      const formValues = form.getFieldsValue()
-      if (formValues.items?.length > 0) {
-        const selectedProductIds = formValues.items.map(
-          (item) => item.productId
-        )
-        setProductSearchTerm(selectedProductIds.join(","))
-        form.setFieldValue("selectedProductIds", selectedProductIds)
-      }
+    if (isEditing && order) {
+      const selectedProductIds = order.items.map((item) => item.productId)
+      setProductSearchTerm(selectedProductIds.join(","))
+      form.setFieldsValue({
+        ...order,
+        selectedProductIds,
+      })
     }
     return () => {
       form.resetFields()
       setProductSearchTerm("")
     }
-  }, [isEditing, form])
+  }, [isEditing, order, form])
 
   const handleSubmit = (values: OrderFormValues) => {
     const selectedProducts =
@@ -73,20 +72,38 @@ const OrderForm = ({
         values.selectedProductIds.includes(product.id)
       ) || []
 
-    const orderItems: OrderItem[] = selectedProducts.map((product) => ({
-      id: product.id,
-      productId: product.id,
-      productName: product.name,
-      quantity: 1,
-      price: product.price,
-      total: product.price,
-    }))
+    // Mevcut siparişin ürünlerini koru
+    const existingItems = order?.items || []
 
-    console.log(orderItems)
+    // Yeni seçilen ürünler için OrderItem nesneleri oluştur
+    const newItems: OrderItem[] = values.selectedProductIds
+      .map((productId) => {
+        // Eğer ürün zaten varsa, mevcut OrderItem'ı kullan
+        const existingItem = existingItems.find(
+          (item) => item.productId === productId
+        )
+        if (existingItem) {
+          return existingItem
+        }
+
+        // Yeni ürün için OrderItem oluştur
+        const product = selectedProducts.find((p) => p.id === productId)
+        if (!product) return null
+
+        return {
+          id: +new Date(),
+          productId: product.id,
+          productName: product.name,
+          quantity: 1,
+          price: product.price,
+          total: product.price,
+        }
+      })
+      .filter((item): item is OrderItem => item !== null)
 
     onSubmit({
       ...values,
-      items: orderItems,
+      items: newItems,
     })
   }
 
