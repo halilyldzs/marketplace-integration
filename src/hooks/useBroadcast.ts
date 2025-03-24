@@ -58,24 +58,30 @@ export const useBroadcast = () => {
         exact,
       })
     },
-    []
+    [channel]
   )
 
-  const refetchQueries = useCallback((queryKey?: string[], exact?: boolean) => {
-    channel.postMessage({
-      type: "REFETCH_QUERIES",
-      queryKey,
-      exact,
-    })
-  }, [])
+  const refetchQueries = useCallback(
+    (queryKey?: string[], exact?: boolean) => {
+      channel.postMessage({
+        type: "REFETCH_QUERIES",
+        queryKey,
+        exact,
+      })
+    },
+    [channel]
+  )
 
-  const resetQueries = useCallback((queryKey?: string[], exact?: boolean) => {
-    channel.postMessage({
-      type: "RESET_QUERIES",
-      queryKey,
-      exact,
-    })
-  }, [])
+  const resetQueries = useCallback(
+    (queryKey?: string[], exact?: boolean) => {
+      channel.postMessage({
+        type: "RESET_QUERIES",
+        queryKey,
+        exact,
+      })
+    },
+    [channel]
+  )
 
   return {
     invalidateQueries,
