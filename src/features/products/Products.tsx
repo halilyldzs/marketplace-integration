@@ -1,9 +1,5 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons"
+import { TableEvent, TableEventTypes } from "@/types/table/table-event-types"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
 import ProductForm from "@features/products/components/ProductForm"
@@ -16,20 +12,10 @@ import type {
   UpdateProductDTO,
 } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Typography,
-  message,
-} from "antd"
-import type { ColumnsType } from "antd/es/table"
-import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore"
-import { useCallback, useRef, useState } from "react"
+import { Button, Form, Input, Modal, Typography, message } from "antd"
+import { useRef, useState } from "react"
 import styles from "./Products.module.css"
+import ProductTable from "./components/table/ProductTable"
 
 const { Text } = Typography
 
@@ -40,15 +26,13 @@ const Products = () => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
-  const [lastVisible, setLastVisible] =
-    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
   const searchTimeout = useRef<NodeJS.Timeout>()
 
   // Queries
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     gcTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -133,29 +117,17 @@ const Products = () => {
     }, 500)
   }
 
-  const handleLoadMore = useCallback(async () => {
-    if (!lastVisible) return
-
-    const moreProducts = await productsService.loadMore(lastVisible, {
-      searchTerm,
-      pageSize: 10,
-      orderByField: "createdAt",
-      orderDirection: "desc",
-    })
-
-    setLastVisible(moreProducts.lastVisible)
-    queryClient.setQueryData<GetProductsResponse>(
-      ["products", searchTerm],
-      (oldData) => {
-        if (!oldData) return moreProducts
-        return {
-          ...moreProducts,
-          products: [...oldData.products, ...moreProducts.products],
-          total: oldData.total,
-        }
-      }
-    )
-  }, [lastVisible, queryClient, searchTerm])
+  const handleEvent = (event: TableEvent<Product | string>) => {
+    console.log(event)
+    switch (event.type) {
+      case TableEventTypes.EDIT:
+        handleEdit(event.payload as Product)
+        break
+      case TableEventTypes.DELETE:
+        handleDelete(event.payload as string)
+        break
+    }
+  }
 
   const handleSubmit = (values: ProductFormValues) => {
     const productData = {
@@ -190,169 +162,6 @@ const Products = () => {
   }
 
   // Table columns
-  const columns: ColumnsType<Product> = [
-    {
-      title: "Ad",
-      dataIndex: "name",
-      key: "name",
-      fixed: "left",
-    },
-    {
-      title: "SKU",
-      dataIndex: "sku",
-      key: "sku",
-      width: 120,
-    },
-    {
-      title: "Barkod",
-      dataIndex: "barcode",
-      key: "barcode",
-      width: 140,
-      responsive: ["lg"],
-    },
-    {
-      title: "Satış Fiyatı",
-      dataIndex: "price",
-      key: "price",
-      width: 120,
-      render: (price: number) => `₺${price.toFixed(2)}`,
-      filters: [
-        { text: "0-100₺", value: "0-100" },
-        { text: "100-500₺", value: "100-500" },
-        { text: "500-1000₺", value: "500-1000" },
-        { text: "1000₺ ve üzeri", value: "1000+" },
-      ],
-      onFilter: (value, record) => {
-        const price = record.price
-        switch (value) {
-          case "0-100":
-            return price >= 0 && price <= 100
-          case "100-500":
-            return price > 100 && price <= 500
-          case "500-1000":
-            return price > 500 && price <= 1000
-          case "1000+":
-            return price > 1000
-          default:
-            return true
-        }
-      },
-    },
-    {
-      title: "Liste Fiyatı",
-      dataIndex: "listPrice",
-      key: "listPrice",
-      width: 120,
-      responsive: ["lg"],
-      render: (listPrice: number) => `₺${listPrice.toFixed(2)}`,
-    },
-    {
-      title: "KDV",
-      dataIndex: "vat",
-      key: "vat",
-      width: 80,
-      responsive: ["lg"],
-      render: (vat: number) => `%${vat}`,
-      filters: [
-        { text: "%0", value: 0 },
-        { text: "%1", value: 1 },
-        { text: "%8", value: 8 },
-        { text: "%18", value: 18 },
-      ],
-      onFilter: (value, record) => record.vat === value,
-    },
-    {
-      title: "Desi",
-      dataIndex: "deci",
-      key: "deci",
-      width: 80,
-      responsive: ["lg"],
-    },
-    {
-      title: "Stok",
-      dataIndex: "stock",
-      key: "stock",
-      width: 100,
-      filters: [
-        { text: "Stokta Yok", value: "0" },
-        { text: "1-10", value: "1-10" },
-        { text: "11-50", value: "11-50" },
-        { text: "50+", value: "50+" },
-      ],
-      onFilter: (value, record) => {
-        const stock = record.stock
-        switch (value) {
-          case "0":
-            return stock === 0
-          case "1-10":
-            return stock > 0 && stock <= 10
-          case "11-50":
-            return stock > 10 && stock <= 50
-          case "50+":
-            return stock > 50
-          default:
-            return true
-        }
-      },
-    },
-    {
-      title: "Kategori",
-      dataIndex: "categoryId",
-      key: "categoryId",
-      responsive: ["md"],
-      render: (categoryId: string) =>
-        categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
-        "-",
-      filters:
-        categoriesData?.categories.map((category) => ({
-          text: category.name,
-          value: category.id,
-        })) || [],
-      onFilter: (value, record) => record.categoryId === value,
-    },
-    {
-      title: "Marka",
-      dataIndex: "brandId",
-      key: "brandId",
-      responsive: ["md"],
-      render: (brandId: string) =>
-        brandsData?.brands.find((b) => b.id === brandId)?.name || "-",
-      filters:
-        brandsData?.brands.map((brand) => ({
-          text: brand.name,
-          value: brand.id,
-        })) || [],
-      onFilter: (value, record) => record.brandId === value,
-    },
-    {
-      title: "Oluşturulma Tarihi",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      responsive: ["lg"],
-      render: (date: Date) => date.toLocaleString(),
-    },
-    {
-      title: "İşlemler",
-      key: "actions",
-      fixed: "right",
-      width: 100,
-      render: (_: unknown, record: Product) => (
-        <Space>
-          <Button
-            type='text'
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Button
-            type='text'
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
-          />
-        </Space>
-      ),
-    },
-  ]
 
   return (
     <div className={styles.container}>
@@ -389,23 +198,17 @@ const Products = () => {
         </div>
       </div>
 
-      <Table<Product>
-        dataSource={productsData?.products || []}
-        columns={columns}
-        rowKey='id'
-        loading={productsLoading}
-        scroll={{ x: "max-content" }}
-        pagination={false}
-        locale={{
-          emptyText: productsLoading ? "Yükleniyor..." : "Ürün bulunamadı",
+      <ProductTable
+        tableStore={{
+          categories: categoriesData?.categories || [],
+          brands: brandsData?.brands || [],
         }}
+        tableDataSource={{
+          data: productsData?.products || [],
+          isLoading: productsLoading,
+        }}
+        handleEvent={handleEvent}
       />
-
-      {productsData?.hasMore && (
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Button onClick={handleLoadMore}>Daha Fazla Yükle</Button>
-        </div>
-      )}
 
       <Modal
         title={
