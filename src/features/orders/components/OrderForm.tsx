@@ -99,6 +99,7 @@ const OrderForm = ({
       })
       .filter((item): item is OrderItem => item !== null)
 
+    values.totalAmount = newItems.reduce((acc, item) => acc + item.total, 0)
     onSubmit({
       ...values,
       items: newItems,
