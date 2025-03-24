@@ -39,7 +39,7 @@ const OrderForm = ({
     queryFn: () =>
       productsService.getAll({
         searchTerm: productSearchTerm,
-        pageSize: 10,
+        pageSize: 100,
         orderByField: "createdAt",
         orderDirection: "desc",
         searchFields: productSearchTerm
@@ -49,11 +49,18 @@ const OrderForm = ({
   })
 
   useEffect(() => {
+    if (isEditing) {
+      const formValues = form.getFieldsValue()
+      if (formValues.items?.length > 0) {
+        const selectedProductIds = formValues.items.join(",")
+        setProductSearchTerm(selectedProductIds)
+      }
+    }
     return () => {
       form.resetFields()
       setProductSearchTerm("")
     }
-  }, [form])
+  }, [isEditing, form])
 
   return (
     <div className={styles.formContainer}>
@@ -176,6 +183,8 @@ const OrderForm = ({
               label: `${product.name} (SKU: ${product.sku}, Barkod: ${product.barcode})`,
               value: product.id,
             }))}
+            value={form.getFieldValue("items")}
+            loading={!productsData}
           />
         </Form.Item>
 
