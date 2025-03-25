@@ -299,7 +299,7 @@ export const Profile = () => {
               <Input placeholder='Telefon numaranız' />
             </Form.Item>
 
-            <Form.Item>
+            <Form.Item style={{ textAlign: "right" }}>
               <Button
                 onClick={() => setIsPasswordModalVisible(true)}
                 style={{ marginRight: 8 }}>
