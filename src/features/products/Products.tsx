@@ -1,4 +1,4 @@
-import { GlobalTable } from "@/components/global-table/global-table"
+import { GlobalTable } from "@/components/global-table/GlobalTable"
 import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
