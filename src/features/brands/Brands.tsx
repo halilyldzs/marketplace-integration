@@ -41,7 +41,6 @@ const Brands = () => {
     useState<QueryDocumentSnapshot<DocumentData> | null>(null)
   const searchTimeout = useRef<NodeJS.Timeout>()
 
-  // Queries
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ["brands", searchTerm],
     queryFn: () =>
@@ -59,7 +58,6 @@ const Brands = () => {
     },
   })
 
-  // Mutations
   const createMutation = useMutation({
     mutationFn: (data: CreateBrandDTO) => brandsService.create(data),
     onSuccess: () => {
@@ -98,7 +96,6 @@ const Brands = () => {
     },
   })
 
-  // Event handlers
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
@@ -163,7 +160,6 @@ const Brands = () => {
     })
   }
 
-  // Table columns
   const columns: ColumnsType<Brand> = [
     {
       title: "ID",

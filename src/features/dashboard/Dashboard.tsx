@@ -21,7 +21,6 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28"]
 const Dashboard: React.FC = () => {
   const { token } = theme.useToken()
 
-  // En çok satılan 5 ürünü bul ve line chart için veriyi hazırla
   const topSellingProducts = [...products]
     .sort((a, b) => b.soldCount - a.soldCount)
     .slice(0, 5)
@@ -30,7 +29,6 @@ const Dashboard: React.FC = () => {
       "Satış Adedi": product.soldCount,
     }))
 
-  // Toplam satış ve sipariş sayılarını hesapla
   const totalSales = marketplaceSales.reduce(
     (sum, item) => sum + item.totalSales,
     0
@@ -109,11 +107,8 @@ const Dashboard: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Grafikler */}
       <div className={styles.chartsContainer}>
-        {/* Üst Sıra Grafikler */}
         <div className={styles.topChartsGrid}>
-          {/* En Çok Satan Ürünler */}
           <Card
             title='En Çok Satan 5 Ürün'
             className={styles.card}>
@@ -164,7 +159,6 @@ const Dashboard: React.FC = () => {
             </div>
           </Card>
 
-          {/* Pazaryeri Dağılımı */}
           <Card
             title='Pazaryeri Dağılımı'
             className={styles.card}>
@@ -216,7 +210,6 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Aylık Sipariş Trendi */}
         <Card
           title='Aylık Sipariş Trendi'
           className={styles.card}>
@@ -264,7 +257,6 @@ const Dashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* Pazaryeri Özet Kartları */}
         <div className={styles.marketplaceCards}>
           {marketplaceSales.map((marketplace) => (
             <Card

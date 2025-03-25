@@ -15,7 +15,6 @@ const Login = () => {
   const { notifyLogin } = useAuthSync()
   const [form] = Form.useForm()
 
-  // Load saved credentials on form mount
   const savedData = localStorage.getItem(STORAGE_KEY)
   if (savedData) {
     try {
@@ -45,7 +44,6 @@ const Login = () => {
         throw new Error("Kullanıcı bilgileri bulunamadı!")
       }
 
-      // Save credentials if remember is checked
       if (values.remember) {
         const encrypted = CryptoJS.AES.encrypt(
           JSON.stringify({

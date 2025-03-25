@@ -145,7 +145,6 @@ const Categories = () => {
 
   const handleTableChange = async (newPagination: TablePaginationConfig) => {
     if (newPagination.current! > pagination.current!) {
-      // Next page
       const params: Omit<GetCategoriesParams, "page"> = {
         pageSize: pagination.pageSize,
         orderByField: "createdAt",
@@ -160,13 +159,11 @@ const Categories = () => {
         current: newPagination.current,
       }))
 
-      // Update cache manually
       queryClient.setQueryData(
         ["categories", newPagination.current, pagination.pageSize, searchTerm],
         result
       )
     } else {
-      // Previous page or page size change
       setPagination(newPagination)
     }
   }
