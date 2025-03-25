@@ -20,18 +20,15 @@ const AppContent = () => {
   const { user } = useAuthStore()
 
   useEffect(() => {
-    // Kullanıcı ayarları varsa onları kullan
     if (user?.settings?.theme) {
       setTheme(user.settings.theme === "dark")
       return
     }
 
-    // Kullanıcı ayarları yoksa sistem temasını kullan
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
     setTheme(mediaQuery.matches)
 
     const handleChange = (e: MediaQueryListEvent) => {
-      // Sadece kullanıcı ayarları yoksa sistem temasını takip et
       if (!user?.settings?.theme) {
         setTheme(e.matches)
       }
@@ -42,7 +39,6 @@ const AppContent = () => {
   }, [setTheme, user?.settings?.theme])
 
   useEffect(() => {
-    // HTML elementine tema attribute'unu ekle
     document.documentElement.setAttribute(
       "data-theme",
       isDarkMode ? "dark" : "light"
