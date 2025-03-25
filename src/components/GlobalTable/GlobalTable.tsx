@@ -55,7 +55,6 @@ export const GlobalTable = <T extends TableBase>({
       }
     )
 
-    // Trigger filter event
     onEvent({
       type: TableEventTypes.FILTER,
       payload: {
