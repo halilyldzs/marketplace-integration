@@ -44,7 +44,6 @@ export const Profile = () => {
   const [preferencesForm] = Form.useForm<UserSettings>()
   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false)
 
-  // Separate loading states
   const [profileLoading, setProfileLoading] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [avatarLoading, setAvatarLoading] = useState(false)
@@ -89,7 +88,6 @@ export const Profile = () => {
         return
       }
 
-      // Önce kullanıcıyı yeniden doğrula
       try {
         const credential = EmailAuthProvider.credential(
           auth.currentUser.email!,
