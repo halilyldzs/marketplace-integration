@@ -1,6 +1,6 @@
 import shipImage from "@/assets/ship.jpg"
+import { firebaseAuthService } from "@/services/FirebaseAuthService"
 import { useAuthSync } from "@hooks/useAuthSync"
-import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
 import { Button, Checkbox, Form, Input, message } from "antd"
 import CryptoJS from "crypto-js"

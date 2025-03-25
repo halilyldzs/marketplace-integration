@@ -1,5 +1,5 @@
 import shipImage from "@/assets/ship.jpg"
-import { firebaseAuthService } from "@services/firebase-auth.service"
+import { firebaseAuthService } from "@/services/FirebaseAuthService"
 import { Button, Form, Input, message } from "antd"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"

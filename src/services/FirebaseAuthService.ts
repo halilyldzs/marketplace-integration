@@ -57,7 +57,6 @@ export const firebaseAuthService = {
       settings: DEFAULT_SETTINGS,
     }
 
-    // Kullanıcı bilgilerini Firestore'a kaydet
     await setDoc(doc(db, "users", userCredential.user.uid), userData)
 
     return userCredential
@@ -71,7 +70,6 @@ export const firebaseAuthService = {
       password
     )
 
-    // Son giriş zamanını güncelle
     await updateDoc(doc(db, "users", userCredential.user.uid), {
       lastLoginAt: new Date().toISOString(),
     })
