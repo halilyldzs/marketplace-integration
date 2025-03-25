@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import styles from "./PageBreadcrumb.module.css"
 
 const breadcrumbNameMap: Record<string, string> = {
-  "/dashboard": "Dashboard",
+  "/dashboard": "Anasayfa",
   "/products": "Ürünler",
   "/users": "Kullanıcılar",
   "/settings": "Ayarlar",

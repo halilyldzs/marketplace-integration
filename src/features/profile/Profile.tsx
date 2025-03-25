@@ -218,12 +218,12 @@ export const Profile = () => {
         <Title
           level={2}
           className={styles.pageTitle}>
-          Profile Settings
+          Profil Ayarları
         </Title>
         <Text
           type='secondary'
           className={styles.pageDescription}>
-          Manage your account settings and preferences
+          Hesabınızın ayarlarını yönetin ve tercihlerinizi yapın
         </Text>
       </div>
 

@@ -10,7 +10,7 @@ export const NavItems: MenuProps["items"] = [
   {
     key: "dashboard",
     icon: <DashboardOutlined />,
-    label: "Dashboard",
+    label: "Anasayfa",
     type: "item",
   },
   {
