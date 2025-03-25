@@ -1,54 +1,111 @@
-# React + TypeScript + Vite
+# Marketplace Integration
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern ve ölçeklenebilir bir e-ticaret yönetim sistemi. React, TypeScript ve Ant Design kullanılarak geliştirilmiş kapsamlı bir web uygulaması.
 
-Currently, two official plugins are available:
+## 🚀 Özellikler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 📦 Ürün Yönetimi
 
-## Expanding the ESLint configuration
+  - Ürün ekleme, düzenleme, silme
+  - Detaylı ürün bilgileri (fiyat, stok, KDV, desi vb.)
+  - Gelişmiş filtreleme ve arama
+  - Toplu işlem desteği
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 🏷️ Kategori Yönetimi
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+  - Hiyerarşik kategori yapısı
+  - Kategori bazlı ürün organizasyonu
+  - Kolay navigasyon
+
+- 🏭 Marka Yönetimi
+
+  - Marka bazlı ürün gruplandırma
+  - Marka bilgileri ve logoları
+  - Marka bazlı filtreleme
+
+- 🔄 Gerçek Zamanlı Senkronizasyon
+
+  - Çoklu sekme desteği
+  - BroadcastChannel ile anlık veri senkronizasyonu
+  - React Query ile etkin veri yönetimi
+
+- 🎨 Modern UI/UX
+  - Ant Design bileşenleri
+  - Responsive tasarım
+  - Kullanıcı dostu arayüz
+  - Özelleştirilebilir temalar
+
+## 🛠️ Teknolojiler
+
+- React 18
+- TypeScript
+- Ant Design
+- React Query
+- React Router
+- CSS Modules
+- Vite
+
+## 📦 Kurulum
+
+1. Projeyi klonlayın:
+
+```bash
+git clone https://github.com/yourusername/marketplace-integration.git
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Proje dizinine gidin:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+cd marketplace-integration
 ```
+
+3. Bağımlılıkları yükleyin:
+
+```bash
+npm install
+# veya
+yarn install
+```
+
+4. Geliştirme sunucusunu başlatın:
+
+```bash
+npm run dev
+# veya
+yarn dev
+```
+
+## 🔧 Geliştirme
+
+- `src/features/`: Özellik bazlı modüller
+- `src/components/`: Yeniden kullanılabilir bileşenler
+- `src/services/`: API servisleri
+- `src/hooks/`: Özel React hooks'ları
+- `src/types/`: TypeScript tip tanımlamaları
+- `src/utils/`: Yardımcı fonksiyonlar
+
+## 📝 Kod Standartları
+
+- ESLint ve Prettier ile kod formatlaması
+- TypeScript strict mode
+- Component bazlı mimari
+- Feature-first organizasyon
+- DRY (Don't Repeat Yourself) prensibi
+
+## 🤝 Katkıda Bulunma
+
+1. Bu repository'yi fork edin
+2. Feature branch'i oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+## 👥 İletişim
+
+Proje Sahibi - [@yourusername](https://github.com/yourusername)
+
+Proje Linki: [https://github.com/yourusername/marketplace-integration](https://github.com/yourusername/marketplace-integration)
