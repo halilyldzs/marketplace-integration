@@ -2,6 +2,8 @@
 
 Modern ve ölçeklenebilir bir e-ticaret yönetim sistemi. React, TypeScript ve Ant Design kullanılarak geliştirilmiş kapsamlı bir web uygulaması.
 
+🔗 [Demo](https://marketplace-integration-seven.vercel.app/)
+
 ## 🚀 Özellikler
 
 - 📦 Ürün Yönetimi
