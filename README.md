@@ -50,7 +50,7 @@ Modern ve ölçeklenebilir bir e-ticaret yönetim sistemi. React, TypeScript ve 
 1. Projeyi klonlayın:
 
 ```bash
-git clone https://github.com/yourusername/marketplace-integration.git
+git clone https://github.com/halilyldzs/marketplace-integration.git
 ```
 
 2. Proje dizinine gidin:
