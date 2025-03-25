@@ -1,3 +1,4 @@
+import shipImage from "@/assets/ship.jpg"
 import { useAuthSync } from "@hooks/useAuthSync"
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
@@ -73,7 +74,7 @@ const Login = () => {
     <div className={styles.container}>
       <div className={styles.imageSection}>
         <img
-          src='/public/assets/ship.jpg'
+          src={shipImage}
           alt='Lojistik'
           className={styles.image}
         />

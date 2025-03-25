@@ -1,3 +1,4 @@
+import shipImage from "@/assets/ship.jpg"
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { Button, Form, Input, message } from "antd"
 import { useState } from "react"
@@ -43,13 +44,13 @@ const Register = () => {
     <div className={styles.container}>
       <div className={styles.imageSection}>
         <img
-          src='/public/assets/ship.jpg'
+          src={shipImage}
           alt='Lojistik'
           className={styles.image}
         />
         <div className={styles.overlay}>
-          <h1>Lojistik YS</h1>
-          <p>Lojistik süreçlerinizi kolayca yönetin</p>
+          <h1>Pazaryeri 360</h1>
+          <p>E-ticaret süreçlerinizi kolayca yönetin</p>
         </div>
       </div>
 
