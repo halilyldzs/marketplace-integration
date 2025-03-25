@@ -103,9 +103,3 @@ yarn dev
 ## 📄 Lisans
 
 Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
-## 👥 İletişim
-
-Proje Sahibi - [@yourusername](https://github.com/yourusername)
-
-Proje Linki: [https://github.com/yourusername/marketplace-integration](https://github.com/yourusername/marketplace-integration)
