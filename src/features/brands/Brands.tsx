@@ -1,33 +1,23 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons"
+import { GlobalTable } from "@/components/GlobalTable/GlobalTable"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import BrandForm from "@features/brands/components/BrandForm"
 import { brandsService } from "@features/brands/services/brands.service"
 import type {
   Brand,
   CreateBrandDTO,
-  GetBrandsResponse,
   UpdateBrandDTO,
 } from "@features/brands/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Typography,
-  message,
-} from "antd"
-import type { ColumnsType } from "antd/es/table"
-import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore"
+import { Button, Form, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import styles from "./Brands.module.css"
 
+import {
+  FilterEventPayload,
+  TableEvent,
+  TableEventTypes,
+} from "@/types/table/table-event-types"
+import { TableTypes } from "@/types/table/table-type"
 const { Text } = Typography
 
 const Brands = () => {
@@ -37,8 +27,6 @@ const Brands = () => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
-  const [lastVisible, setLastVisible] =
-    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
   const searchTimeout = useRef<NodeJS.Timeout>()
 
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
@@ -50,12 +38,6 @@ const Brands = () => {
         orderByField: "createdAt",
         orderDirection: "desc",
       }),
-    initialData: {
-      brands: [],
-      total: 0,
-      hasMore: false,
-      lastVisible: null,
-    },
   })
 
   const createMutation = useMutation({
@@ -109,30 +91,6 @@ const Brands = () => {
     }, 500)
   }
 
-  const handleLoadMore = async () => {
-    if (!lastVisible) return
-
-    const moreBrands = await brandsService.loadMore(lastVisible, {
-      searchTerm,
-      pageSize: 10,
-      orderByField: "createdAt",
-      orderDirection: "desc",
-    })
-
-    setLastVisible(moreBrands.lastVisible)
-    queryClient.setQueryData(
-      ["brands", searchTerm],
-      (oldData: GetBrandsResponse | undefined) => {
-        if (!oldData) return moreBrands
-        return {
-          ...moreBrands,
-          brands: [...oldData.brands, ...moreBrands.brands],
-          total: oldData.total,
-        }
-      }
-    )
-  }
-
   const handleSubmit = (values: { name: string; description?: string }) => {
     if (editingBrand) {
       updateMutation.mutate({ id: editingBrand.id, ...values })
@@ -160,55 +118,19 @@ const Brands = () => {
     })
   }
 
-  const columns: ColumnsType<Brand> = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 220,
-      responsive: ["lg"],
-    },
-    {
-      title: "Ad",
-      dataIndex: "name",
-      key: "name",
-      fixed: "left",
-    },
-    {
-      title: "Açıklama",
-      dataIndex: "description",
-      key: "description",
-      responsive: ["md"],
-    },
-    {
-      title: "Oluşturulma Tarihi",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      responsive: ["lg"],
-      render: (date: Date) => date.toLocaleString(),
-    },
-    {
-      title: "İşlemler",
-      key: "actions",
-      fixed: "right",
-      width: 100,
-      render: (_: unknown, record: Brand) => (
-        <Space>
-          <Button
-            type='text'
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Button
-            type='text'
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
-          />
-        </Space>
-      ),
-    },
-  ]
+  const handleEvent = (
+    event: TableEvent<Brand | string | FilterEventPayload>
+  ) => {
+    switch (event.type) {
+      case TableEventTypes.EDIT:
+        handleEdit(event.payload as Brand)
+
+        break
+      case TableEventTypes.DELETE:
+        handleDelete(event.payload as string)
+        break
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -243,23 +165,17 @@ const Brands = () => {
         </div>
       </div>
 
-      <Table<Brand>
-        dataSource={brandsData?.brands || []}
-        columns={columns}
-        rowKey='id'
-        loading={brandsLoading}
-        scroll={{ x: "max-content" }}
-        pagination={false}
-        locale={{
-          emptyText: brandsLoading ? "Yükleniyor..." : "Marka bulunamadı",
+      <GlobalTable
+        tableType={TableTypes.BRAND}
+        tableStore={{
+          brands: brandsData?.brands || [],
         }}
+        tableDataSource={{
+          data: brandsData?.brands || [],
+          isLoading: brandsLoading,
+        }}
+        onEvent={handleEvent}
       />
-
-      {brandsData?.hasMore && (
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Button onClick={handleLoadMore}>Daha Fazla Yükle</Button>
-        </div>
-      )}
 
       <Modal
         title={

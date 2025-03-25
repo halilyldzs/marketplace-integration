@@ -1,4 +1,5 @@
 import { useTableUrlParams } from "@/hooks/useTableUrlParams"
+import { TableBase } from "@/types/table/table-base"
 import {
   FilterEventPayload,
   TableEvent,
@@ -7,29 +8,33 @@ import {
 import { TableDataSource, TableStore } from "@/types/table/table-store"
 import { TableTypes } from "@/types/table/table-type"
 import { getTableFunction } from "@/utils/get-table-function"
-import { Product } from "@features/products/types"
 import { Table } from "antd"
+import { ColumnsType } from "antd/es/table"
 import type {
   FilterValue,
   SorterResult,
   TablePaginationConfig,
 } from "antd/lib/table/interface"
 
-interface GlobalTableProps<T extends Product> {
+interface GlobalTableProps<T> {
   tableType: TableTypes
   tableStore: TableStore
   tableDataSource: TableDataSource<T>
   onEvent: (event: TableEvent<T | string | FilterEventPayload>) => void
 }
 
-export const GlobalTable = <T extends Product>({
+export const GlobalTable = <T extends TableBase>({
   tableType,
   tableStore,
   tableDataSource,
   onEvent,
 }: GlobalTableProps<T>) => {
   const { searchParams, updateUrlParams } = useTableUrlParams<T>(onEvent)
-  const columns = getTableFunction<T>(tableType, tableStore, onEvent)
+  const columns = getTableFunction<T>(
+    tableType,
+    tableStore,
+    onEvent
+  ) as ColumnsType<T>
 
   const handleTableChange = (
     pagination: TablePaginationConfig,
