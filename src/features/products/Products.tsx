@@ -43,21 +43,11 @@ const Products = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: 1000 * 60 * 60,
-    gcTime: 1000 * 60 * 60,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
   })
 
   const { data: brandsData } = useQuery({
     queryKey: ["brands"],
     queryFn: () => brandsService.getAll(),
-    staleTime: Infinity,
-    gcTime: 1000 * 60 * 60,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
   })
 
   const { data: productsData, isLoading: productsLoading } =
@@ -84,9 +74,6 @@ const Products = () => {
             )
           ),
         }),
-      initialData: undefined,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
     })
 
   const createMutation = useMutation({
