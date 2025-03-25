@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons"
 import logo from "@assets/logo.svg"
 import { PageBreadcrumb } from "@components/PageBreadcrumb/PageBreadcrumb"
+import { useAuthSync } from "@hooks/useAuthSync"
 import { useAuthStore } from "@store/auth"
 import { useThemeStore } from "@store/theme"
 import { Avatar, Button, Drawer, Dropdown, Layout, Menu } from "antd"
@@ -22,6 +23,7 @@ const MainLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout, user } = useAuthStore()
+  const { notifyLogout } = useAuthSync()
   const { isDarkMode, toggleTheme, setTheme } = useThemeStore()
   const [collapsed, setCollapsed] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -47,6 +49,7 @@ const MainLayout = () => {
 
   const handleLogout = async () => {
     await logout()
+    notifyLogout()
     navigate("/login")
   }
 

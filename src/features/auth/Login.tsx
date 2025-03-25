@@ -1,3 +1,4 @@
+import { useAuthSync } from "@hooks/useAuthSync"
 import { firebaseAuthService } from "@services/firebase-auth.service"
 import { useAuthStore } from "@store/auth"
 import { Button, Checkbox, Form, Input, message } from "antd"
@@ -11,6 +12,7 @@ const Login = () => {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
   const setUser = useAuthStore((state) => state.setUser)
+  const { notifyLogin } = useAuthSync()
   const [form] = Form.useForm()
 
   // Load saved credentials on form mount
@@ -60,6 +62,7 @@ const Login = () => {
       login(userCredential.user.uid)
       setUser(userData)
       navigate("/dashboard")
+      notifyLogin()
       message.success("Giriş başarılı!")
     } catch (error: Error | unknown) {
       message.error(

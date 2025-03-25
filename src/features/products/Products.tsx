@@ -1,9 +1,12 @@
+import { GlobalTable } from "@/components/global-table/global-table"
+import { useBroadcast } from "@/hooks/useBroadcast"
 import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons"
+  FilterEventPayload,
+  TableEvent,
+  TableEventTypes,
+} from "@/types/table/table-event-types"
+import { TableTypes } from "@/types/table/table-type"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
 import ProductForm from "@features/products/components/ProductForm"
@@ -16,39 +19,31 @@ import type {
   UpdateProductDTO,
 } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Typography,
-  message,
-} from "antd"
-import type { ColumnsType } from "antd/es/table"
-import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore"
-import { useCallback, useRef, useState } from "react"
+import { Button, Input, Modal, Typography, message } from "antd"
+import { useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
 
 const { Text } = Typography
 
 const Products = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [form] = Form.useForm<ProductFormValues>()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+
+  const { invalidateQueries } = useBroadcast()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
-  const [lastVisible, setLastVisible] =
-    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
+  const [openModal, setOpenModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
   const searchTimeout = useRef<NodeJS.Timeout>()
 
   // Queries
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 60, // 1 hour
     gcTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -67,21 +62,31 @@ const Products = () => {
 
   const { data: productsData, isLoading: productsLoading } =
     useQuery<GetProductsResponse>({
-      queryKey: ["products", searchTerm],
+      queryKey: ["products", searchTerm, searchParams.toString()],
       queryFn: () =>
         productsService.getAll({
           searchTerm,
-          pageSize: 10,
-          orderByField: "createdAt",
-          orderDirection: "desc",
+          pageSize: Number(searchParams.get("pageSize")) || 10,
+          page: Number(searchParams.get("page")) || 1,
+          orderByField:
+            (searchParams.get("orderByField") as keyof Product) || "createdAt",
+          orderDirection:
+            (searchParams.get("orderDirection") as "asc" | "desc") || "desc",
+          ...Object.fromEntries(
+            Array.from(searchParams.entries()).filter(
+              ([key]) =>
+                ![
+                  "page",
+                  "pageSize",
+                  "orderByField",
+                  "orderDirection",
+                ].includes(key)
+            )
+          ),
         }),
-
-      initialData: {
-        products: [],
-        total: 0,
-        hasMore: false,
-        lastVisible: null,
-      },
+      initialData: undefined,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
     })
 
   // Mutations
@@ -89,9 +94,10 @@ const Products = () => {
     mutationFn: (data: CreateProductDTO) => productsService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla oluşturuldu")
-      setIsModalOpen(false)
-      form.resetFields()
+      setEditingProduct(null)
+      setOpenModal(false)
     },
     onError: (error: Error) => {
       message.error(`Ürün oluşturulamadı: ${error.message}`)
@@ -102,10 +108,10 @@ const Products = () => {
     mutationFn: (data: UpdateProductDTO) => productsService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla güncellendi")
-      setIsModalOpen(false)
       setEditingProduct(null)
-      form.resetFields()
+      setOpenModal(false)
     },
     onError: (error: Error) => {
       message.error(`Ürün güncellenemedi: ${error.message}`)
@@ -116,6 +122,7 @@ const Products = () => {
     mutationFn: (id: string) => productsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
+      invalidateQueries(["products"])
       message.success("Ürün başarıyla silindi")
     },
     onError: (error: Error) => {
@@ -137,29 +144,31 @@ const Products = () => {
     }, 500)
   }
 
-  const handleLoadMore = useCallback(async () => {
-    if (!lastVisible) return
-
-    const moreProducts = await productsService.loadMore(lastVisible, {
-      searchTerm,
-      pageSize: 10,
-      orderByField: "createdAt",
-      orderDirection: "desc",
-    })
-
-    setLastVisible(moreProducts.lastVisible)
-    queryClient.setQueryData<GetProductsResponse>(
-      ["products", searchTerm],
-      (oldData) => {
-        if (!oldData) return moreProducts
-        return {
-          ...moreProducts,
-          products: [...oldData.products, ...moreProducts.products],
-          total: oldData.total,
-        }
-      }
-    )
-  }, [lastVisible, queryClient, searchTerm])
+  const handleEvent = (
+    event: TableEvent<Product | string | FilterEventPayload>
+  ) => {
+    switch (event.type) {
+      case TableEventTypes.EDIT:
+        setEditingProduct(event.payload as Product)
+        setOpenModal(true)
+        break
+      case TableEventTypes.DELETE:
+        Modal.confirm({
+          title: "Ürünü silmek istediğinize emin misiniz?",
+          content: "Bu işlem geri alınamaz.",
+          okText: "Evet",
+          okType: "danger",
+          cancelText: "Hayır",
+          onOk() {
+            deleteMutation.mutate(event.payload as string)
+          },
+        })
+        break
+      case TableEventTypes.FILTER:
+        // Filter event is handled by URL params
+        break
+    }
+  }
 
   const handleSubmit = (values: ProductFormValues) => {
     const productData = {
@@ -173,142 +182,6 @@ const Products = () => {
       createMutation.mutate(productData)
     }
   }
-
-  const handleEdit = (record: Product) => {
-    setEditingProduct(record)
-    form.setFieldsValue(record)
-    setIsModalOpen(true)
-  }
-
-  const handleDelete = (id: string) => {
-    Modal.confirm({
-      title: "Ürünü silmek istediğinize emin misiniz?",
-      content: "Bu işlem geri alınamaz.",
-      okText: "Evet",
-      okType: "danger",
-      cancelText: "Hayır",
-      onOk() {
-        deleteMutation.mutate(id)
-      },
-    })
-  }
-
-  // Table columns
-  const columns: ColumnsType<Product> = [
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 220,
-      responsive: ["lg"],
-    },
-    {
-      title: "Ad",
-      dataIndex: "name",
-      key: "name",
-      fixed: "left",
-    },
-    {
-      title: "SKU",
-      dataIndex: "sku",
-      key: "sku",
-      width: 120,
-    },
-    {
-      title: "Barkod",
-      dataIndex: "barcode",
-      key: "barcode",
-      width: 140,
-      responsive: ["lg"],
-    },
-    {
-      title: "Satış Fiyatı",
-      dataIndex: "price",
-      key: "price",
-      width: 120,
-      render: (price: number) => `₺${price.toFixed(2)}`,
-    },
-    {
-      title: "Liste Fiyatı",
-      dataIndex: "listPrice",
-      key: "listPrice",
-      width: 120,
-      responsive: ["lg"],
-      render: (listPrice: number) => `₺${listPrice.toFixed(2)}`,
-    },
-    {
-      title: "KDV",
-      dataIndex: "vat",
-      key: "vat",
-      width: 80,
-      responsive: ["lg"],
-      render: (vat: number) => `%${vat}`,
-    },
-    {
-      title: "Desi",
-      dataIndex: "deci",
-      key: "deci",
-      width: 80,
-      responsive: ["lg"],
-    },
-    {
-      title: "Stok",
-      dataIndex: "stock",
-      key: "stock",
-      width: 100,
-    },
-    {
-      title: "Açıklama",
-      dataIndex: "description",
-      key: "description",
-      responsive: ["md"],
-    },
-    {
-      title: "Kategori",
-      dataIndex: "categoryId",
-      key: "categoryId",
-      responsive: ["md"],
-      render: (categoryId: string) =>
-        categoriesData?.categories.find((c) => c.id === categoryId)?.name ||
-        "-",
-    },
-    {
-      title: "Marka",
-      dataIndex: "brandId",
-      key: "brandId",
-      responsive: ["md"],
-      render: (brandId: string) =>
-        brandsData?.brands.find((b) => b.id === brandId)?.name || "-",
-    },
-    {
-      title: "Oluşturulma Tarihi",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      responsive: ["lg"],
-      render: (date: Date) => date.toLocaleString(),
-    },
-    {
-      title: "İşlemler",
-      key: "actions",
-      fixed: "right",
-      width: 100,
-      render: (_: unknown, record: Product) => (
-        <Space>
-          <Button
-            type='text'
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Button
-            type='text'
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
-          />
-        </Space>
-      ),
-    },
-  ]
 
   return (
     <div className={styles.container}>
@@ -336,8 +209,7 @@ const Products = () => {
             icon={<PlusOutlined />}
             onClick={() => {
               setEditingProduct(null)
-              form.resetFields()
-              setIsModalOpen(true)
+              setOpenModal(true)
             }}
             size='large'>
             Yeni Ürün
@@ -345,64 +217,31 @@ const Products = () => {
         </div>
       </div>
 
-      <Table<Product>
-        dataSource={productsData?.products || []}
-        columns={columns}
-        rowKey='id'
-        loading={productsLoading && !productsData?.products.length}
-        scroll={{ x: "max-content" }}
-        pagination={false}
-        locale={{
-          emptyText: productsLoading ? "Yükleniyor..." : "Ürün bulunamadı",
+      <GlobalTable
+        tableType={TableTypes.PRODUCT}
+        tableStore={{
+          categories: categoriesData?.categories || [],
+          brands: brandsData?.brands || [],
         }}
+        tableDataSource={{
+          data: productsData?.products || [],
+          isLoading: productsLoading,
+        }}
+        onEvent={handleEvent}
       />
 
-      {productsData?.hasMore && (
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Button onClick={handleLoadMore}>Daha Fazla Yükle</Button>
-        </div>
-      )}
-
-      <Modal
-        title={
-          <div className={styles.modalTitle}>
-            <Text
-              strong
-              className={styles.modalTitleText}>
-              {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Oluştur"}
-            </Text>
-          </div>
-        }
-        open={isModalOpen}
+      <ProductForm
+        product={editingProduct}
+        open={openModal}
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        categories={categoriesData?.categories || []}
+        brands={brandsData?.brands || []}
         onCancel={() => {
-          setIsModalOpen(false)
+          setOpenModal(false)
           setEditingProduct(null)
-          form.resetFields()
         }}
-        footer={null}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
-        style={{ padding: "24px" }}>
-        <ProductForm
-          form={form}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setIsModalOpen(false)
-            setEditingProduct(null)
-            form.resetFields()
-          }}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          editMode={!!editingProduct}
-          categories={categoriesData?.categories || []}
-          brands={brandsData?.brands || []}
-        />
-      </Modal>
+      />
     </div>
   )
 }
