@@ -48,6 +48,8 @@ export interface GetProductsResponse {
 
 export const productsService = {
   async getAll(params?: GetProductsParams): Promise<GetProductsResponse> {
+    console.log(params)
+
     try {
       const {
         pageSize = 10,
