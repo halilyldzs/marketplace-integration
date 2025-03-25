@@ -54,7 +54,6 @@ export const useTableUrlParams = <T>(
   ) => {
     const newParams = new URLSearchParams(searchParams)
 
-    // Handle filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
         newParams.set(
@@ -66,7 +65,6 @@ export const useTableUrlParams = <T>(
       }
     })
 
-    // Handle sorting
     if (sorter.field) {
       newParams.set("orderByField", sorter.field)
       newParams.set(
@@ -78,7 +76,6 @@ export const useTableUrlParams = <T>(
       newParams.delete("orderDirection")
     }
 
-    // Handle pagination
     if (pagination.current) {
       newParams.set("page", String(pagination.current))
     }
