@@ -1,4 +1,4 @@
-import { useTableUrlParams } from "@/hooks/use-table-url-params"
+import { useTableUrlParams } from "@/hooks/useTableUrlParams"
 import {
   FilterEventPayload,
   TableEvent,
