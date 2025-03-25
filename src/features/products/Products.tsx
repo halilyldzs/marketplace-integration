@@ -1,4 +1,4 @@
-import { GlobalTable } from "@/components/global-table/GlobalTable"
+import { GlobalTable } from "@/components/GlobalTable/GlobalTable"
 import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
@@ -39,12 +39,11 @@ const Products = () => {
 
   const searchTimeout = useRef<NodeJS.Timeout>()
 
-  // Queries
   const { data: categoriesData } = useQuery({
     queryKey: ["categories"],
     queryFn: () => categoriesService.getAll(),
-    staleTime: 1000 * 60 * 60, // 1 hour
-    gcTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -54,7 +53,7 @@ const Products = () => {
     queryKey: ["brands"],
     queryFn: () => brandsService.getAll(),
     staleTime: Infinity,
-    gcTime: 1000 * 60 * 60, // 1 hour
+    gcTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -89,7 +88,6 @@ const Products = () => {
       refetchOnWindowFocus: false,
     })
 
-  // Mutations
   const createMutation = useMutation({
     mutationFn: (data: CreateProductDTO) => productsService.create(data),
     onSuccess: () => {
@@ -130,7 +128,6 @@ const Products = () => {
     },
   })
 
-  // Event handlers
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
@@ -165,7 +162,7 @@ const Products = () => {
         })
         break
       case TableEventTypes.FILTER:
-        // Filter event is handled by URL params
+        // TODO: Filter event is handled by URL params
         break
     }
   }
@@ -173,7 +170,7 @@ const Products = () => {
   const handleSubmit = (values: ProductFormValues) => {
     const productData = {
       ...values,
-      images: [], // Şimdilik boş array
+      images: [],
     }
 
     if (editingProduct) {
@@ -245,5 +242,4 @@ const Products = () => {
     </div>
   )
 }
-
 export default Products

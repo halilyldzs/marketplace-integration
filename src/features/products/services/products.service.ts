@@ -63,21 +63,17 @@ export const productsService = {
 
       const constraints: QueryConstraint[] = []
 
-      // Add filters
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
 
-      // Add category filter if provided
       if (categoryId) {
         constraints.push(where("categoryId", "==", categoryId))
       }
 
-      // Add search term filter if provided
       if (searchTerm?.trim()) {
         const searchLower = searchTerm.toLowerCase().trim()
 
-        // Her alan için ayrı sorgu oluştur
         const searchQueries = searchFields.map((field) => {
           const fieldConstraints = [...constraints]
           if (field === "name") {
@@ -88,12 +84,10 @@ export const productsService = {
           return query(collection(db, COLLECTION_NAME), ...fieldConstraints)
         })
 
-        // Tüm sorguları paralel olarak çalıştır
         const searchResults = await Promise.all(
           searchQueries.map((q) => getDocs(q))
         )
 
-        // Sonuçları birleştir ve tekrar edenleri kaldır
         const uniqueProducts = new Map()
         searchResults.forEach((snapshot) => {
           snapshot.docs.forEach((doc) => {
@@ -119,7 +113,6 @@ export const productsService = {
         }
       }
 
-      // Normal sorgu (arama yoksa)
       if (orderByField && orderByField !== ("nameLower" as keyof Product)) {
         constraints.push(orderBy(orderByField, orderDirection))
       }
@@ -165,23 +158,19 @@ export const productsService = {
 
       const constraints: QueryConstraint[] = []
 
-      // Add filters
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
 
-      // Add category filter if provided
       if (categoryId) {
         constraints.push(where("categoryId", "==", categoryId))
       }
 
-      // Add search term filter if provided
       if (searchTerm?.trim()) {
         const searchLower = searchTerm.toLowerCase().trim()
         constraints.push(where("nameLower", ">=", searchLower))
       }
 
-      // Add ordering
       if (searchTerm) {
         constraints.push(orderBy("nameLower"))
       }
@@ -189,15 +178,12 @@ export const productsService = {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
-      // Add start after for pagination
       if (lastVisible) {
         constraints.push(startAfter(lastVisible))
       }
 
-      // Add limit
       constraints.push(limit(pageSize))
 
-      // Create and execute query
       const q = query(collection(db, COLLECTION_NAME), ...constraints)
       const querySnapshot = await getDocs(q)
       const newLastVisible =
@@ -212,7 +198,7 @@ export const productsService = {
 
       return {
         products,
-        total: 0, // Not needed for load more
+        total: 0,
         hasMore: products.length === pageSize,
         lastVisible: newLastVisible,
       }
@@ -237,7 +223,6 @@ export const productsService = {
   },
 
   async getByCategory(categoryId: string): Promise<Product[]> {
-    // Kategori var mı kontrol et
     const category = await categoriesService.getById(categoryId)
     if (!category) {
       throw new Error("Category not found")
@@ -258,7 +243,6 @@ export const productsService = {
   },
 
   async create(data: CreateProductDTO): Promise<Product> {
-    // Kategori var mı kontrol et
     const category = await categoriesService.getById(data.categoryId)
     if (!category) {
       throw new Error("Category not found")
@@ -283,7 +267,6 @@ export const productsService = {
   async update(data: UpdateProductDTO): Promise<void> {
     const { id, ...updateData } = data
 
-    // Eğer categoryId değişiyorsa, kategorinin varlığını kontrol et
     if (updateData.categoryId) {
       const category = await categoriesService.getById(updateData.categoryId)
       if (!category) {

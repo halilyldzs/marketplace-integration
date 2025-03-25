@@ -56,18 +56,15 @@ export const brandsService = {
 
       const constraints: QueryConstraint[] = []
 
-      // Add filters
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
 
-      // Add search term filter if provided
       if (searchTerm?.trim()) {
         const searchLower = searchTerm.toLowerCase().trim()
         constraints.push(where("nameLower", ">=", searchLower))
       }
 
-      // Add ordering
       if (searchTerm) {
         constraints.push(orderBy("nameLower"))
       }
@@ -75,13 +72,10 @@ export const brandsService = {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
-      // Add pagination
       constraints.push(limit(pageSize))
 
-      // Create query
       const q = query(collection(db, COLLECTION_NAME), ...constraints)
 
-      // Get total count (without pagination)
       const totalQuery = query(
         collection(db, COLLECTION_NAME),
         ...constraints.filter((c) => c.type !== "limit")
@@ -89,7 +83,6 @@ export const brandsService = {
       const totalSnapshot = await getDocs(totalQuery)
       const total = totalSnapshot.size
 
-      // Get paginated data
       const querySnapshot = await getDocs(q)
       const lastVisible =
         querySnapshot.docs[querySnapshot.docs.length - 1] || null
@@ -128,18 +121,15 @@ export const brandsService = {
 
       const constraints: QueryConstraint[] = []
 
-      // Add filters
       filters.forEach(({ field, operator, value }) => {
         constraints.push(where(field, operator, value))
       })
 
-      // Add search term filter if provided
       if (searchTerm?.trim()) {
         const searchLower = searchTerm.toLowerCase().trim()
         constraints.push(where("nameLower", ">=", searchLower))
       }
 
-      // Add ordering
       if (searchTerm) {
         constraints.push(orderBy("nameLower"))
       }
@@ -147,15 +137,12 @@ export const brandsService = {
         constraints.push(orderBy(orderByField, orderDirection))
       }
 
-      // Add start after for pagination
       if (lastVisible) {
         constraints.push(startAfter(lastVisible))
       }
 
-      // Add limit
       constraints.push(limit(pageSize))
 
-      // Create and execute query
       const q = query(collection(db, COLLECTION_NAME), ...constraints)
       const querySnapshot = await getDocs(q)
       const newLastVisible =
@@ -170,7 +157,7 @@ export const brandsService = {
 
       return {
         brands,
-        total: 0, // Not needed for load more
+        total: 0,
         hasMore: brands.length === pageSize,
         lastVisible: newLastVisible,
       }
