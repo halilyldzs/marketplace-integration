@@ -1,18 +1,13 @@
 import { Product } from "@/features/products/types"
-import { TableEvent, TableEventTypes } from "@/types/table/table-event-types"
-import { TableStore } from "@/types/table/table-store"
+import { TableEventTypes } from "@/types/table/table-event-types"
+import { TableColumnsProps } from "@/types/table/table-store"
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons"
 import { Button, Space, TableColumnsType } from "antd"
-
-interface ProductTableColumnsProps<T> {
-  onEvent: (event: TableEvent<T | string>) => void
-  tableStore: TableStore
-}
 
 export const getProductTableColumns = <T extends Product>({
   onEvent,
   tableStore,
-}: ProductTableColumnsProps<T>): TableColumnsType<T> => {
+}: TableColumnsProps<T>): TableColumnsType<T> => {
   const { categories, brands } = tableStore
   return [
     {
