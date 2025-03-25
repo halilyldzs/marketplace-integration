@@ -199,7 +199,6 @@ export const Profile = () => {
       message.success("Tercihler başarıyla güncellendi!")
     } catch (error: unknown) {
       if (error instanceof Error) {
-        // Hata durumunda eski ayarlara geri dön
         const currentTheme = user?.settings?.theme || "light"
         setTheme(currentTheme === "dark")
         preferencesForm.setFieldsValue({ theme: currentTheme })
