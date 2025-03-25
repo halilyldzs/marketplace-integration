@@ -19,7 +19,7 @@ import type {
   UpdateProductDTO,
 } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button, Form, Input, Modal, Typography, message } from "antd"
+import { Button, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
@@ -27,15 +27,17 @@ import styles from "./Products.module.css"
 const { Text } = Typography
 
 const Products = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [form] = Form.useForm<ProductFormValues>()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+
+  const { invalidateQueries } = useBroadcast()
+
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
+  const [openModal, setOpenModal] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+
   const searchTimeout = useRef<NodeJS.Timeout>()
-  const [searchParams] = useSearchParams()
-  const { invalidateQueries } = useBroadcast()
 
   // Queries
   const { data: categoriesData } = useQuery({
@@ -94,8 +96,8 @@ const Products = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       invalidateQueries(["products"])
       message.success("Ürün başarıyla oluşturuldu")
-      setIsModalOpen(false)
-      form.resetFields()
+      setEditingProduct(null)
+      setOpenModal(false)
     },
     onError: (error: Error) => {
       message.error(`Ürün oluşturulamadı: ${error.message}`)
@@ -108,9 +110,8 @@ const Products = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       invalidateQueries(["products"])
       message.success("Ürün başarıyla güncellendi")
-      setIsModalOpen(false)
       setEditingProduct(null)
-      form.resetFields()
+      setOpenModal(false)
     },
     onError: (error: Error) => {
       message.error(`Ürün güncellenemedi: ${error.message}`)
@@ -148,10 +149,20 @@ const Products = () => {
   ) => {
     switch (event.type) {
       case TableEventTypes.EDIT:
-        handleEdit(event.payload as Product)
+        setEditingProduct(event.payload as Product)
+        setOpenModal(true)
         break
       case TableEventTypes.DELETE:
-        handleDelete(event.payload as string)
+        Modal.confirm({
+          title: "Ürünü silmek istediğinize emin misiniz?",
+          content: "Bu işlem geri alınamaz.",
+          okText: "Evet",
+          okType: "danger",
+          cancelText: "Hayır",
+          onOk() {
+            deleteMutation.mutate(event.payload as string)
+          },
+        })
         break
       case TableEventTypes.FILTER:
         // Filter event is handled by URL params
@@ -171,27 +182,6 @@ const Products = () => {
       createMutation.mutate(productData)
     }
   }
-
-  const handleEdit = (record: Product) => {
-    setEditingProduct(record)
-    form.setFieldsValue(record)
-    setIsModalOpen(true)
-  }
-
-  const handleDelete = (id: string) => {
-    Modal.confirm({
-      title: "Ürünü silmek istediğinize emin misiniz?",
-      content: "Bu işlem geri alınamaz.",
-      okText: "Evet",
-      okType: "danger",
-      cancelText: "Hayır",
-      onOk() {
-        deleteMutation.mutate(id)
-      },
-    })
-  }
-
-  // Table columns
 
   return (
     <div className={styles.container}>
@@ -219,8 +209,7 @@ const Products = () => {
             icon={<PlusOutlined />}
             onClick={() => {
               setEditingProduct(null)
-              form.resetFields()
-              setIsModalOpen(true)
+              setOpenModal(true)
             }}
             size='large'>
             Yeni Ürün
@@ -241,46 +230,18 @@ const Products = () => {
         onEvent={handleEvent}
       />
 
-      <Modal
-        title={
-          <div className={styles.modalTitle}>
-            <Text
-              strong
-              className={styles.modalTitleText}>
-              {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Oluştur"}
-            </Text>
-          </div>
-        }
-        open={isModalOpen}
+      <ProductForm
+        product={editingProduct}
+        open={openModal}
+        onSubmit={handleSubmit}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        categories={categoriesData?.categories || []}
+        brands={brandsData?.brands || []}
         onCancel={() => {
-          setIsModalOpen(false)
+          setOpenModal(false)
           setEditingProduct(null)
-          form.resetFields()
         }}
-        footer={null}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
-        style={{ padding: "24px" }}>
-        <ProductForm
-          form={form}
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setIsModalOpen(false)
-            setEditingProduct(null)
-            form.resetFields()
-          }}
-          isSubmitting={createMutation.isPending || updateMutation.isPending}
-          editMode={!!editingProduct}
-          categories={categoriesData?.categories || []}
-          brands={brandsData?.brands || []}
-        />
-      </Modal>
+      />
     </div>
   )
 }
