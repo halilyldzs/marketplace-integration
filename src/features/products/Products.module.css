@@ -52,6 +52,14 @@
   box-shadow: 0 0 0 0.125rem rgba(var(--ant-color-primary-rgb), 0.1);
 }
 
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .searchIcon {
   color: var(--ant-color-text-quaternary);
   margin-left: 12px;
@@ -183,6 +191,14 @@
   .searchWrapper {
     width: 100%;
     max-width: none;
+  }
+
+  .buttonContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   .title {

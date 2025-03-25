@@ -72,6 +72,14 @@ export const GlobalTable = <T extends Product>({
       columns={columns}
       dataSource={tableDataSource.data}
       rowKey='id'
+      rowSelection={{
+        onChange: (selectedRowKeys, selectedRows) => {
+          onEvent({
+            type: TableEventTypes.SELECT,
+            payload: selectedRows as T[],
+          })
+        },
+      }}
       pagination={{
         showSizeChanger: true,
         showTotal: (total: number) => `Toplam ${total} kayıt`,

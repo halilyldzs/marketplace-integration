@@ -178,7 +178,7 @@ export const getProductTableColumns = <T extends Product>({
             onClick={() =>
               onEvent({
                 type: TableEventTypes.DELETE,
-                payload: record.id,
+                payload: record as T,
               })
             }
           />

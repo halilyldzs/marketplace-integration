@@ -6,7 +6,7 @@ import {
   TableEventTypes,
 } from "@/types/table/table-event-types"
 import { TableTypes } from "@/types/table/table-type"
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
+import { DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
 import ProductForm from "@features/products/components/ProductForm"
@@ -19,7 +19,7 @@ import type {
   UpdateProductDTO,
 } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button, Input, Modal, Typography, message } from "antd"
+import { Button, Input, Modal, Tooltip, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
@@ -36,6 +36,7 @@ const Products = () => {
   const [inputValue, setInputValue] = useState("")
   const [openModal, setOpenModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
 
   const searchTimeout = useRef<NodeJS.Timeout>()
 
@@ -117,14 +118,20 @@ const Products = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => productsService.delete(id),
+    mutationFn: () =>
+      Promise.all(
+        selectedProducts.map((product) => productsService.delete(product.id))
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
       invalidateQueries(["products"])
-      message.success("Ürün başarıyla silindi")
+      message.success(`${selectedProducts.length} ürün başarıyla silindi`)
+      setSelectedProducts([])
     },
     onError: (error: Error) => {
-      message.error(`Ürün silinemedi: ${error.message}`)
+      message.error(
+        `${selectedProducts.length} ürün silinemedi: ${error.message}`
+      )
     },
   })
 
@@ -150,16 +157,11 @@ const Products = () => {
         setOpenModal(true)
         break
       case TableEventTypes.DELETE:
-        Modal.confirm({
-          title: "Ürünü silmek istediğinize emin misiniz?",
-          content: "Bu işlem geri alınamaz.",
-          okText: "Evet",
-          okType: "danger",
-          cancelText: "Hayır",
-          onOk() {
-            deleteMutation.mutate(event.payload as string)
-          },
-        })
+        setSelectedProducts([event.payload as Product])
+        handleDelete()
+        break
+      case TableEventTypes.SELECT:
+        setSelectedProducts(event.payload as Product[])
         break
       case TableEventTypes.FILTER:
         // TODO: Filter event is handled by URL params
@@ -178,6 +180,19 @@ const Products = () => {
     } else {
       createMutation.mutate(productData)
     }
+  }
+
+  const handleDelete = () => {
+    Modal.confirm({
+      title: `Seçilen ${selectedProducts.length} ürünü silmek istediğinize emin misiniz?`,
+      content: "Bu işlem geri alınamaz.",
+      okText: "Evet",
+      okType: "danger",
+      cancelText: "Hayır",
+      onOk() {
+        deleteMutation.mutate()
+      },
+    })
   }
 
   return (
@@ -201,16 +216,30 @@ const Products = () => {
               className={styles.searchInput}
             />
           </div>
-          <Button
-            type='primary'
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingProduct(null)
-              setOpenModal(true)
-            }}
-            size='large'>
-            Yeni Ürün
-          </Button>
+          <div className={styles.buttonContainer}>
+            <Tooltip title='Toplu Ürün Silmek için seçiniz'>
+              <Button
+                disabled={selectedProducts.length === 0}
+                type='primary'
+                size='large'
+                danger
+                icon={<DeleteOutlined />}
+                onClick={handleDelete}>
+                Toplu Ürün Sil
+              </Button>
+            </Tooltip>
+
+            <Button
+              type='primary'
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setEditingProduct(null)
+                setOpenModal(true)
+              }}
+              size='large'>
+              Yeni Ürün
+            </Button>
+          </div>
         </div>
       </div>
 
