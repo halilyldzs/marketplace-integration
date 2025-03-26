@@ -26,6 +26,7 @@ const MainLayout = () => {
   const { notifyLogout } = useAuthSync()
   const { isDarkMode, toggleTheme, setTheme } = useThemeStore()
   const [collapsed, setCollapsed] = useState(false)
+  const [opened, setOpened] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
@@ -113,7 +114,9 @@ const MainLayout = () => {
             <Button
               type='text'
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() =>
+                isMobile ? setOpened(!opened) : setCollapsed(!collapsed)
+              }
               className={styles.toggleButton}
             />
             <div className={styles.headerRight}>
@@ -149,11 +152,15 @@ const MainLayout = () => {
       {isMobile && (
         <Drawer
           placement='left'
-          onClose={() => setCollapsed(true)}
-          open={!collapsed}
+          onClose={() => setIsMobile(false)}
+          open={opened}
           width={200}
           closable={false}
-          bodyStyle={{ padding: 0 }}>
+          styles={{
+            body: {
+              padding: 0,
+            },
+          }}>
           {renderSideMenu()}
         </Drawer>
       )}
