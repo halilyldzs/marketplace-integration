@@ -33,9 +33,6 @@ const MainLayout = () => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
-      if (!mobile && collapsed) {
-        setCollapsed(false)
-      }
     }
 
     window.addEventListener("resize", handleResize)
