@@ -7,15 +7,6 @@
   background: #1f1f1f;
 }
 
-.sider {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 100;
-  background: #141414;
-}
-
 .logo {
   height: 64px;
   padding: 16px;
@@ -87,46 +78,48 @@
   min-height: calc(100vh - 64px);
 }
 
-@media screen and (max-width: 768px) {
-  .sider {
-    position: fixed;
-    left: -200px;
-    transition: all 0.2s;
-  }
-
-  .sider.siderVisible {
-    left: 0;
-  }
-
-  .layout > :global(.ant-layout) {
-    margin-left: 0 !important;
-  }
-
-  .userName {
-    display: none;
-  }
-
-  .content {
-    padding: 16px;
-  }
+.drawer {
+  background: #141414;
 }
 
-/* Ant Design Menu Overrides */
-.sider :global(.ant-menu) {
+.sider {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  background: #141414;
+}
+
+.sider :global(.ant-menu),
+.drawer :global(.ant-menu) {
   background: #141414;
   border-right: none;
 }
 
-.sider :global(.ant-menu-item) {
+.sider :global(.ant-menu-item),
+.drawer :global(.ant-menu-item) {
   color: rgba(255, 255, 255, 0.65);
+  margin: 4px 0 !important;
+  width: calc(100% - 8px) !important;
 }
 
-.sider :global(.ant-menu-item-selected) {
-  background-color: #1f1f1f !important;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.sider :global(.ant-menu-item:hover) {
+.sider :global(.ant-menu-item-selected),
+.drawer :global(.ant-menu-item-selected) {
   background-color: #1f1f1f !important;
   color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.sider :global(.ant-menu-item:hover),
+.drawer :global(.ant-menu-item:hover) {
+  background-color: #1f1f1f !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.drawer :global(.ant-drawer-content) {
+  background: #141414;
+}
+
+.drawer :global(.ant-drawer-header) {
+  display: none;
 }

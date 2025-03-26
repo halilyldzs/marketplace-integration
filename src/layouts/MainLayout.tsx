@@ -33,11 +33,14 @@ const MainLayout = () => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
+      if (isMobile) {
+        setOpened(false)
+      }
     }
 
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [collapsed])
+  }, [collapsed, isMobile])
 
   useEffect(() => {
     if (user?.settings?.theme) {
@@ -153,8 +156,10 @@ const MainLayout = () => {
           open={opened}
           width={200}
           closable={false}
+          className={styles.drawer}
           styles={{
             body: {
+              backgroundColor: "#141414",
               padding: 0,
             },
           }}>
