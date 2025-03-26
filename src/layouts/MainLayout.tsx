@@ -149,10 +149,10 @@ const MainLayout = () => {
         </Content>
       </Layout>
 
-      {isMobile && (
+      {isMobile && opened && (
         <Drawer
           placement='left'
-          onClose={() => setIsMobile(false)}
+          onClose={() => setOpened(false)}
           open={opened}
           width={200}
           closable={false}
