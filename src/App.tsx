@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { App as AntApp, ConfigProvider, theme } from "antd"
 import { useEffect } from "react"
 import { BrowserRouter, useRoutes } from "react-router-dom"
+import "./index.css"
 import { routes } from "./routes"
-import "./styles/global.css"
 
 const queryClient = new QueryClient()
 
@@ -51,8 +51,7 @@ const AppContent = () => {
         theme={{
           algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
           token: {
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+            fontFamily: "Poppins, sans-serif",
             fontSize: 14,
             borderRadius: 6,
             colorPrimary: "#1890ff",
