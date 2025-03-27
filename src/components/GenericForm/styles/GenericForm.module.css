@@ -1,0 +1,14 @@
+.form {
+  width: 100%;
+}
+
+.formItem {
+  margin-bottom: 24px;
+}
+
+.formActions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
