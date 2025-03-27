@@ -1,5 +1,7 @@
 import { getBrandsTableColumns } from "@/features/brands/consts/brandsTableColumns"
 import { Brand } from "@/features/brands/types"
+import { getCategoriesTableColumns } from "@/features/categories/consts/categoriesTableColumns"
+import { Category } from "@/features/categories/types"
 import { getProductTableColumns } from "@/features/products/consts/product-table-columns"
 import { Product } from "@/features/products/types"
 import { TableBase } from "@/types/table/table-base"
@@ -28,6 +30,11 @@ export const getTableFunction = <T extends TableBase>(
     case TableTypes.BRAND:
       return getBrandsTableColumns({
         onEvent: onEvent as (event: TableEvent<Brand | string>) => void,
+        tableStore,
+      }) as ColumnsType<T>
+    case TableTypes.CATEGORIES:
+      return getCategoriesTableColumns({
+        onEvent: onEvent as (event: TableEvent<Category | string>) => void,
         tableStore,
       }) as ColumnsType<T>
     default:

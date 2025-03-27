@@ -1,9 +1,11 @@
+import { GlobalTable } from "@/components/GlobalTable/GlobalTable"
 import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons"
+  FilterEventPayload,
+  TableEvent,
+  TableEventTypes,
+} from "@/types/table/table-event-types"
+import { TableTypes } from "@/types/table/table-type"
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import CategoryForm from "@features/categories/components/CategoryForm"
 import type { GetCategoriesParams } from "@features/categories/services/categories.service"
 import { categoriesService } from "@features/categories/services/categories.service"
@@ -13,14 +15,9 @@ import {
   UpdateCategoryDTO,
 } from "@features/categories/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button, Input, Modal, Space, Table, Typography, message } from "antd"
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table"
+import { Button, Input, Modal, Typography, message } from "antd"
+import type { TablePaginationConfig } from "antd/es/table"
 import { FirebaseError } from "firebase/app"
-import {
-  DocumentData,
-  FieldValue,
-  QueryDocumentSnapshot,
-} from "firebase/firestore"
 import { useRef, useState } from "react"
 import styles from "./Categories.module.css"
 
@@ -32,6 +29,7 @@ const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   )
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -39,12 +37,10 @@ const Categories = () => {
     pageSize: 10,
     total: 0,
   })
-  const [lastVisible, setLastVisible] =
-    useState<QueryDocumentSnapshot<DocumentData> | null>(null)
 
   const searchTimeout = useRef<NodeJS.Timeout>()
 
-  const { data, isLoading } = useQuery({
+  const { data: categoriesData, isLoading } = useQuery({
     queryKey: [
       "categories",
       pagination.current,
@@ -61,7 +57,7 @@ const Categories = () => {
       }
 
       const result = await categoriesService.getAll(params)
-      setLastVisible(result.lastVisible)
+
       setPagination((prev) => ({ ...prev, total: result.total }))
       return result
     },
@@ -94,7 +90,12 @@ const Categories = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => categoriesService.delete(id),
+    mutationFn: () =>
+      Promise.all(
+        selectedCategories.map((category) =>
+          categoriesService.delete(category.id)
+        )
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
       message.success("Kategori silindi")
@@ -132,40 +133,15 @@ const Categories = () => {
     setSelectedCategory(null)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = () => {
     Modal.confirm({
-      title: "Kategoriyi silmek istediğinizden emin misiniz?",
+      title: `${selectedCategories.length} kategoriyi silmek istediğinizden emin misiniz?`,
       content: "Bu işlem geri alınamaz",
       okText: "Sil",
       cancelText: "İptal",
       okButtonProps: { danger: true },
-      onOk: () => deleteMutation.mutate(id),
+      onOk: () => deleteMutation.mutate(),
     })
-  }
-
-  const handleTableChange = async (newPagination: TablePaginationConfig) => {
-    if (newPagination.current! > pagination.current!) {
-      const params: Omit<GetCategoriesParams, "page"> = {
-        pageSize: pagination.pageSize,
-        orderByField: "createdAt",
-        orderDirection: "desc",
-        searchTerm: searchTerm || undefined,
-      }
-
-      const result = await categoriesService.loadMore(lastVisible, params)
-      setLastVisible(result.lastVisible)
-      setPagination((prev) => ({
-        ...prev,
-        current: newPagination.current,
-      }))
-
-      queryClient.setQueryData(
-        ["categories", newPagination.current, pagination.pageSize, searchTerm],
-        result
-      )
-    } else {
-      setPagination(newPagination)
-    }
   }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,73 +157,19 @@ const Categories = () => {
     }, 500)
   }
 
-  const columns: ColumnsType<Category> = [
-    {
-      title: "Ad",
-      dataIndex: "name",
-      key: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      fixed: "left",
-    },
-    {
-      title: "Slug",
-      dataIndex: "slug",
-      key: "slug",
-      responsive: ["md"],
-    },
-    {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
-      width: 100,
-      responsive: ["lg"],
-    },
-    {
-      title: "Oluşturulma Tarihi",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      responsive: ["md"],
-      render: (date: Date | FieldValue) =>
-        date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
-      sorter: (a, b) =>
-        a.createdAt instanceof Date && b.createdAt instanceof Date
-          ? a.createdAt.getTime() - b.createdAt.getTime()
-          : 0,
-    },
-    {
-      title: "Güncellenme Tarihi",
-      dataIndex: "updatedAt",
-      key: "updatedAt",
-      responsive: ["lg"],
-      render: (date: Date | FieldValue) =>
-        date instanceof Date ? date.toLocaleDateString("tr-TR") : "-",
-      sorter: (a, b) =>
-        a.updatedAt instanceof Date && b.updatedAt instanceof Date
-          ? a.updatedAt.getTime() - b.updatedAt.getTime()
-          : 0,
-    },
-    {
-      title: "İşlemler",
-      key: "actions",
-      width: 100,
-      fixed: "right",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type='text'
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Button
-            type='text'
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
-          />
-        </Space>
-      ),
-    },
-  ]
+  const handleEvent = (
+    event: TableEvent<Category | string | FilterEventPayload>
+  ) => {
+    switch (event.type) {
+      case TableEventTypes.EDIT:
+        handleEdit(event.payload as Category)
+        break
+      case TableEventTypes.DELETE:
+        setSelectedCategories([event.payload as Category])
+        handleDelete()
+        break
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -280,18 +202,16 @@ const Categories = () => {
         </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={data?.categories}
-        loading={isLoading}
-        rowKey='id'
-        pagination={{
-          ...pagination,
-          showSizeChanger: true,
-          showTotal: (total) => `Toplam ${total} kategori`,
+      <GlobalTable<Category>
+        tableType={TableTypes.CATEGORIES}
+        tableStore={{
+          categories: categoriesData?.categories || [],
         }}
-        onChange={(newPagination) => handleTableChange(newPagination)}
-        scroll={{ x: "max-content" }}
+        tableDataSource={{
+          data: categoriesData?.categories || [],
+          isLoading,
+        }}
+        onEvent={handleEvent}
       />
 
       <Modal
