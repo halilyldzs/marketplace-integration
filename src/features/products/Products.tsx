@@ -1,4 +1,5 @@
 import { GlobalTable } from "@/components/GlobalTable/GlobalTable"
+import ProductFormModal from "@/features/products/components/ProductFormModal"
 import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
@@ -8,15 +9,9 @@ import {
 import { DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
-import ProductForm from "@features/products/components/ProductForm"
 import type { GetProductsResponse } from "@features/products/services/products.service"
 import { productsService } from "@features/products/services/products.service"
-import type {
-  CreateProductDTO,
-  Product,
-  ProductFormValues,
-  UpdateProductDTO,
-} from "@features/products/types"
+import type { Product } from "@features/products/types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Input, Modal, Tooltip, Typography, message } from "antd"
 import { useRef, useState } from "react"
@@ -29,7 +24,6 @@ const { Text } = Typography
 const Products = () => {
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
-
   const { invalidateQueries } = useBroadcast()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -75,34 +69,6 @@ const Products = () => {
           ),
         }),
     })
-
-  const createMutation = useMutation({
-    mutationFn: (data: CreateProductDTO) => productsService.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] })
-      invalidateQueries(["products"])
-      message.success("Ürün başarıyla oluşturuldu")
-      setEditingProduct(null)
-      setOpenModal(false)
-    },
-    onError: (error: Error) => {
-      message.error(`Ürün oluşturulamadı: ${error.message}`)
-    },
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: (data: UpdateProductDTO) => productsService.update(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] })
-      invalidateQueries(["products"])
-      message.success("Ürün başarıyla güncellendi")
-      setEditingProduct(null)
-      setOpenModal(false)
-    },
-    onError: (error: Error) => {
-      message.error(`Ürün güncellenemedi: ${error.message}`)
-    },
-  })
 
   const deleteMutation = useMutation({
     mutationFn: () =>
@@ -153,19 +119,6 @@ const Products = () => {
       case TableEventTypes.FILTER:
         // TODO: Filter event is handled by URL params
         break
-    }
-  }
-
-  const handleSubmit = (values: ProductFormValues) => {
-    const productData = {
-      ...values,
-      images: [],
-    }
-
-    if (editingProduct) {
-      updateMutation.mutate({ id: editingProduct.id, ...productData })
-    } else {
-      createMutation.mutate(productData)
     }
   }
 
@@ -245,13 +198,9 @@ const Products = () => {
         onEvent={handleEvent}
       />
 
-      <ProductForm
+      <ProductFormModal
         product={editingProduct}
         open={openModal}
-        onSubmit={handleSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
-        categories={categoriesData?.categories || []}
-        brands={brandsData?.brands || []}
         onCancel={() => {
           setOpenModal(false)
           setEditingProduct(null)
@@ -260,4 +209,5 @@ const Products = () => {
     </div>
   )
 }
+
 export default Products

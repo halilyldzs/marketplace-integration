@@ -19,6 +19,10 @@ interface FormFieldProps {
 export const FormField = ({ field }: FormFieldProps) => {
   const commonProps = {
     disabled: field.disabled,
+  }
+
+  const inputProps = {
+    ...commonProps,
     allowClear: field.allowClear,
   }
 
@@ -26,7 +30,7 @@ export const FormField = ({ field }: FormFieldProps) => {
     case "text":
       return (
         <Input
-          {...commonProps}
+          {...inputProps}
           placeholder={field.placeholder as string}
         />
       )
@@ -48,7 +52,7 @@ export const FormField = ({ field }: FormFieldProps) => {
     case "textarea":
       return (
         <TextArea
-          {...commonProps}
+          {...inputProps}
           placeholder={field.placeholder as string}
           rows={field.rows}
           showCount={field.showCount}
@@ -58,7 +62,7 @@ export const FormField = ({ field }: FormFieldProps) => {
     case "select":
       return (
         <Select
-          {...commonProps}
+          {...inputProps}
           placeholder={field.placeholder as string}
           options={field.options}
           mode={field.mode}
@@ -97,15 +101,13 @@ export const FormField = ({ field }: FormFieldProps) => {
     case "radio":
       return (
         <Radio.Group {...commonProps}>
-          {field.options?.map(
-            (option: { label: string; value: string | number }) => (
-              <Radio
-                key={option.value}
-                value={option.value}>
-                {option.label}
-              </Radio>
-            )
-          )}
+          {field.options?.map((option) => (
+            <Radio
+              key={option.value}
+              value={option.value}>
+              {option.label}
+            </Radio>
+          ))}
         </Radio.Group>
       )
 

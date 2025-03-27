@@ -21,6 +21,7 @@ export interface Product {
   images: string[]
   createdAt: Date | FieldValue
   updatedAt: Date | FieldValue
+  [key: string]: unknown
 }
 
 export interface ProductsResponse {
@@ -41,6 +42,7 @@ export interface CreateProductDTO {
   categoryId: string
   brandId: string
   images: string[]
+  [key: string]: unknown
 }
 
 export interface UpdateProductDTO extends Partial<CreateProductDTO> {
