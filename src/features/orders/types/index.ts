@@ -35,3 +35,17 @@ export interface OrderFilters {
   startDate?: string
   endDate?: string
 }
+
+export const statusColors = {
+  [OrderStatus.NEW]: "blue",
+  [OrderStatus.SHIPPED]: "green",
+  [OrderStatus.CANCELLED]: "red",
+  [OrderStatus.RETURNED]: "orange",
+}
+
+export const statusLabels = {
+  [OrderStatus.NEW]: "Yeni",
+  [OrderStatus.SHIPPED]: "Kargolandı",
+  [OrderStatus.CANCELLED]: "İptal",
+  [OrderStatus.RETURNED]: "İade",
+}
