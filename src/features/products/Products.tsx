@@ -5,7 +5,6 @@ import {
   TableEvent,
   TableEventTypes,
 } from "@/types/table/table-event-types"
-import { TableTypes } from "@/types/table/table-type"
 import { DeleteOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import { brandsService } from "@features/brands/services/brands.service"
 import { categoriesService } from "@features/categories/services/categories.service"
@@ -23,6 +22,7 @@ import { Button, Input, Modal, Tooltip, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
+import { getProductTableColumns } from "./consts/product-table-columns"
 
 const { Text } = Typography
 
@@ -230,12 +230,10 @@ const Products = () => {
         </div>
       </div>
 
-      <GlobalTable
-        tableType={TableTypes.PRODUCT}
-        tableStore={{
-          categories: categoriesData?.categories || [],
-          brands: brandsData?.brands || [],
-        }}
+      <GlobalTable<Product>
+        columns={getProductTableColumns({
+          onEvent: handleEvent,
+        })}
         tableDataSource={{
           data: productsData?.products || [],
           isLoading: productsLoading,

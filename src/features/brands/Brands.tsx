@@ -12,12 +12,13 @@ import { Button, Form, Input, Modal, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import styles from "./Brands.module.css"
 
+import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
   TableEvent,
   TableEventTypes,
 } from "@/types/table/table-event-types"
-import { TableTypes } from "@/types/table/table-type"
+import { getBrandsTableColumns } from "./consts/brandsTableColumns"
 const { Text } = Typography
 
 const Brands = () => {
@@ -27,7 +28,10 @@ const Brands = () => {
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState("")
   const [inputValue, setInputValue] = useState("")
+  const [selectedBrands, setSelectedBrands] = useState<Brand[]>([])
   const searchTimeout = useRef<NodeJS.Timeout>()
+
+  const { invalidateQueries } = useBroadcast()
 
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ["brands", searchTerm],
@@ -44,6 +48,7 @@ const Brands = () => {
     mutationFn: (data: CreateBrandDTO) => brandsService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] })
+      invalidateQueries(["brands"])
       message.success("Marka başarıyla oluşturuldu")
       setIsModalOpen(false)
       form.resetFields()
@@ -57,6 +62,7 @@ const Brands = () => {
     mutationFn: (data: UpdateBrandDTO) => brandsService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] })
+      invalidateQueries(["brands"])
       message.success("Marka başarıyla güncellendi")
       setIsModalOpen(false)
       setEditingBrand(null)
@@ -68,13 +74,20 @@ const Brands = () => {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => brandsService.delete(id),
+    mutationFn: () =>
+      Promise.all(
+        selectedBrands.map((brand) => brandsService.delete(brand.id))
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brands"] })
-      message.success("Marka başarıyla silindi")
+      invalidateQueries(["brands"])
+      message.success(`${selectedBrands.length} marka başarıyla silindi`)
+      setSelectedBrands([])
     },
     onError: (error: Error) => {
-      message.error(`Marka silinemedi: ${error.message}`)
+      message.error(
+        `${selectedBrands.length} marka silinemedi: ${error.message}`
+      )
     },
   })
 
@@ -105,15 +118,15 @@ const Brands = () => {
     setIsModalOpen(true)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = () => {
     Modal.confirm({
-      title: "Markayı silmek istediğinize emin misiniz?",
+      title: `${selectedBrands.length} markayı silmek istediğinize emin misiniz?`,
       content: "Bu işlem geri alınamaz.",
       okText: "Evet",
       okType: "danger",
       cancelText: "Hayır",
       onOk() {
-        deleteMutation.mutate(id)
+        deleteMutation.mutate()
       },
     })
   }
@@ -127,7 +140,11 @@ const Brands = () => {
 
         break
       case TableEventTypes.DELETE:
-        handleDelete(event.payload as string)
+        setSelectedBrands([event.payload as Brand])
+        handleDelete()
+        break
+      case TableEventTypes.SELECT:
+        setSelectedBrands(event.payload as Brand[])
         break
     }
   }
@@ -165,11 +182,10 @@ const Brands = () => {
         </div>
       </div>
 
-      <GlobalTable
-        tableType={TableTypes.BRAND}
-        tableStore={{
-          brands: brandsData?.brands || [],
-        }}
+      <GlobalTable<Brand>
+        columns={getBrandsTableColumns({
+          onEvent: handleEvent,
+        })}
         tableDataSource={{
           data: brandsData?.brands || [],
           isLoading: brandsLoading,

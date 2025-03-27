@@ -14,5 +14,5 @@ export type TableDataSource<T> = {
 
 export type TableColumnsProps<T> = {
   onEvent: (event: TableEvent<T | string>) => void
-  tableStore: TableStore
+  tableStore?: TableStore
 }

@@ -1,10 +1,10 @@
 import { GlobalTable } from "@/components/GlobalTable/GlobalTable"
+import { useBroadcast } from "@/hooks/useBroadcast"
 import {
   FilterEventPayload,
   TableEvent,
   TableEventTypes,
 } from "@/types/table/table-event-types"
-import { TableTypes } from "@/types/table/table-type"
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons"
 import CategoryForm from "@features/categories/components/CategoryForm"
 import type { GetCategoriesParams } from "@features/categories/services/categories.service"
@@ -20,6 +20,7 @@ import type { TablePaginationConfig } from "antd/es/table"
 import { FirebaseError } from "firebase/app"
 import { useRef, useState } from "react"
 import styles from "./Categories.module.css"
+import { getCategoriesTableColumns } from "./consts/categoriesTableColumns"
 
 const { Text } = Typography
 
@@ -39,6 +40,8 @@ const Categories = () => {
   })
 
   const searchTimeout = useRef<NodeJS.Timeout>()
+
+  const { invalidateQueries } = useBroadcast()
 
   const { data: categoriesData, isLoading } = useQuery({
     queryKey: [
@@ -67,6 +70,7 @@ const Categories = () => {
     mutationFn: (data: CreateCategoryDTO) => categoriesService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
+      invalidateQueries(["categories"])
       message.success("Kategori eklendi")
       handleModalClose()
     },
@@ -80,6 +84,7 @@ const Categories = () => {
     mutationFn: (data: UpdateCategoryDTO) => categoriesService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
+      invalidateQueries(["categories"])
       message.success("Kategori güncellendi")
       handleModalClose()
     },
@@ -98,11 +103,15 @@ const Categories = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] })
-      message.success("Kategori silindi")
+      invalidateQueries(["categories"])
+      message.success(`${selectedCategories.length} kategori silindi`)
+      setSelectedCategories([])
     },
     onError: (error) => {
       console.error("Category deletion error details:", error)
-      message.error("Kategori silinirken bir sorun oluştu")
+      message.error(
+        `${selectedCategories.length} kategori silinirken bir sorun oluştu`
+      )
     },
   })
 
@@ -168,6 +177,9 @@ const Categories = () => {
         setSelectedCategories([event.payload as Category])
         handleDelete()
         break
+      case TableEventTypes.SELECT:
+        setSelectedCategories(event.payload as Category[])
+        break
     }
   }
 
@@ -203,10 +215,9 @@ const Categories = () => {
       </div>
 
       <GlobalTable<Category>
-        tableType={TableTypes.CATEGORIES}
-        tableStore={{
-          categories: categoriesData?.categories || [],
-        }}
+        columns={getCategoriesTableColumns({
+          onEvent: handleEvent,
+        })}
         tableDataSource={{
           data: categoriesData?.categories || [],
           isLoading,
