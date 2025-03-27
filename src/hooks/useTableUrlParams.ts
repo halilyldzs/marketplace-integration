@@ -4,15 +4,25 @@ import {
   TableEventTypes,
 } from "@/types/table/table-event-types"
 import { FilterValue } from "antd/lib/table/interface"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 
 export const useTableUrlParams = <T>(
   onEvent: (event: TableEvent<T | string | FilterEventPayload>) => void
 ) => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const prevParamsRef = useRef<string>()
 
   useEffect(() => {
+    const currentParams = searchParams.toString()
+
+    // Eğer URL parametreleri değişmediyse, event'i tetikleme
+    if (currentParams === prevParamsRef.current) {
+      return
+    }
+
+    prevParamsRef.current = currentParams
+
     // Get all filter parameters from URL
     const filters: Record<string, FilterValue | null> = {}
     Array.from(searchParams.entries()).forEach(([key, value]) => {
@@ -33,7 +43,6 @@ export const useTableUrlParams = <T>(
     const current = Number(searchParams.get("page")) || 1
     const pageSize = Number(searchParams.get("pageSize")) || 10
 
-    // Trigger filter event with URL parameters
     onEvent({
       type: TableEventTypes.FILTER,
       payload: {

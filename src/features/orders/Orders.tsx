@@ -24,7 +24,7 @@ import {
   Space,
   Tooltip,
 } from "antd"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import type { OrderFormValues } from "./components/OrderForm"
 import OrderForm from "./components/OrderForm"
 import { getOrdersTableColumns } from "./consts/ordersTableColumns"
@@ -38,8 +38,6 @@ const Orders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | null>(null)
   const [pageSize, setPageSize] = useState(10)
   const queryClient = useQueryClient()
   const { invalidateQueries } = useBroadcast()
@@ -48,13 +46,20 @@ const Orders = () => {
 
   // Siparişleri getir
   const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["orders", currentPage, pageSize, searchTerm, statusFilter],
+    queryKey: ["orders", currentPage, pageSize, filters],
     queryFn: () =>
       ordersService.getAll({
         page: currentPage,
         pageSize,
-        searchTerm,
-        status: statusFilter || undefined,
+        searchTerm: filters.search || "",
+        status: filters.status || undefined,
+        dateRange:
+          filters.startDate && filters.endDate
+            ? {
+                startDate: new Date(filters.startDate),
+                endDate: new Date(filters.endDate),
+              }
+            : undefined,
       }),
   })
 
@@ -130,57 +135,49 @@ const Orders = () => {
     },
   })
 
-  const handleUpdateStatus = (order: Order) => {
-    let selectedStatus = order.status
+  const handleStatusChange = useCallback(
+    (id: string, status: OrderStatus) => {
+      updateStatusMutation.mutate({ id, status })
+    },
+    [updateStatusMutation]
+  )
 
-    Modal.confirm({
-      title: "Sipariş Durumu Güncelle",
-      content: (
-        <Select
-          defaultValue={order.status}
-          style={{ width: "100%" }}
-          onChange={(value) => (selectedStatus = value)}>
-          {Object.entries(statusLabels).map(([value, label]) => (
-            <Select.Option
-              key={value}
-              value={value}>
-              {label}
-            </Select.Option>
-          ))}
-        </Select>
-      ),
-      onOk: () => {
-        if (selectedStatus !== order.status) {
-          handleStatusChange(order.id, selectedStatus)
-        }
-      },
-    })
-  }
+  const handleUpdateStatus = useCallback(
+    (order: Order) => {
+      let selectedStatus = order.status
 
-  const handleSearch = () => {
-    setSearchTerm(filters.search || "")
-    setStatusFilter(filters.status || null)
-    setCurrentPage(1)
-  }
+      Modal.confirm({
+        title: "Sipariş Durumu Güncelle",
+        content: (
+          <Select
+            defaultValue={order.status}
+            style={{ width: "100%" }}
+            onChange={(value) => (selectedStatus = value)}>
+            {Object.entries(statusLabels).map(([value, label]) => (
+              <Select.Option
+                key={value}
+                value={value}>
+                {label}
+              </Select.Option>
+            ))}
+          </Select>
+        ),
+        onOk: () => {
+          if (selectedStatus !== order.status) {
+            handleStatusChange(order.id, selectedStatus)
+          }
+        },
+      })
+    },
+    [handleStatusChange]
+  )
 
-  const handleReset = () => {
-    setFilters({})
-    setSearchTerm("")
-    setStatusFilter(null)
-    setCurrentPage(1)
-  }
-
-  const handleCreate = () => {
-    setEditingOrder(null)
-    setIsModalOpen(true)
-  }
-
-  const handleEdit = (order: Order) => {
+  const handleEdit = useCallback((order: Order) => {
     setEditingOrder(order)
     setIsModalOpen(true)
-  }
+  }, [])
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     Modal.confirm({
       title: "Siparişi Sil",
       content: "Bu siparişi silmek istediğinizden emin misiniz?",
@@ -188,10 +185,20 @@ const Orders = () => {
       cancelText: "Hayır",
       onOk: () => deleteMutation.mutate(),
     })
+  }, [deleteMutation])
+
+  const handleSearch = () => {
+    setCurrentPage(1)
   }
 
-  const handleStatusChange = (id: string, status: OrderStatus) => {
-    updateStatusMutation.mutate({ id, status })
+  const handleReset = () => {
+    setFilters({})
+    setCurrentPage(1)
+  }
+
+  const handleCreate = () => {
+    setEditingOrder(null)
+    setIsModalOpen(true)
   }
 
   const handleSubmit = async (values: OrderFormValues) => {
@@ -214,25 +221,35 @@ const Orders = () => {
     }
   }
 
-  const handleEvent = (
-    event: TableEvent<Order | string | FilterEventPayload>
-  ) => {
-    switch (event.type) {
-      case TableEventTypes.EDIT:
-        handleEdit(event.payload as Order)
-        break
-      case TableEventTypes.DELETE:
-        setSelectedOrders([event.payload as Order])
-        handleDelete()
-        break
-      case TableEventTypes.ORDER_UPDATE_STATUS:
-        handleUpdateStatus(event.payload as Order)
-        break
-      case TableEventTypes.FILTER:
-        setFilters(event.payload as OrderFilters)
-        break
-    }
-  }
+  const handleEvent = useCallback(
+    (event: TableEvent<Order | string | FilterEventPayload>) => {
+      switch (event.type) {
+        case TableEventTypes.EDIT:
+          handleEdit(event.payload as Order)
+          break
+        case TableEventTypes.DELETE:
+          setSelectedOrders([event.payload as Order])
+          handleDelete()
+          break
+        case TableEventTypes.ORDER_UPDATE_STATUS:
+          handleUpdateStatus(event.payload as Order)
+          break
+        case TableEventTypes.FILTER: {
+          const payload = event.payload as FilterEventPayload
+          setFilters((prev) => ({
+            ...prev,
+            ...payload.filters,
+          }))
+          if (payload.pagination) {
+            setCurrentPage(payload.pagination.current)
+            setPageSize(payload.pagination.pageSize)
+          }
+          break
+        }
+      }
+    },
+    [handleEdit, handleDelete, handleUpdateStatus]
+  )
 
   return (
     <div className={styles.container}>
@@ -256,7 +273,7 @@ const Orders = () => {
               prefix={<SearchOutlined />}
               value={filters.search}
               onChange={(e) =>
-                setFilters({ ...filters, search: e.target.value })
+                setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
               style={{ width: 300 }}
             />
@@ -265,7 +282,9 @@ const Orders = () => {
               allowClear
               style={{ width: 150 }}
               value={filters.status}
-              onChange={(value) => setFilters({ ...filters, status: value })}>
+              onChange={(value) =>
+                setFilters((prev) => ({ ...prev, status: value }))
+              }>
               {Object.values(OrderStatus).map((status) => (
                 <Select.Option
                   key={status}
@@ -276,19 +295,11 @@ const Orders = () => {
             </Select>
             <RangePicker
               onChange={(dates) => {
-                if (dates) {
-                  setFilters({
-                    ...filters,
-                    startDate: dates[0]?.toISOString(),
-                    endDate: dates[1]?.toISOString(),
-                  })
-                } else {
-                  setFilters({
-                    ...filters,
-                    startDate: undefined,
-                    endDate: undefined,
-                  })
-                }
+                setFilters((prev) => ({
+                  ...prev,
+                  startDate: dates?.[0]?.toISOString(),
+                  endDate: dates?.[1]?.toISOString(),
+                }))
               }}
             />
             <Button
