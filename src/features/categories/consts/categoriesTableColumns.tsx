@@ -5,9 +5,9 @@ import { Button, Space, TableColumnsType } from "antd"
 import { FieldValue } from "firebase/firestore"
 import { Category } from "../types"
 
-export const getCategoriesTableColumns = <T extends Category>({
+export const getCategoriesTableColumns = ({
   onEvent,
-}: TableColumnsProps<T>): TableColumnsType<T> => [
+}: TableColumnsProps<Category>): TableColumnsType<Category> => [
   {
     title: "Ad",
     dataIndex: "name",
@@ -71,7 +71,7 @@ export const getCategoriesTableColumns = <T extends Category>({
           danger
           icon={<DeleteOutlined />}
           onClick={() =>
-            onEvent({ type: TableEventTypes.DELETE, payload: record.id })
+            onEvent({ type: TableEventTypes.DELETE, payload: record })
           }
         />
       </Space>

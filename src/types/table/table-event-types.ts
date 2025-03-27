@@ -10,6 +10,7 @@ export const TableEventTypes = {
   SEARCH: "search",
   RESET: "reset",
   SELECT: "SELECT",
+  ORDER_UPDATE_STATUS: "ORDER_UPDATE_STATUS",
 } as const
 
 export type TableEventTypes =
@@ -31,6 +32,10 @@ export type TableEvent<T> =
   | {
       type: "SELECT"
       payload: T[]
+    }
+  | {
+      type: "ORDER_UPDATE_STATUS"
+      payload: T
     }
 
 export interface FilterEventPayload {

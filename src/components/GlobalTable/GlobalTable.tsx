@@ -5,9 +5,7 @@ import {
   TableEvent,
   TableEventTypes,
 } from "@/types/table/table-event-types"
-import { TableDataSource, TableStore } from "@/types/table/table-store"
-import { TableTypes } from "@/types/table/table-type"
-import { getTableFunction } from "@/utils/get-table-function"
+import { TableDataSource } from "@/types/table/table-store"
 import { Table } from "antd"
 import { ColumnsType } from "antd/es/table"
 import type {
@@ -17,24 +15,17 @@ import type {
 } from "antd/lib/table/interface"
 
 interface GlobalTableProps<T> {
-  tableType: TableTypes
-  tableStore: TableStore
   tableDataSource: TableDataSource<T>
+  columns: ColumnsType<T>
   onEvent: (event: TableEvent<T | string | FilterEventPayload>) => void
 }
 
 export const GlobalTable = <T extends TableBase>({
-  tableType,
-  tableStore,
+  columns,
   tableDataSource,
   onEvent,
 }: GlobalTableProps<T>) => {
   const { searchParams, updateUrlParams } = useTableUrlParams<T>(onEvent)
-  const columns = getTableFunction<T>(
-    tableType,
-    tableStore,
-    onEvent
-  ) as ColumnsType<T>
 
   const handleTableChange = (
     pagination: TablePaginationConfig,
