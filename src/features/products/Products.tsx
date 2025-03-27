@@ -233,6 +233,10 @@ const Products = () => {
       <GlobalTable<Product>
         columns={getProductTableColumns({
           onEvent: handleEvent,
+          tableStore: {
+            brands: brandsData?.brands || [],
+            categories: categoriesData?.categories || [],
+          },
         })}
         tableDataSource={{
           data: productsData?.products || [],
