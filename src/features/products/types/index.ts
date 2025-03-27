@@ -56,4 +56,17 @@ export interface GetProductsResponse {
   lastVisible: QueryDocumentSnapshot<DocumentData> | null
 }
 
-export type ProductFormValues = CreateProductDTO
+export type ProductFormValues = {
+  name: string
+  description: string
+  price: number
+  listPrice: number
+  sku: string
+  barcode: string
+  vat: number
+  deci: number
+  stock: number
+  categoryId: string
+  brandId: string
+  images: string[]
+}

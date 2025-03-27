@@ -10,7 +10,7 @@ import type {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Modal, Typography, message } from "antd"
 import type { FormInstance } from "antd/es/form"
-import { useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { GenericForm } from "../../../components/GenericForm"
 import { getProductFormFields } from "../consts/product-form-fields"
 import styles from "../Products.module.css"
@@ -31,6 +31,11 @@ const ProductFormModal = ({
 }: ProductFormModalProps) => {
   const formRef = useRef<FormInstance<ProductFormValues>>(null)
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    console.log(product)
+  }, [product])
+
   const { invalidateQueries } = useBroadcast()
 
   const { data: categoriesData } = useQuery({
@@ -49,7 +54,7 @@ const ProductFormModal = ({
       queryClient.invalidateQueries({ queryKey: ["products"] })
       invalidateQueries(["products"])
       message.success("Ürün başarıyla oluşturuldu")
-      onCancel()
+      cancel()
     },
     onError: (error: Error) => {
       message.error(`Ürün oluşturulamadı: ${error.message}`)
@@ -62,7 +67,7 @@ const ProductFormModal = ({
       queryClient.invalidateQueries({ queryKey: ["products"] })
       invalidateQueries(["products"])
       message.success("Ürün başarıyla güncellendi")
-      onCancel()
+      cancel()
     },
     onError: (error: Error) => {
       message.error(`Ürün güncellenemedi: ${error.message}`)
@@ -88,6 +93,11 @@ const ProductFormModal = ({
     formRef,
   })
 
+  const cancel = () => {
+    formRef.current?.resetFields()
+    onCancel()
+  }
+
   const submitButton = (
     <Button
       type='primary'
@@ -101,9 +111,14 @@ const ProductFormModal = ({
   const cancelButton = (
     <Button
       size='large'
-      onClick={onCancel}>
+      onClick={cancel}>
       İptal
     </Button>
+  )
+
+  const initialValues = useMemo(
+    () => (product ? getInitialValues(product) : undefined),
+    [product]
   )
 
   return (
@@ -118,7 +133,7 @@ const ProductFormModal = ({
         </div>
       }
       open={open}
-      onCancel={onCancel}
+      onCancel={cancel}
       footer={null}
       width={{
         xs: "90%",
@@ -133,7 +148,7 @@ const ProductFormModal = ({
         ref={formRef}
         fields={fields}
         onSubmit={handleSubmit}
-        defaultValues={product || undefined}
+        initialValues={initialValues}
         submitButton={submitButton}
         cancelButton={cancelButton}
         requiredMark='optional'
@@ -141,6 +156,23 @@ const ProductFormModal = ({
       />
     </Modal>
   )
+}
+
+function getInitialValues(product: Product) {
+  return {
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    listPrice: product.listPrice,
+    sku: product.sku,
+    barcode: product.barcode,
+    vat: product.vat,
+    deci: product.deci,
+    stock: product.stock,
+    categoryId: product.categoryId,
+    brandId: product.brandId,
+    images: product.images,
+  }
 }
 
 export default ProductFormModal
