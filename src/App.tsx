@@ -59,7 +59,7 @@ const AppContent = () => {
           cssVar: true,
           hashed: false,
         }}>
-        <AntApp>
+        <AntApp message={{ maxCount: 3 }}>
           <BrowserRouter>
             <AppRoutesComponent />
           </BrowserRouter>
