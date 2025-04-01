@@ -20,7 +20,7 @@ import type { TablePaginationConfig } from "antd/es/table"
 import { FirebaseError } from "firebase/app"
 import { useRef, useState } from "react"
 import styles from "./Categories.module.css"
-import { getCategoriesTableColumns } from "./consts/categoriesTableColumns"
+import { getCategoriesTableColumns } from "./constants/categoriesTableColumns"
 
 const { Text } = Typography
 

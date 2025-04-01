@@ -12,7 +12,7 @@ import { Button, Modal, Typography, message } from "antd"
 import type { FormInstance } from "antd/es/form"
 import { useMemo, useRef } from "react"
 import { GenericForm } from "../../../components/GenericForm"
-import { getProductFormFields } from "../consts/product-form-fields"
+import { getProductFormFields } from "../constants/product-form-fields"
 import { productsService } from "../services/products.service"
 import styles from "../styles/ProductForm.module.css"
 

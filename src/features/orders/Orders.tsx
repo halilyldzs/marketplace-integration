@@ -27,7 +27,7 @@ import {
 import { useCallback, useState } from "react"
 import type { OrderFormValues } from "./components/OrderForm"
 import OrderForm from "./components/OrderForm"
-import { getOrdersTableColumns } from "./consts/ordersTableColumns"
+import { getOrdersTableColumns } from "./constants/ordersTableColumns"
 import styles from "./Orders.module.css"
 import { ordersService } from "./services/orders.service"
 

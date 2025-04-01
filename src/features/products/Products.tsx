@@ -17,7 +17,7 @@ import { Button, Input, Modal, Tooltip, Typography, message } from "antd"
 import { useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import styles from "./Products.module.css"
-import { getProductTableColumns } from "./consts/product-table-columns"
+import { getProductTableColumns } from "./constants/product-table-columns"
 
 const { Text } = Typography
 

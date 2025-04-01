@@ -18,7 +18,7 @@ import {
   TableEvent,
   TableEventTypes,
 } from "@/types/table/table-event-types"
-import { getBrandsTableColumns } from "./consts/brandsTableColumns"
+import { getBrandsTableColumns } from "./constants/brandsTableColumns"
 const { Text } = Typography
 
 const Brands = () => {
