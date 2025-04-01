@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 type BroadcastMessage = {
   type: "INVALIDATE_QUERIES" | "REFETCH_QUERIES" | "RESET_QUERIES"
@@ -9,9 +9,11 @@ type BroadcastMessage = {
 
 export const useBroadcast = () => {
   const queryClient = useQueryClient()
-  const channel = useMemo(() => new BroadcastChannel("app_sync"), [])
+  const channelRef = useRef<BroadcastChannel | null>(null)
 
   useEffect(() => {
+    channelRef.current = new BroadcastChannel("app_sync")
+
     const handleMessage = (event: MessageEvent<BroadcastMessage>) => {
       const { type, queryKey, exact } = event.data
 
@@ -42,46 +44,49 @@ export const useBroadcast = () => {
       }
     }
 
-    channel.addEventListener("message", handleMessage)
+    channelRef.current.addEventListener("message", handleMessage)
 
     return () => {
-      channel.removeEventListener("message", handleMessage)
-      channel.close()
+      if (channelRef.current) {
+        channelRef.current.removeEventListener("message", handleMessage)
+        channelRef.current.close()
+        channelRef.current = null
+      }
     }
-  }, [queryClient, channel])
+  }, [queryClient])
 
   const invalidateQueries = useCallback(
     (queryKey?: string[], exact?: boolean) => {
-      channel.postMessage({
-        type: "INVALIDATE_QUERIES",
-        queryKey,
-        exact,
-      })
+      if (channelRef.current) {
+        channelRef.current.postMessage({
+          type: "INVALIDATE_QUERIES",
+          queryKey,
+          exact,
+        })
+      }
     },
-    [channel]
+    []
   )
 
-  const refetchQueries = useCallback(
-    (queryKey?: string[], exact?: boolean) => {
-      channel.postMessage({
+  const refetchQueries = useCallback((queryKey?: string[], exact?: boolean) => {
+    if (channelRef.current) {
+      channelRef.current.postMessage({
         type: "REFETCH_QUERIES",
         queryKey,
         exact,
       })
-    },
-    [channel]
-  )
+    }
+  }, [])
 
-  const resetQueries = useCallback(
-    (queryKey?: string[], exact?: boolean) => {
-      channel.postMessage({
+  const resetQueries = useCallback((queryKey?: string[], exact?: boolean) => {
+    if (channelRef.current) {
+      channelRef.current.postMessage({
         type: "RESET_QUERIES",
         queryKey,
         exact,
       })
-    },
-    [channel]
-  )
+    }
+  }, [])
 
   return {
     invalidateQueries,
