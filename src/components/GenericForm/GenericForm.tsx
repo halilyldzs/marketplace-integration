@@ -11,9 +11,10 @@ import {
   Switch,
 } from "antd"
 import type { FormInstance } from "antd/es/form"
-import { ReactNode, forwardRef } from "react"
+import type { Store } from "antd/es/form/interface"
+import { ReactNode, forwardRef, useEffect } from "react"
 import styles from "./styles/GenericForm.module.css"
-import { Field } from "./types"
+import type { Field } from "./types"
 
 const { TextArea } = Input
 const { RangePicker } = DatePicker
@@ -55,6 +56,13 @@ export const GenericForm = forwardRef(
       onSubmit(values)
     }
 
+    useEffect(() => {
+      if (initialValues) {
+        form.resetFields()
+        form.setFieldsValue(initialValues as Store)
+      }
+    }, [initialValues, form])
+
     return (
       <Form
         ref={ref}
@@ -63,11 +71,6 @@ export const GenericForm = forwardRef(
         layout={layout}
         labelCol={labelCol}
         wrapperCol={wrapperCol}
-        initialValues={initialValues}
-        preserve
-        onValuesChange={(changedValues, allValues) => {
-          console.log("Form values changed:", changedValues, allValues)
-        }}
         className={`${styles.form} ${formClassName || ""}`}
         {...formProps}>
         <div className='grid'>
@@ -132,21 +135,27 @@ const renderField = (field: Field) => {
 
     case "number":
       return (
-        <div style={{ width: "100%" }}>
-          <InputNumber
-            {...commonProps}
-            placeholder={field.placeholder as string}
-            min={field.min}
-            max={field.max}
-            step={field.step}
-            prefix={field.prefix}
-            suffix={field.suffix}
-            style={{ width: "100%" }}
-            controls={true}
-            addonBefore={field.prefix}
-            addonAfter={field.suffix}
-          />
-        </div>
+        <InputNumber
+          {...commonProps}
+          style={{ width: "100%" }}
+          min={field.min}
+          max={field.max}
+          step={field.step}
+          precision={field.precision}
+          placeholder={field.placeholder as string}
+          addonBefore={field.prefix}
+          formatter={(value) => {
+            if (value === null || value === undefined) return ""
+            return field.prefix
+              ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              : `${value}`
+          }}
+          parser={(value) => {
+            if (!value) return 0
+            const parsedValue = value.toString().replace(/[^\d.-]/g, "")
+            return !parsedValue ? 0 : Number(parsedValue)
+          }}
+        />
       )
 
     case "textarea":
