@@ -1,0 +1,71 @@
+/* Form Container */
+.form {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Form Item Base Styles */
+.formItem {
+  margin-bottom: 24px;
+}
+
+.formItem :global(.ant-input),
+.formItem :global(.ant-select),
+.formItem :global(.ant-picker) {
+  width: 100%;
+}
+
+.formItem :global(.ant-input-number-affix-wrapper) {
+  width: 100% !important;
+}
+
+.formItem :global(.ant-input-number) {
+  width: 100% !important;
+}
+
+.formItem :global(.ant-input-number-input-wrap) {
+  width: 100% !important;
+}
+
+.formItem :global(.ant-input-number-input) {
+  width: 100% !important;
+}
+
+.formItem :global(.ant-input-number-handler-wrap) {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Special Input Styles */
+.descriptionInput {
+  resize: none;
+}
+
+/* Form Actions */
+.formActions {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1rem;
+  grid-column: 1 / -1;
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end !important;
+  gap: 12px;
+}
+
+.modalTitleText {
+  font-size: 20px;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .formActions {
+    margin-top: 24px;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

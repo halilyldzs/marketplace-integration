@@ -10,11 +10,11 @@ import type {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button, Modal, Typography, message } from "antd"
 import type { FormInstance } from "antd/es/form"
-import { useEffect, useMemo, useRef } from "react"
+import { useMemo, useRef } from "react"
 import { GenericForm } from "../../../components/GenericForm"
 import { getProductFormFields } from "../consts/product-form-fields"
-import styles from "../Products.module.css"
 import { productsService } from "../services/products.service"
+import styles from "../styles/ProductForm.module.css"
 
 const { Text } = Typography
 
@@ -31,10 +31,6 @@ const ProductFormModal = ({
 }: ProductFormModalProps) => {
   const formRef = useRef<FormInstance<ProductFormValues>>(null)
   const queryClient = useQueryClient()
-
-  useEffect(() => {
-    console.log(product)
-  }, [product])
 
   const { invalidateQueries } = useBroadcast()
 

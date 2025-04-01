@@ -3,12 +3,21 @@
 }
 
 .formItem {
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .formActions {
-  margin-top: 24px;
+  grid-column: 1 / -1;
+  margin-top: 32px;
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .formActions {
+    margin-top: 24px;
+    flex-direction: column;
+    gap: 8px;
+  }
 }

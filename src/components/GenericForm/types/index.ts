@@ -34,4 +34,9 @@ export interface Field {
   format?: string
   showTime?: boolean
   defaultValue?: string | number | boolean | Date | [Date, Date]
+  className?: string
+  formItemClassName?: string
+  inputClassName?: string
+  maxLength?: number
+  precision?: number
 }
